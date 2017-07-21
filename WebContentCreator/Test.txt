@@ -2,3 +2,4 @@ Temporary file to test sync.
 New Line for sync test 2.
 New Line for sync test 3.
 New Line for sync test 4.
+New Line for sync test 5.
