@@ -79,6 +79,11 @@ public class WCCView {
 		menuFileSaveAs.setActionCommand(WCCControl.fileSaveAs);
 		menuFile.add(menuFileSaveAs);
 		menuFile.addSeparator();
+		JMenuItem menuFileExport = new JMenuItem("Exportieren");
+		menuFileExport.addActionListener(actionListener);
+		menuFileExport.setActionCommand(WCCControl.fileExport);
+		menuFile.add(menuFileExport);
+		menuFile.addSeparator();
 		JMenuItem menuFileExit = new JMenuItem("Schlieﬂen");
 		menuFileExit.addActionListener(actionListener);
 		menuFileExit.setActionCommand(WCCControl.fileExit);
@@ -136,11 +141,6 @@ public class WCCView {
 		toolbar.setBorder(BorderFactory.createRaisedBevelBorder());
 		JButton buttonNew = new JButton(new ImageIcon("icons/plusIcon.png"));
 			JPopupMenu popupButtonNew = new JPopupMenu();
-			JMenuItem menuFileNewProject = new JMenuItem("Neues Projekt");
-			menuFileNewProject.addActionListener(actionListener);
-			menuFileNewProject.setActionCommand(WCCControl.fileNew);
-			popupButtonNew.add(menuFileNewProject);
-			popupButtonNew.addSeparator();
 			JMenuItem menuFileNewPage = new JMenuItem("Neue Seite");
 			menuFileNewPage.addActionListener(actionListener);
 			menuFileNewPage.setActionCommand(WCCControl.pageNewPage);
@@ -167,14 +167,29 @@ public class WCCView {
 				popupButtonNew.show(buttonNew, 0, buttonNew.getHeight());
 			}
 		});
+		buttonNew.setToolTipText("Neu...");
 		toolbar.add(buttonNew);
 		toolbar.addSeparator();
 		
 		JButton buttonSave = new JButton(new ImageIcon("icons/saveIcon.png"));
 		buttonSave.addActionListener(actionListener);
 		buttonSave.setActionCommand(WCCControl.fileSave);
+		buttonSave.setToolTipText("Speichern");
 		toolbar.add(buttonSave);
 		toolbar.addSeparator();
+		
+		JButton buttonExport = new JButton(new ImageIcon("icons/exportIcon.png"));
+		buttonExport.addActionListener(actionListener);
+		buttonExport.setActionCommand(WCCControl.fileExport);
+		buttonExport.setToolTipText("Exportieren");
+		toolbar.add(buttonExport);
+		toolbar.addSeparator();
+		
+		JButton buttonNewPage = new JButton(new ImageIcon("icons/newPageIcon.png"));
+		buttonNewPage.addActionListener(actionListener);
+		buttonNewPage.setActionCommand(WCCControl.pageNewPage);
+		buttonNewPage.setToolTipText("Neue Seite");
+		toolbar.add(buttonNewPage);
 		
 		return toolbar;
 	}

@@ -17,6 +17,7 @@ public class WCCControl implements ActionListener, WindowListener{
 	public static final String fileOpen = "fileOpen";
 	public static final String fileSave = "fileSave";
 	public static final String fileSaveAs = "fileSaveAs";
+	public static final String fileExport = "fileExport";
 	public static final String fileExit = "fileExit";
 	public static final String pageNewPage = "pageNewPage";
 	public static final String pageNewHeader = "pageNewHeader";
@@ -71,6 +72,8 @@ public class WCCControl implements ActionListener, WindowListener{
 		case fileSave:
 			break;
 		case fileSaveAs:
+			break;
+		case fileExport:
 			break;
 		case fileExit:
 			break;
