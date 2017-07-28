@@ -7,3 +7,6 @@
 /SettingsInterface.class
 /Page.class
 /Element.class
+/WCCController.class
+/Observer.class
+/SerializableObserver.class

@@ -1,10 +1,14 @@
+import java.io.Serializable;
+import java.util.Observable;
 
 /*
  * Represents an element and its content.
  * 
  * Created by Leo Köberlein on 26.07.2017
  */
-public class Element {
+public class Element extends Observable implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static final int HEADER = 0;
 	public static final int SUBHEADER = 1;
@@ -13,14 +17,21 @@ public class Element {
 	
 	private int type;
 	private String value;
+	private SerializableObserver observer;
 	
-	public Element(int type, String value) {
+	public Element(int type, String value, SerializableObserver o) {
 		this.type = type;
 		this.value = value;
+		observer = o;
+	}
+	
+	public void update() {
+		observer.update(this, null);
 	}
 	
 	public void setType(int newType) {
 		type = newType;
+		update();
 	}
 	
 	public int getType() {
@@ -29,6 +40,7 @@ public class Element {
 	
 	public void setValue(String newValue) {
 		value = newValue;
+		update();
 	}
 	
 	public String getValue() {

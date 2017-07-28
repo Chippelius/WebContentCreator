@@ -8,11 +8,11 @@ import java.awt.event.WindowListener;
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCControl implements ActionListener, WindowListener {
+public class WCCController implements ActionListener, WindowListener {
 	
-	public static WCCModel model;
-	public static WCCView view;
-	public static WCCControl control;
+	private static WCCModel model;
+	private static WCCView view;
+	private static WCCController control;
 	
 	/*
 	 * Optional functionality for later:
@@ -36,20 +36,45 @@ public class WCCControl implements ActionListener, WindowListener {
 	public static final String helpCheckForUpdates = "helpCheckForUpdates";
 
 	public static void main(String[] args) {
-		control = new WCCControl("WebContentCreator");
+		control = new WCCController("WebContentCreator");
 	}
 	
-	public WCCControl(String title) {
+	public WCCController(String title) {
 		//Initialize components
 		view = new WCCView(this, this);
 		model = new WCCModel();
 		
 		//Load existing settings or create new ones and apply them
-		model.loadSettings();
+		applySettings(model.loadSettings());
 		//Load project data
 		model.loadDataStorage();
 		
+		
 		view.setVisible(true);
+	}
+	
+	private void applySettings(SettingsInterface settings) {
+		WCCController.view.setLocation(settings.getLocation());
+		WCCController.view.setSize(settings.getSize());
+		WCCController.view.setFullscreen(settings.isFullscreen());
+		WCCController.view.setDividerLocation(settings.getDividerLocation());
+	}
+	
+	private SettingsInterface fetchSettings() {
+		SettingsInterface settings = new Settings();
+		settings.setLocation(WCCController.view.getLocation());
+		settings.setSize(WCCController.view.getSize());
+		settings.setFullscreen(WCCController.view.isFullscreen());
+		settings.setDividerLocation(WCCController.view.getDividerLocation());
+		return settings;
+	}
+	
+	private void showData(DataStorage data) {
+		
+	}
+	
+	public void shutdown() {
+		model.saveSettings(fetchSettings());
 	}
 
 	@Override

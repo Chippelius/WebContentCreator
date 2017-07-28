@@ -1,52 +1,62 @@
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.Observable;
 
 /*
  * Model part of WebContentCreator (by concept of ModelViewControl)
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCModel {
+public class WCCModel implements SerializableObserver {
 
+	private static final long serialVersionUID = 1L;
+	
 	private File programWorkspace;
-	private Settings settings;
-	private DataStorage data;
+	private SettingsInterface settings;
+	private DataStorage dataStorage;
 	
 	public WCCModel() {
 		try {
-			programWorkspace = new File(WCCControl.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException e) {e.printStackTrace();}
-		
+		loadSettings();
+		loadDataStorage();
 	}
 
-	//Load existing settings or create new ones and apply them
-	public void loadSettings() {
+	//Load existing settings or create new ones
+	private void loadSettings() {
+		//TODO: implement correctly
 		settings = new Settings();
-		
-		WCCControl.view.setLocation(settings.getLocation());
-		WCCControl.view.setSize(settings.getSize());
-		WCCControl.view.setFullscreen(settings.isFullscreen());
-		WCCControl.view.setDividerLocation(settings.getDividerLocation());
+	}
+	
+	public SettingsInterface getSettings() {
+		return settings;
 	}
 	
 	//Save settings in settings file
 	public void saveSettings() {
-		settings.setLocation(WCCControl.view.getLocation());
-		settings.setSize(WCCControl.view.getSize());
-		settings.setFullscreen(WCCControl.view.isFullscreen());
-		settings.setDividerLocation(WCCControl.view.getDividerLocation());
+		//TODO: implement
 	}
 	
-	//Load project data
-	public void loadDataStorage() {
-		data = new DataStorage();
-		
-		WCCControl.view.setPages(data.getPages());
-		WCCControl.view.setElements(data.getPages()[0].getElements());
+	
+	//Load project data or create new ones
+	private void loadDataStorage() {
+		//TODO: implement correctly
+		dataStorage = new DataStorage(this);
 	}
 	
-	public void shutdown() {
-		saveSettings();
+	public DataStorage getDataStorage() {
+		return dataStorage;
+	}
+	
+	//Save project data
+	public void saveDataStorage() {
+		//TODO: implement
 	}
 
+	@Override
+	public void update(Observable o, Object arg) {
+		
+	}
+	
 }
