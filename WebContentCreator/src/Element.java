@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.Observable;
+import java.util.Observer;
 
 /*
  * Represents an element and its content.
@@ -17,9 +18,9 @@ public class Element extends Observable implements Serializable {
 	
 	private int type;
 	private String value;
-	private SerializableObserver observer;
+	private Observer observer;
 	
-	public Element(int type, String value, SerializableObserver o) {
+	public Element(int type, String value, Observer o) {
 		this.type = type;
 		this.value = value;
 		observer = o;

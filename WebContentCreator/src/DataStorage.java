@@ -1,26 +1,29 @@
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Observable;
+import java.util.Observer;
 
 /*
  * Represents a storage file's content.
  * 
  * Created by Leo Köberlein on 10.07.2017
  */
-public class DataStorage extends Observable implements SerializableObserver {
+public class DataStorage extends Observable implements Serializable, Observer {
 
 	private static final long serialVersionUID = 1L;
 	
 	private Page[] pages;
 	private boolean editedSinceLastSave;
-	private SerializableObserver observer;
+	private Observer observer;
 	
-	public DataStorage(SerializableObserver o) {
+	public DataStorage(Observer o) {
 		pages = new Page[] {new Page("startpage.html", "Home", this)};
 		editedSinceLastSave = true;
 		observer = o;
 	}
 	
-	public void setObserver(SerializableObserver o) {
+	//To be called after being saved or loaded to re-link observer.
+	public void setObserver(Observer o) {
 		this.observer = o;
 	}
 	
@@ -82,8 +85,17 @@ public class DataStorage extends Observable implements SerializableObserver {
 		return pages;
 	}
 	
+	/* 
+	 * Mark as saved and cut all connections to objects outside the data to be stored 
+	 * (so nothing gets accidentally stored with the data).
+	 */
 	public void save() {
 		editedSinceLastSave = false;
+		observer = null;
+	}
+	
+	public boolean isEditedSinceLastSave() {
+		return editedSinceLastSave;
 	}
 	
 	//Returns a hash of all page-versions

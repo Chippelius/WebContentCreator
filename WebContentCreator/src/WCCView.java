@@ -14,6 +14,7 @@ import javax.swing.*;
  */
 public class WCCView implements Observer {
 	
+	private WCCModel model;
 	private ActionListener actionListener;
 	private JFrame f;
 	private JSplitPane mainPanel;
@@ -21,21 +22,31 @@ public class WCCView implements Observer {
 	private JList<String> elementList;
 	
 	//Constructor to initiate needed variables and create the window
-	public WCCView(ActionListener actionListener, WindowListener windowListener) {
+	public WCCView(WCCModel m, ActionListener actionListener, WindowListener windowListener) {
+		this.model = m;
+		this.model.setObserver(this);
 		this.actionListener = actionListener;
-		//Window creation and settings
 		try {
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
-		f = new JFrame();
+		
+		//Create window
+		f = new JFrame("Web Content Creator");
 		f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		f.addWindowListener(windowListener);
 		
-		//Window charging with content
+		//Charge window with content
 		f.getContentPane().setLayout(new BorderLayout());
 		f.setJMenuBar(createMenuBar());
 		f.getContentPane().add(createToolBar(), BorderLayout.NORTH);
 		f.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
+		
+		//Apply settings to window and content
+		applySettings();
+		
+		//Make data visible for first time
+		update(model.getDataStorage().getPages()[0], model.getDataStorage().getPages()[0].getFilename());
+		SwingUtilities.updateComponentTreeUI(f);
 	}
 	
 	//Method to create the window's menubar
@@ -138,6 +149,17 @@ public class WCCView implements Observer {
 		menuPage.add(menuPageDelete);
 		menubar.add(menuPage);
 		
+		JMenu menuWindow = new JMenu("Ansicht  ");
+		JMenuItem menuWindowMaximized = new JMenuItem("Maximieren/Minimieren");
+		menuWindowMaximized.addActionListener(actionListener);
+		menuWindowMaximized.setActionCommand(WCCController.windowToggleMaximized);
+		menuWindow.add(menuWindowMaximized);
+		JMenuItem menuWindowCenterDivider = new JMenuItem("Trennstrich zentrieren");
+		menuWindowCenterDivider.addActionListener(actionListener);
+		menuWindowCenterDivider.setActionCommand(WCCController.windowCenterDivider);
+		menuWindow.add(menuWindowCenterDivider);
+		menubar.add(menuWindow);
+		
 		JMenu menuHelp = new JMenu("Hilfe  ");
 		JMenuItem menuHelpInfo = new JMenuItem("Info");
 		menuHelpInfo.addActionListener(actionListener);
@@ -156,7 +178,7 @@ public class WCCView implements Observer {
 	private JToolBar createToolBar () {
 		JToolBar toolbar = new JToolBar("Toolbar");
 		toolbar.setFloatable(true);
-		toolbar.setBorder(BorderFactory.createRaisedBevelBorder());
+		//toolbar.setBorder(BorderFactory.createRaisedBevelBorder());
 		JButton buttonNew = new JButton(new ImageIcon("icons/plusIcon.png"));
 		buttonNew.setToolTipText("Neu...");
 		buttonNew.setFocusable(false);
@@ -212,6 +234,7 @@ public class WCCView implements Observer {
 		buttonNewPage.setToolTipText("Neue Seite");
 		buttonNewPage.setFocusable(false);
 		toolbar.add(buttonNewPage);
+		toolbar.addSeparator();
 		JButton buttonNewHeader = new JButton(new ImageIcon("icons/headerIcon.png"));
 		buttonNewHeader.addActionListener(actionListener);
 		buttonNewHeader.setActionCommand(WCCController.pageNewHeader);
@@ -253,11 +276,36 @@ public class WCCView implements Observer {
 		return mainPanel;
 	}
 
+	public void applySettings() {
+		f.setLocation(model.getSettings().getLocation());
+		f.setSize(model.getSettings().getSize());
+		if(model.getSettings().isFullscreen()) {
+			f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		} else { 
+			f.setExtendedState(JFrame.NORMAL);
+		}
+		mainPanel.setDividerLocation(model.getSettings().getDividerLocation());
+	}
+	
+	public void fetchSettings() {
+		model.getSettings().setLocation(f.getLocation());
+		model.getSettings().setSize(f.getSize());
+		model.getSettings().setFullscreen(f.getExtendedState() == JFrame.MAXIMIZED_BOTH);
+		model.getSettings().setDividerLocation(mainPanel.getDividerLocation());
+	}
+	
+	public void setVisible(boolean b) {
+		f.setVisible(b);
+	}
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
-		
+		if(model.getDataStorage().isEditedSinceLastSave() && (!f.getTitle().startsWith("*"))) {
+			f.setTitle("*" + f.getTitle());
+		} else if((!model.getDataStorage().isEditedSinceLastSave()) && f.getTitle().startsWith("*")) {
+			f.setTitle(f.getTitle().substring(1));
+		}
+		//TODO: implement rest (get pages and elements and fill the lists with them, then select correct page and element)
 	}
 	
 }

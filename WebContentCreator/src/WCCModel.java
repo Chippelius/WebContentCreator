@@ -1,19 +1,19 @@
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Observable;
+import java.util.Observer;
 
 /*
  * Model part of WebContentCreator (by concept of ModelViewControl)
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCModel implements SerializableObserver {
+public class WCCModel extends Observable implements Observer {
 
-	private static final long serialVersionUID = 1L;
-	
 	private File programWorkspace;
-	private SettingsInterface settings;
+	private Settings settings;
 	private DataStorage dataStorage;
+	private Observer observer;
 	
 	public WCCModel() {
 		try {
@@ -22,14 +22,23 @@ public class WCCModel implements SerializableObserver {
 		loadSettings();
 		loadDataStorage();
 	}
-
+	
+	public void setObserver(Observer o) {
+		observer = o;
+	}
+	
+	@Override
+	public void update(Observable o, Object arg) {
+		observer.update(o, arg);
+	}
+	
 	//Load existing settings or create new ones
 	private void loadSettings() {
 		//TODO: implement correctly
 		settings = new Settings();
 	}
 	
-	public SettingsInterface getSettings() {
+	public Settings getSettings() {
 		return settings;
 	}
 	
@@ -41,7 +50,7 @@ public class WCCModel implements SerializableObserver {
 	
 	//Load project data or create new ones
 	private void loadDataStorage() {
-		//TODO: implement correctly
+		//TODO: implement correctly (don't forget to call setObserver(this) at the end!)
 		dataStorage = new DataStorage(this);
 	}
 	
@@ -51,12 +60,8 @@ public class WCCModel implements SerializableObserver {
 	
 	//Save project data
 	public void saveDataStorage() {
-		//TODO: implement
+		//TODO: implement (don't forget to call setObserver(this) at the end!)
+		update(null, null);
 	}
 
-	@Override
-	public void update(Observable o, Object arg) {
-		
-	}
-	
 }

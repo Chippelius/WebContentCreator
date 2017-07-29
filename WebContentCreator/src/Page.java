@@ -1,27 +1,29 @@
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Observable;
+import java.util.Observer;
 
 /*
  * Represents a page and its elements.
  * 
  * Created by Leo Köberlein on 26.07.2017
  */
-public class Page extends Observable  implements SerializableObserver {
+public class Page extends Observable  implements Serializable, Observer {
 
 	private static final long serialVersionUID = 1L;
 	
-	//Unique name to identify a page. Ends with file extension (i.e. '.html'). Only letters allowed (No whitespaces, no special characters).
+	//Unique name to identify a page. Ends with file extension (i.e. '.html'). Only letters and dots ('.') allowed (No whitespaces, no special characters).
 	private String filename;
 	//Name that shows up in the menu. May contain whitespaces and special characters.
 	private String name;
 	private long version;
 	private boolean editedSinceLastExport;
 	private Element[] elements;
-	private SerializableObserver observer;
+	private Observer observer;
 	
-	public Page(String filename, String name, SerializableObserver o) {
+	public Page(String filename, String name, Observer o) {
 		for(char c : filename.toLowerCase().toCharArray()) {
-			if(!"abcdefghijklmnopqrstuvwxyzäöüß".contains("" + c)) {
+			if(!"abcdefghijklmnopqrstuvwxyzäöüß.".contains("" + c)) {
 				throw new IllegalArgumentException("filename must not contain special characters!");
 			}
 		}
