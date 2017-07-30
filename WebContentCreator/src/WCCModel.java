@@ -1,5 +1,8 @@
 import java.io.File;
-import java.net.URISyntaxException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -10,15 +13,22 @@ import java.util.Observer;
  */
 public class WCCModel extends Observable implements Observer {
 
-	private File programWorkspace;
+	private File programWorkspace, settingsFile, dataStorageFile;
 	private Settings settings;
 	private DataStorage dataStorage;
 	private Observer observer;
 	
 	public WCCModel() {
 		try {
-			programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-		} catch (URISyntaxException e) {e.printStackTrace();}
+			/* To be used when exportet into jar file
+			 * programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			 */
+			
+			//Only used during development
+			programWorkspace = new File("");
+			settingsFile = new File(programWorkspace.getAbsolutePath() + "/settings.dat");
+			dataStorageFile = new File(programWorkspace.getAbsolutePath() + "/dataStorage.dat");
+		} catch (Exception e) {e.printStackTrace();}
 		loadSettings();
 		loadDataStorage();
 	}
@@ -34,8 +44,16 @@ public class WCCModel extends Observable implements Observer {
 	
 	//Load existing settings or create new ones
 	private void loadSettings() {
-		//TODO: implement correctly
-		settings = new Settings();
+		if(!settingsFile.exists()) {
+			settings = new Settings();
+		} else {
+			try {
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(settingsFile));
+				settings = (Settings) ois.readObject();
+				settings.refresh();
+				ois.close();
+			} catch (Exception e) {e.printStackTrace();}
+		}
 	}
 	
 	public Settings getSettings() {
@@ -44,14 +62,31 @@ public class WCCModel extends Observable implements Observer {
 	
 	//Save settings in settings file
 	public void saveSettings() {
-		//TODO: implement
+		try {
+			if(!settingsFile.exists())
+				settingsFile.createNewFile();
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(settingsFile, false));
+			oos.writeObject(settings);
+			oos.flush();
+			oos.close();
+		} catch (Exception e) {e.printStackTrace();}
+	
 	}
 	
 	
 	//Load project data or create new ones
 	private void loadDataStorage() {
 		//TODO: implement correctly (don't forget to call setObserver(this) at the end!)
-		dataStorage = new DataStorage(this);
+		if(!dataStorageFile.exists()) {
+			dataStorage = new DataStorage(this);
+		} else {
+			try {
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dataStorageFile));
+				dataStorage = (DataStorage) ois.readObject();
+				dataStorage.setObserver(this);
+				ois.close();
+			} catch (Exception e) {e.printStackTrace();}
+		}
 	}
 	
 	public DataStorage getDataStorage() {
@@ -61,6 +96,16 @@ public class WCCModel extends Observable implements Observer {
 	//Save project data
 	public void saveDataStorage() {
 		//TODO: implement (don't forget to call setObserver(this) at the end!)
+		try {
+			if(!dataStorageFile.exists())
+				dataStorageFile.createNewFile();
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dataStorageFile, false));
+			dataStorage.save();
+			oos.writeObject(dataStorage);
+			oos.flush();
+			oos.close();
+		} catch (Exception e) {e.printStackTrace();}
+		dataStorage.setObserver(this);
 		update(null, null);
 	}
 

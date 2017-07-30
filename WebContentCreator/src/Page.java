@@ -1,5 +1,5 @@
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -18,20 +18,17 @@ public class Page extends Observable  implements Serializable, Observer {
 	private String name;
 	private long version;
 	private boolean editedSinceLastExport;
-	private Element[] elements;
+	private LinkedList<Element> elements;
 	private Observer observer;
 	
 	public Page(String filename, String name, Observer o) {
-		for(char c : filename.toLowerCase().toCharArray()) {
-			if(!"abcdefghijklmnopqrstuvwxyzäöüß.".contains("" + c)) {
-				throw new IllegalArgumentException("filename must not contain special characters!");
-			}
-		}
+		if(!isValidFilename(filename))
+			throw new IllegalArgumentException("filename must not contain special characters!");
 		this.filename = filename;
 		this.name = name;
 		version = 0;
 		editedSinceLastExport = true;
-		elements = new Element[0];
+		elements = new LinkedList<>();
 		observer = o;
 	}
 	
@@ -44,12 +41,20 @@ public class Page extends Observable  implements Serializable, Observer {
 		observer.update(o, this.filename);
 	}
 	
-	public void setFilename(String s) {
-		for(char c :s.toLowerCase().toCharArray()) {
-			if(!"abcdefghijklmnopqrstuvwxyzäöüß".contains("" + c)) {
-				throw new IllegalArgumentException("filename must not contain special characters!");
+	public static boolean isValidFilename(String s) {
+		if(s.equalsIgnoreCase("index.html"))
+			return false;
+		for(char c : s.toLowerCase().toCharArray()) {
+			if(!"abcdefghijklmnopqrstuvwxyzäöüß.".contains("" + c)) {
+				return false;
 			}
 		}
+		return true;
+	}
+	
+	public void setFilename(String s) {
+		if(!isValidFilename(s))
+			throw new IllegalArgumentException("filename must not contain special characters!");
 		filename = s;
 		update(this, null);
 	}
@@ -68,38 +73,26 @@ public class Page extends Observable  implements Serializable, Observer {
 	}
 	
 	public void createElement(int type, String value) {
-		elements = Arrays.copyOf(elements, elements.length+1);
-		elements[elements.length-1] = new Element(type, value, this);
-		update(elements[elements.length-1], null);
+		elements.add(new Element(type, value, this));
+		update(elements.getLast(), null);
 	}
 	
 	public void deleteElement(Element element) {
-		for(int i=0; i<elements.length; ++i) {
-			if(elements[i] == element) {
-				deleteElement(i);
-				return;
-			}
-		}
-	}
-	
-	public void deleteElement(int index) {
-		Element[] res = new Element[elements.length-1];
-		if(index > 0) {
-			System.arraycopy(elements, 0, res, 0, index);
-		}
-		if(index < res.length) {
-			System.arraycopy(elements, index+1, res, index, res.length-index);
-		}
-		elements = res;
+		elements.remove(element);
 		update(this, null);
 	}
 	
-	public void setElements(Element[] e) {
+	public void deleteElement(int index) {
+		elements.remove(index);
+		update(this, null);
+	}
+	
+	public void setElements(LinkedList<Element> e) {
 		elements = e;
 		update(this, null);
 	}
 	
-	public Element[] getElements() {
+	public LinkedList<Element> getElements() {
 		return elements;
 	}
 	

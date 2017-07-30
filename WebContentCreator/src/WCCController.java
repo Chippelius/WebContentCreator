@@ -2,14 +2,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 
 /*
  * Control part of WebContentCreator (by concept of ModelViewControl)
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCController implements ActionListener, WindowListener, WindowStateListener {
+public class WCCController implements ActionListener, WindowListener {
 	
 	private static WCCModel model;
 	private static WCCView view;
@@ -46,7 +45,7 @@ public class WCCController implements ActionListener, WindowListener, WindowStat
 	public WCCController() {
 		//Initialize components
 		model = new WCCModel();
-		view = new WCCView(model, this, this);
+		view = new WCCView(model, this);
 		view.setVisible(true);
 	}
 	
@@ -75,12 +74,8 @@ public class WCCController implements ActionListener, WindowListener, WindowStat
 	public void windowOpened(WindowEvent arg0) {}
 
 	@Override
-	public void windowStateChanged(WindowEvent e) {
-		view.fetchSettings();
-		view.applySettings();
-	}
-	@Override
 	public void actionPerformed(ActionEvent ae) {
+		//TODO: implement rest
 		switch(ae.getActionCommand().split(":")[0]) {
 		/*
 		 * Optional functionality for later:
@@ -90,6 +85,7 @@ public class WCCController implements ActionListener, WindowListener, WindowStat
 		 * 	break;
 		 */
 		case fileSave:
+			model.saveDataStorage();
 			break;
 		/*
 		 * Optional functionality for later:

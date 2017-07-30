@@ -1,5 +1,5 @@
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -12,12 +12,13 @@ public class DataStorage extends Observable implements Serializable, Observer {
 
 	private static final long serialVersionUID = 1L;
 	
-	private Page[] pages;
+	private LinkedList<Page> pages;
 	private boolean editedSinceLastSave;
 	private Observer observer;
 	
 	public DataStorage(Observer o) {
-		pages = new Page[] {new Page("startpage.html", "Home", this)};
+		pages = new LinkedList<>();
+		pages.add(new Page("startpage.html", "Home", this));
 		editedSinceLastSave = true;
 		observer = o;
 	}
@@ -35,53 +36,50 @@ public class DataStorage extends Observable implements Serializable, Observer {
 		observer.update(o, arg);
 	}
 	
-	public void createPage(String filename, String name) {
+	public boolean createPage(String filename, String name) {
 		//TODO: check for name duplication and validity (i.e. not 'index')
-		pages = Arrays.copyOf(pages, pages.length+1);
-		pages[pages.length-1] = new Page(filename, name, this);
-		update(pages[pages.length-1], filename);
+		if(Page.isValidFilename(filename))
+			return false;
+		Page p = new Page(filename, name, this);
+		pages.add(p);
+		update(p, filename);
+		return true;
 	}
 	
 	public void deletePage(Page p) {
-		for(int i=0; i<pages.length; ++i) {
-			if(pages[i] == p) {
-				deletePage(i);
-				return;
-			}
-		}
+		pages.remove(p);
+		if(pages.size() == 0)
+			pages.add(new Page("startpage.html", "Home", this));
+		update(this, null);
 	}
 	
 	public void deletePage(String name) {
-		for(int i=0; i<pages.length; ++i) {
-			if(pages[i].getFilename().equals(name)) {
-				deletePage(i);
+		for(int i=0; i<pages.size(); ++i) {
+			if(pages.get(i).getFilename().equals(name)) {
+				pages.remove(i);
+				if(pages.size() == 0)
+					pages.add(new Page("startpage.html", "Home", this));
+				update(this, null);
 				return;
 			}
 		}
 	}
 	
 	public void deletePage(int index) {
-		Page[] res = new Page[pages.length-1];
-		if(index > 0) {
-			System.arraycopy(pages, 0, res, 0, index);
-		}
-		if(index < res.length) {
-			System.arraycopy(pages, index+1, res, index, res.length-index);
-		}
-		pages = res;
+		pages.remove(index);
+		if(pages.size() == 0)
+			pages.add(new Page("startpage.html", "Home", this));
 		update(this, null);
 	}
 	
-	public void setPages(Page[] p) {
-		if(p.length > 0) {
-			pages = p;
-		} else {
-			pages = new Page[] {new Page("startpage.html", "Home", this)};
-		}
+	public void setPages(LinkedList<Page> p) {
+		pages = new LinkedList<>(p);
+		if(pages.size() == 0) 
+			pages.add(new Page("startpage.html", "Home", this));
 		update(this, null);
 	}
 	
-	public Page[] getPages() {
+	public LinkedList<Page> getPages() {
 		return pages;
 	}
 	

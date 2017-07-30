@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowListener;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -15,17 +14,17 @@ import javax.swing.*;
 public class WCCView implements Observer {
 	
 	private WCCModel model;
-	private ActionListener actionListener;
+	private WCCController controller;
 	private JFrame f;
 	private JSplitPane mainPanel;
-	private JList<String> pageList;
-	private JList<String> elementList;
+	private JList<String> pageList, elementList;
+	private DefaultListModel<String> pageListModel, elementListModel;
 	
 	//Constructor to initiate needed variables and create the window
-	public WCCView(WCCModel m, ActionListener actionListener, WindowListener windowListener) {
+	public WCCView(WCCModel m, WCCController c) {
 		this.model = m;
 		this.model.setObserver(this);
-		this.actionListener = actionListener;
+		this.controller = c;
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
@@ -33,7 +32,7 @@ public class WCCView implements Observer {
 		//Create window
 		f = new JFrame("Web Content Creator");
 		f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		f.addWindowListener(windowListener);
+		f.addWindowListener(controller);
 		
 		//Charge window with content
 		f.getContentPane().setLayout(new BorderLayout());
@@ -45,8 +44,7 @@ public class WCCView implements Observer {
 		applySettings();
 		
 		//Make data visible for first time
-		update(model.getDataStorage().getPages()[0], model.getDataStorage().getPages()[0].getFilename());
-		SwingUtilities.updateComponentTreeUI(f);
+		update(model.getDataStorage().getPages().getFirst(), model.getDataStorage().getPages().getFirst().getFilename());
 	}
 	
 	//Method to create the window's menubar
@@ -58,30 +56,30 @@ public class WCCView implements Observer {
 			/*
 			 * Optional functionality for later:
 			 * JMenuItem menuFileNewProject = new JMenuItem("Neues Projekt", new ImageIcon("icons/plusIcon.png"));
-			 * menuFileNewProject.addActionListener(actionListener);
+			 * menuFileNewProject.addActionListener(controller);
 			 * menuFileNewProject.setActionCommand(WCCController.fileNew);
 			 * menuFileNew.add(menuFileNewProject);
 			 * menuFileNew.addSeparator();
 			 */
 			JMenuItem menuFileNewPage = new JMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"));
-			menuFileNewPage.addActionListener(actionListener);
+			menuFileNewPage.addActionListener(controller);
 			menuFileNewPage.setActionCommand(WCCController.pageNewPage);
 			menuFileNew.add(menuFileNewPage);
 			menuFileNew.addSeparator();
 			JMenuItem menuFileNewHeader = new JMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"));
-			menuFileNewHeader.addActionListener(actionListener);
+			menuFileNewHeader.addActionListener(controller);
 			menuFileNewHeader.setActionCommand(WCCController.pageNewHeader);
 			menuFileNew.add(menuFileNewHeader);
 			JMenuItem menuFileNewSubheader = new JMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"));
-			menuFileNewSubheader.addActionListener(actionListener);
+			menuFileNewSubheader.addActionListener(controller);
 			menuFileNewSubheader.setActionCommand(WCCController.pageNewSubheader);
 			menuFileNew.add(menuFileNewSubheader);
 			JMenuItem menuFileNewText = new JMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"));
-			menuFileNewText.addActionListener(actionListener);
+			menuFileNewText.addActionListener(controller);
 			menuFileNewText.setActionCommand(WCCController.pageNewText);
 			menuFileNew.add(menuFileNewText);
 			JMenuItem menuFileNewImage = new JMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"));
-			menuFileNewImage.addActionListener(actionListener);
+			menuFileNewImage.addActionListener(controller);
 			menuFileNewImage.setActionCommand(WCCController.pageNewImage);
 			menuFileNew.add(menuFileNewImage);
 			menuFile.add(menuFileNew);
@@ -89,84 +87,84 @@ public class WCCView implements Observer {
 		/*
 		 * Optional functionality for later:
 		 * JMenuItem menuFileOpen = new JMenuItem("Öffnen", new ImageIcon("icons/openIcon.png"));
-		 * menuFileOpen.addActionListener(actionListener);
+		 * menuFileOpen.addActionListener(controller);
 		 * menuFileOpen.setActionCommand(WCCController.fileOpen);
 		 * menuFile.add(menuFileOpen);
 		 * menuFile.addSeparator();
 		 */
 		JMenuItem menuFileSave = new JMenuItem("Speichern", new ImageIcon("icons/saveIcon.png"));
-		menuFileSave.addActionListener(actionListener);
+		menuFileSave.addActionListener(controller);
 		menuFileSave.setActionCommand(WCCController.fileSave);
 		menuFile.add(menuFileSave);
 		/*
 		 * Optional functionality for later:
 		 * JMenuItem menuFileSaveAs = new JMenuItem("Speichern unter", new ImageIcon("icons/saveIcon.png"));
-		 * menuFileSaveAs.addActionListener(actionListener);
+		 * menuFileSaveAs.addActionListener(controller);
 		 * menuFileSaveAs.setActionCommand(WCCController.fileSaveAs);
 		 * menuFile.add(menuFileSaveAs);
 		 */
 		menuFile.addSeparator();
 		JMenuItem menuFileExport = new JMenuItem("Exportieren", new ImageIcon("icons/exportIcon.png"));
-		menuFileExport.addActionListener(actionListener);
+		menuFileExport.addActionListener(controller);
 		menuFileExport.setActionCommand(WCCController.fileExport);
 		menuFile.add(menuFileExport);
 		menuFile.addSeparator();
 		JMenuItem menuFileExit = new JMenuItem("Schließen");
-		menuFileExit.addActionListener(actionListener);
+		menuFileExit.addActionListener(controller);
 		menuFileExit.setActionCommand(WCCController.fileExit);
 		menuFile.add(menuFileExit);
 		menubar.add(menuFile);
 		
 		JMenu menuPage = new JMenu("Seite  ");
 		JMenuItem menuPageNewPage = new JMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"));
-		menuPageNewPage.addActionListener(actionListener);
+		menuPageNewPage.addActionListener(controller);
 		menuPageNewPage.setActionCommand(WCCController.pageNewPage);
 		menuPage.add(menuPageNewPage);
 		menuPage.addSeparator();
 			JMenu menuPageNew = new JMenu("Neues Element");
 			menuPageNew.setIcon(new ImageIcon("icons/plusIcon.png"));
 			JMenuItem menuPageNewHeader = new JMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"));
-			menuPageNewHeader.addActionListener(actionListener);
+			menuPageNewHeader.addActionListener(controller);
 			menuPageNewHeader.setActionCommand(WCCController.pageNewHeader);
 			menuPageNew.add(menuPageNewHeader);
 			JMenuItem menuPageNewSubheader = new JMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"));
-			menuPageNewSubheader.addActionListener(actionListener);
+			menuPageNewSubheader.addActionListener(controller);
 			menuPageNewSubheader.setActionCommand(WCCController.pageNewSubheader);
 			menuPageNew.add(menuPageNewSubheader);
 			JMenuItem menuPageNewText = new JMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"));
-			menuPageNewText.addActionListener(actionListener);
+			menuPageNewText.addActionListener(controller);
 			menuPageNewText.setActionCommand(WCCController.pageNewText);
 			menuPageNew.add(menuPageNewText);
 			JMenuItem menuPageNewImage = new JMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"));
-			menuPageNewImage.addActionListener(actionListener);
+			menuPageNewImage.addActionListener(controller);
 			menuPageNewImage.setActionCommand(WCCController.pageNewImage);
 			menuPageNew.add(menuPageNewImage);
 			menuPage.add(menuPageNew);
 		menuPage.addSeparator();
 		JMenuItem menuPageDelete = new JMenuItem("Seite löschen", new ImageIcon("icons/deletePageIcon.png"));
-		menuPageDelete.addActionListener(actionListener);
+		menuPageDelete.addActionListener(controller);
 		menuPageDelete.setActionCommand(WCCController.pageDelete);
 		menuPage.add(menuPageDelete);
 		menubar.add(menuPage);
 		
 		JMenu menuWindow = new JMenu("Ansicht  ");
 		JMenuItem menuWindowMaximized = new JMenuItem("Maximieren/Minimieren");
-		menuWindowMaximized.addActionListener(actionListener);
+		menuWindowMaximized.addActionListener(controller);
 		menuWindowMaximized.setActionCommand(WCCController.windowToggleMaximized);
 		menuWindow.add(menuWindowMaximized);
 		JMenuItem menuWindowCenterDivider = new JMenuItem("Trennstrich zentrieren");
-		menuWindowCenterDivider.addActionListener(actionListener);
+		menuWindowCenterDivider.addActionListener(controller);
 		menuWindowCenterDivider.setActionCommand(WCCController.windowCenterDivider);
 		menuWindow.add(menuWindowCenterDivider);
 		menubar.add(menuWindow);
 		
 		JMenu menuHelp = new JMenu("Hilfe  ");
 		JMenuItem menuHelpInfo = new JMenuItem("Info");
-		menuHelpInfo.addActionListener(actionListener);
+		menuHelpInfo.addActionListener(controller);
 		menuHelpInfo.setActionCommand(WCCController.helpInfo);
 		menuHelp.add(menuHelpInfo);
 		JMenuItem menuHelpCheckForUpdates = new JMenuItem("Nach Updates suchen");
-		menuHelpCheckForUpdates.addActionListener(actionListener);
+		menuHelpCheckForUpdates.addActionListener(controller);
 		menuHelpCheckForUpdates.setActionCommand(WCCController.helpCheckForUpdates);
 		menuHelp.add(menuHelpCheckForUpdates);
 		menubar.add(menuHelp);
@@ -184,24 +182,24 @@ public class WCCView implements Observer {
 		buttonNew.setFocusable(false);
 			JPopupMenu popupButtonNew = new JPopupMenu();
 			JMenuItem menuFileNewPage = new JMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"));
-			menuFileNewPage.addActionListener(actionListener);
+			menuFileNewPage.addActionListener(controller);
 			menuFileNewPage.setActionCommand(WCCController.pageNewPage);
 			popupButtonNew.add(menuFileNewPage);
 			popupButtonNew.addSeparator();
 			JMenuItem menuFileNewHeader = new JMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"));
-			menuFileNewHeader.addActionListener(actionListener);
+			menuFileNewHeader.addActionListener(controller);
 			menuFileNewHeader.setActionCommand(WCCController.pageNewHeader);
 			popupButtonNew.add(menuFileNewHeader);
 			JMenuItem menuFileNewSubheader = new JMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"));
-			menuFileNewSubheader.addActionListener(actionListener);
+			menuFileNewSubheader.addActionListener(controller);
 			menuFileNewSubheader.setActionCommand(WCCController.pageNewSubheader);
 			popupButtonNew.add(menuFileNewSubheader);
 			JMenuItem menuFileNewText = new JMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"));
-			menuFileNewText.addActionListener(actionListener);
+			menuFileNewText.addActionListener(controller);
 			menuFileNewText.setActionCommand(WCCController.pageNewText);
 			popupButtonNew.add(menuFileNewText);
 			JMenuItem menuFileNewImage = new JMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"));
-			menuFileNewImage.addActionListener(actionListener);
+			menuFileNewImage.addActionListener(controller);
 			menuFileNewImage.setActionCommand(WCCController.pageNewImage);
 			popupButtonNew.add(menuFileNewImage);
 		buttonNew.addActionListener(new ActionListener() {
@@ -213,7 +211,7 @@ public class WCCView implements Observer {
 		toolbar.addSeparator();
 		
 		JButton buttonSave = new JButton(new ImageIcon("icons/saveIcon.png"));
-		buttonSave.addActionListener(actionListener);
+		buttonSave.addActionListener(controller);
 		buttonSave.setActionCommand(WCCController.fileSave);
 		buttonSave.setToolTipText("Speichern");
 		buttonSave.setFocusable(false);
@@ -221,7 +219,7 @@ public class WCCView implements Observer {
 		toolbar.addSeparator();
 		
 		JButton buttonExport = new JButton(new ImageIcon("icons/exportIcon.png"));
-		buttonExport.addActionListener(actionListener);
+		buttonExport.addActionListener(controller);
 		buttonExport.setActionCommand(WCCController.fileExport);
 		buttonExport.setToolTipText("Exportieren");
 		buttonExport.setFocusable(false);
@@ -229,32 +227,32 @@ public class WCCView implements Observer {
 		toolbar.addSeparator();
 		
 		JButton buttonNewPage = new JButton(new ImageIcon("icons/newPageIcon.png"));
-		buttonNewPage.addActionListener(actionListener);
+		buttonNewPage.addActionListener(controller);
 		buttonNewPage.setActionCommand(WCCController.pageNewPage);
 		buttonNewPage.setToolTipText("Neue Seite");
 		buttonNewPage.setFocusable(false);
 		toolbar.add(buttonNewPage);
 		toolbar.addSeparator();
 		JButton buttonNewHeader = new JButton(new ImageIcon("icons/headerIcon.png"));
-		buttonNewHeader.addActionListener(actionListener);
+		buttonNewHeader.addActionListener(controller);
 		buttonNewHeader.setActionCommand(WCCController.pageNewHeader);
 		buttonNewHeader.setToolTipText("Neue Überschrift");
 		buttonNewHeader.setFocusable(false);
 		toolbar.add(buttonNewHeader);
 		JButton buttonNewSubheader = new JButton(new ImageIcon("icons/subheaderIcon.png"));
-		buttonNewSubheader.addActionListener(actionListener);
+		buttonNewSubheader.addActionListener(controller);
 		buttonNewSubheader.setActionCommand(WCCController.pageNewSubheader);
 		buttonNewSubheader.setToolTipText("Neue Unterüberschrift");
 		buttonNewSubheader.setFocusable(false);
 		toolbar.add(buttonNewSubheader);
 		JButton buttonNewText = new JButton(new ImageIcon("icons/textIcon.png"));
-		buttonNewText.addActionListener(actionListener);
+		buttonNewText.addActionListener(controller);
 		buttonNewText.setActionCommand(WCCController.pageNewText);
 		buttonNewText.setToolTipText("Neuer Textinhalt");
 		buttonNewText.setFocusable(false);
 		toolbar.add(buttonNewText);
 		JButton buttonNewImage = new JButton(new ImageIcon("icons/imageIcon.png"));
-		buttonNewImage.addActionListener(actionListener);
+		buttonNewImage.addActionListener(controller);
 		buttonNewImage.setActionCommand(WCCController.pageNewImage);
 		buttonNewImage.setToolTipText("Neues Bild");
 		buttonNewImage.setFocusable(false);
@@ -267,12 +265,15 @@ public class WCCView implements Observer {
 	private Component createMainPanel () {
 		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		mainPanel.setContinuousLayout(true);
-		//TODO: Set lists into scrollpane
 		//TODO: Make lists D&D-enabled
-		pageList = new JList<>(new String[]{"Testseite 1", "Testseite 2", "Testseite 3", "Testseite 4", "Testseite 5"});
-		elementList = new JList<>(new String[]{"Testelement 1", "Testelement 2", "Testelement 3", "Testelement 4", "Testelement 5"});
-		mainPanel.setLeftComponent(pageList);
-		mainPanel.setRightComponent(elementList);
+		pageListModel = new DefaultListModel<>();
+		pageList = new JList<>(pageListModel);
+		pageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		elementListModel = new DefaultListModel<>();
+		elementList = new JList<>(elementListModel);
+		elementList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		mainPanel.setLeftComponent(new JScrollPane(pageList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+		mainPanel.setRightComponent(new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 		return mainPanel;
 	}
 
@@ -306,6 +307,19 @@ public class WCCView implements Observer {
 			f.setTitle(f.getTitle().substring(1));
 		}
 		//TODO: implement rest (get pages and elements and fill the lists with them, then select correct page and element)
+		for(Page p : model.getDataStorage().getPages()) {
+			pageListModel.addElement(createPageItem(p));
+		}
+	}
+	
+	public String createPageItem(Page p) {
+		return "<html><body style=\"padding: 5px 10px;\">" + p.getFilename() + "<br><a style=\"font-size: 20px; font-weight: bold;\">" + p.getName() + "</a></body></html>";
+		
+	}
+	
+	public String createElementItem(Element e) {
+		return null;
+		
 	}
 	
 }

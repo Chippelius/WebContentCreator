@@ -18,11 +18,19 @@ public class Settings implements Serializable {
 	private int dividerLocation;
 	
 	public Settings () {
+		refresh();
+	}
+	
+	//To be called after being loaded to fill empty variables (i.e. new attributes after an update)
+	public void refresh() {
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		windowLocation = new Point(toolkit.getScreenSize().width/4, toolkit.getScreenSize().height/4);
-		windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
-		maximized = false;
-		dividerLocation = (windowSize.width - 5)/2;
+		if(windowLocation == null)
+			windowLocation = new Point(toolkit.getScreenSize().width/4, toolkit.getScreenSize().height/4);
+		if(windowSize == null) 
+			windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
+		if(dividerLocation == 0)
+			dividerLocation = (windowSize.width - 5)/2;
+		
 	}
 
 	
