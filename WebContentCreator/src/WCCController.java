@@ -49,11 +49,14 @@ public class WCCController implements ActionListener, WindowListener {
 		view.setVisible(true);
 	}
 	
-	public void shutdown() {
+	public void shutdown(boolean forced) {
 		view.fetchSettings();
 		model.saveSettings();
-		model.saveDataStorage();
-		System.exit(0);
+		if(!forced && model.getDataStorage().isEditedSinceLastSave()) {
+			view.askForSaveBeforeExit();
+		} else {
+			System.exit(0);
+		}
 	}
 
 	@Override
@@ -62,7 +65,7 @@ public class WCCController implements ActionListener, WindowListener {
 	public void windowClosed(WindowEvent arg0) {}
 	@Override
 	public void windowClosing(WindowEvent arg0) {
-		shutdown();
+		shutdown(false);
 	}
 	@Override
 	public void windowDeactivated(WindowEvent arg0) {}
@@ -76,7 +79,8 @@ public class WCCController implements ActionListener, WindowListener {
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 		//TODO: implement rest
-		switch(ae.getActionCommand().split(":")[0]) {
+		String[] commandParts = ae.getActionCommand().split(":");
+		switch(commandParts[0]) {
 		/*
 		 * Optional functionality for later:
 		 * case fileNew:
@@ -95,7 +99,11 @@ public class WCCController implements ActionListener, WindowListener {
 		case fileExport:
 			break;
 		case fileExit:
-			shutdown();
+			if(commandParts.length > 1) {
+				shutdown(Boolean.parseBoolean(commandParts[1]));
+			} else {
+				shutdown(false);
+			}
 			break;
 		case pageNewPage:
 			break;
@@ -108,6 +116,7 @@ public class WCCController implements ActionListener, WindowListener {
 		case pageNewImage:
 			break;
 		case pageDelete:
+			System.out.println(ae.getActionCommand());
 			break;
 		case windowToggleMaximized:
 			view.fetchSettings();

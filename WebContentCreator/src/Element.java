@@ -18,16 +18,24 @@ public class Element extends Observable implements Serializable {
 	
 	private int type;
 	private String value;
-	private Observer observer;
 	
 	public Element(int type, String value, Observer o) {
 		this.type = type;
 		this.value = value;
-		observer = o;
+		addObserver(o);
 	}
 	
 	public void update() {
-		observer.update(this, null);
+		setChanged();
+		notifyObservers(this);
+	}
+	
+	public void save() {
+		deleteObservers();
+	}
+	
+	public void relink(Observer o) {
+		addObserver(o);
 	}
 	
 	public void setType(int newType) {

@@ -1,5 +1,9 @@
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -8,24 +12,17 @@ import java.util.Observer;
  * 
  * Created by Leo Köberlein on 10.07.2017
  */
-public class DataStorage extends Observable implements Serializable, Observer {
+public class DataStorage extends Observable implements Serializable, List<Page>, Observer {
 
 	private static final long serialVersionUID = 1L;
 	
-	private LinkedList<Page> pages;
+	private ArrayList<Page> pages;
 	private boolean editedSinceLastSave;
-	private Observer observer;
 	
-	public DataStorage(Observer o) {
-		pages = new LinkedList<>();
+	public DataStorage() {
+		pages = new ArrayList<>();
 		pages.add(new Page("startpage.html", "Home", this));
 		editedSinceLastSave = true;
-		observer = o;
-	}
-	
-	//To be called after being saved or loaded to re-link observer.
-	public void setObserver(Observer o) {
-		this.observer = o;
 	}
 	
 	@Override
@@ -33,54 +30,8 @@ public class DataStorage extends Observable implements Serializable, Observer {
 		if(!editedSinceLastSave) {
 			editedSinceLastSave = true;
 		}
-		observer.update(o, arg);
-	}
-	
-	public boolean createPage(String filename, String name) {
-		//TODO: check for name duplication and validity (i.e. not 'index')
-		if(Page.isValidFilename(filename))
-			return false;
-		Page p = new Page(filename, name, this);
-		pages.add(p);
-		update(p, filename);
-		return true;
-	}
-	
-	public void deletePage(Page p) {
-		pages.remove(p);
-		if(pages.size() == 0)
-			pages.add(new Page("startpage.html", "Home", this));
-		update(this, null);
-	}
-	
-	public void deletePage(String name) {
-		for(int i=0; i<pages.size(); ++i) {
-			if(pages.get(i).getFilename().equals(name)) {
-				pages.remove(i);
-				if(pages.size() == 0)
-					pages.add(new Page("startpage.html", "Home", this));
-				update(this, null);
-				return;
-			}
-		}
-	}
-	
-	public void deletePage(int index) {
-		pages.remove(index);
-		if(pages.size() == 0)
-			pages.add(new Page("startpage.html", "Home", this));
-		update(this, null);
-	}
-	
-	public void setPages(LinkedList<Page> p) {
-		pages = new LinkedList<>(p);
-		if(pages.size() == 0) 
-			pages.add(new Page("startpage.html", "Home", this));
-		update(this, null);
-	}
-	
-	public LinkedList<Page> getPages() {
-		return pages;
+		setChanged();
+		notifyObservers(arg);
 	}
 	
 	/* 
@@ -89,7 +40,17 @@ public class DataStorage extends Observable implements Serializable, Observer {
 	 */
 	public void save() {
 		editedSinceLastSave = false;
-		observer = null;
+		deleteObservers();
+		for(Page p : pages) {
+			p.save();
+		}
+	}
+	
+	public void relink(Observer o) {
+		addObserver(o);
+		for(Page p : pages) {
+			p.relink(this);
+		}
 	}
 	
 	public boolean isEditedSinceLastSave() {
@@ -100,6 +61,181 @@ public class DataStorage extends Observable implements Serializable, Observer {
 	public String export() {
 		//TODO: implement using the export-method of the pages
 		return null;
+	}
+
+	public boolean isValidFilename(String s) {
+		if(s.equalsIgnoreCase("index.html"))
+			return false;
+		for(char c : s.toLowerCase().toCharArray()) {
+			if(!"abcdefghijklmnopqrstuvwxyzäöüß.".contains("" + c)) {
+				return false;
+			}
+		}
+		if(pages.stream().filter(x -> x.getFilename().equalsIgnoreCase(s)).count() > 0)
+			return false;
+		
+		return true;
+	}
+	
+	public boolean createPage(String filename, String name) {
+		return add(new Page(filename, name, this));
+	}
+	
+	@Override
+	public boolean add(Page p) {
+		if(!isValidFilename(p.getFilename()))
+			return false;
+		boolean b = pages.add(p);
+		p.addObserver(this);
+		update(this, this);
+		return b;
+	}
+
+	@Override
+	public void add(int index, Page p) {
+		if(!isValidFilename(p.getFilename()))
+			throw new IllegalArgumentException("filename must not contain special characters!");
+		pages.add(index, p);
+		p.addObserver(this);
+		update(this, this);
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends Page> c) {
+		for(Page p : c) {
+			if(!isValidFilename(p.getFilename()))
+				return false;
+		}
+		boolean b = pages.addAll(c);
+		c.forEach(x -> x.addObserver(this));
+		update(this, this);
+		return b;
+	}
+
+	@Override
+	public boolean addAll(int index, Collection<? extends Page> c) {
+		for(Page p : c) {
+			if(!isValidFilename(p.getFilename()))
+				return false;
+		}
+		boolean b = pages.addAll(index, c);
+		c.forEach(x -> x.addObserver(this));
+		update(this, this);
+		return b;
+	}
+
+	@Override
+	public void clear() {
+		pages.forEach(x -> x.deleteObserver(this));
+		pages.clear();
+		update(this, this);
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		return pages.contains(o);
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return pages.containsAll(c);
+	}
+
+	@Override
+	public Page get(int index) {
+		return pages.get(index);
+	}
+
+	@Override
+	public int indexOf(Object o) {
+		return pages.indexOf(o);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return pages.isEmpty();
+	}
+
+	@Override
+	public Iterator<Page> iterator() {
+		return pages.iterator();
+	}
+
+	@Override
+	public int lastIndexOf(Object o) {
+		return pages.lastIndexOf(o);
+	}
+
+	@Override
+	public ListIterator<Page> listIterator() {
+		return pages.listIterator();
+	}
+
+	@Override
+	public ListIterator<Page> listIterator(int index) {
+		return pages.listIterator(index);
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		boolean b = pages.remove(o);
+		((Page)o).deleteObserver(this);
+		if(pages.size() == 0)
+			pages.add(new Page("startpage.html", "Home", this));
+		update(this, null);
+		return b;
+	}
+
+	@Override
+	public Page remove(int index) {
+		Page p = pages.remove(index);
+		p.deleteObserver(this);
+		update(this, this);
+		return p;
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		boolean b = pages.removeAll(c);
+		c.forEach(x -> ((Page)x).deleteObserver(this));
+		update(this, this);
+		return b;
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		boolean b = pages.retainAll(c);
+		update(this, this);
+		return b;
+	}
+
+	@Override
+	public Page set(int index, Page element) {
+		Page p = pages.set(index, element);
+		element.addObserver(this);
+		p.deleteObserver(this);
+		update(this, this);
+		return p;
+	}
+
+	@Override
+	public int size() {
+		return pages.size();
+	}
+
+	@Override
+	public List<Page> subList(int fromIndex, int toIndex) {
+		return pages.subList(fromIndex, toIndex);
+	}
+
+	@Override
+	public Object[] toArray() {
+		return pages.toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return pages.toArray(a);
 	}
 	
 }
