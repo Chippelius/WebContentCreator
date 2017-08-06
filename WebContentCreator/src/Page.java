@@ -40,7 +40,7 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 			version += 1;
 		}
 		setChanged();
-		notifyObservers(arg);
+		notifyObservers(this);
 	}
 	
 	public void save() {

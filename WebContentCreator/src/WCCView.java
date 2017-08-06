@@ -17,11 +17,12 @@ public class WCCView implements Observer {
 	
 	private WCCModel model;
 	private WCCController controller;
-	private Color backgroundColor;
+	private Color backgroundColor, hoverColor, selectedColor, transparentColor;
 	private String title = "Web Content Creator";
 	private JFrame f;
 	private JSplitPane mainPanel;
-	private JPanel leftList, rightList;
+	private JPanel pageList, elementList;
+	private int selectedPage;
 	
 	//Constructor to initiate needed variables and create the window
 	public WCCView(WCCModel m, WCCController c) {
@@ -32,6 +33,10 @@ public class WCCView implements Observer {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
 		backgroundColor = new Color(255, 255, 255);
+		hoverColor = new Color(235, 235, 235);
+		selectedColor = new Color(210, 210, 210);
+		transparentColor = new Color(0, 0, 0, 0);
+		selectedPage = -1;
 		
 		//Create window
 		f = new JFrame(title);
@@ -174,74 +179,93 @@ public class WCCView implements Observer {
 		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		mainPanel.setBackground(backgroundColor);
 		mainPanel.setContinuousLayout(true);
-		leftList = new JPanel();
-		leftList.setLayout(new BoxLayout(leftList, BoxLayout.Y_AXIS));
-		leftList.setBackground(backgroundColor);
-		rightList = new JPanel();
-		rightList.setLayout(new BoxLayout(rightList, BoxLayout.Y_AXIS));
-		rightList.setBackground(backgroundColor);
-		mainPanel.setLeftComponent(new JScrollPane(leftList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		mainPanel.setRightComponent(new JScrollPane(rightList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 		return mainPanel;
 	}
 	
 	private Component createPageListItem(Page p) {
-		JPanel itemPanel = new JPanel(new BorderLayout());
-		itemPanel.setBackground(backgroundColor);
-		itemPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		itemPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBackground(backgroundColor);
+		panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+		panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+		
+		//TODO: implement popup menu
+		
 			JPanel labelPanel = new JPanel(new BorderLayout());
-			labelPanel.setBackground(backgroundColor);
-			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-				JLabel nameLabel = new JLabel("<html><a style='font-size: 20px;'>"+p.getName()+"</a></html>");
+			labelPanel.setBackground(transparentColor);
+			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
+				JLabel nameLabel = new JLabel("<html><a style='font-size: 15px;'>"+p.getName()+"</a></html>");
 				labelPanel.add(nameLabel, BorderLayout.CENTER);
-				JLabel fileNameLabel = new JLabel("<html>"+p.getFilename()+"</html>");
+				JLabel fileNameLabel = new JLabel("<html>&nbsp;"+p.getFilename()+"</html>");
 				labelPanel.add(fileNameLabel, BorderLayout.SOUTH);
-			itemPanel.add(labelPanel, BorderLayout.CENTER);
+			panel.add(labelPanel, BorderLayout.CENTER);
 			
-			JPanel deleteButtonPanel = new JPanel(new FlowLayout());
-			deleteButtonPanel.setBackground(backgroundColor);
-				JButton deleteButton = new JButton("<html><a style='font-size: 15px;'>x</a></html>");
-				deleteButton.addActionListener(controller);
-				deleteButton.setActionCommand(WCCController.pageDelete + ":" + p.getFilename());
-				deleteButton.setFocusable(false);
-				deleteButton.setContentAreaFilled(false);
-				deleteButton.setMargin(new Insets(0, 0, 0, 0));
-				deleteButton.setPreferredSize(new Dimension(25, 25));
-				deleteButton.setVisible(false);
-				deleteButtonPanel.add(deleteButton);
-			itemPanel.add(deleteButtonPanel, BorderLayout.EAST);
-		itemPanel.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+			JPanel sidePanel = new JPanel(new BorderLayout());
+			sidePanel.setBackground(transparentColor);
+			sidePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+				JPanel deleteButtonPanel = new JPanel(new FlowLayout());
+				deleteButtonPanel.setBackground(transparentColor);
+					JButton deleteButton = new JButton("<html><a style='font-size: 15px;'>x</a></html>");
+					deleteButton.addActionListener(controller);
+					deleteButton.setActionCommand(WCCController.pageDelete + ":" + p.getFilename());
+					deleteButton.setToolTipText("Seite löschen");
+					deleteButton.setFocusable(false);
+					deleteButton.setContentAreaFilled(false);
+					deleteButton.setMargin(new Insets(0, 0, 0, 0));
+					deleteButton.setPreferredSize(new Dimension(15, 15));
+					deleteButtonPanel.add(deleteButton);
+				sidePanel.add(deleteButtonPanel, BorderLayout.EAST);
+				JLabel versionLabel = new JLabel("<html>&nbsp;&nbsp;Version: " + p.getVersion() + "&nbsp;&nbsp;</html>");
+				sidePanel.add(versionLabel, BorderLayout.SOUTH);
+			panel.add(sidePanel, BorderLayout.EAST);
+		MouseListener hoverListener = new MouseListener() {
+			@Override public void mouseReleased(MouseEvent e) {}
+			@Override public void mousePressed(MouseEvent e) {}
 			@Override
 			public void mouseExited(MouseEvent e) {
-				deleteButton.setVisible(false);
+				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
+					panel.setBackground(backgroundColor);
+				}
 			}
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				deleteButton.setVisible(true);
+				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
+					panel.setBackground(hoverColor);
+				}
 			}
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+			public void mouseClicked(MouseEvent e) {}
+		};
+		panel.addMouseListener(hoverListener);
+		deleteButton.addMouseListener(hoverListener);
+		MouseListener clickListener = new MouseListener() {
+			@Override public void mouseReleased(MouseEvent e) {}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				controller.actionPerformed(new ActionEvent(panel, ActionEvent.ACTION_PERFORMED, WCCController.pageSelect+":"+model.getDataStorage().indexOf(p)));
 			}
-		});
-		itemPanel.setMaximumSize(new Dimension(1920, nameLabel.getPreferredSize().height + fileNameLabel.getPreferredSize().height + 20));
-		return itemPanel;
+			@Override public void mouseExited(MouseEvent e) {}
+			@Override public void mouseEntered(MouseEvent e) {}
+			@Override public void mouseClicked(MouseEvent e) {}
+		};
+		panel.addMouseListener(clickListener);
+		return panel;
+	}
+	
+	public void selectPage(int id) {
+		selectedPage = id;
+		for(int i=0; i<model.getDataStorage().size(); ++i) {
+			pageList.getComponent(i).setBackground(backgroundColor);
+		}
+		pageList.getComponent(id).setBackground(selectedColor);
+		for(Element e : model.getDataStorage().get(id)) {
+			elementList.add(createElementListItem(e));
+		}
 	}
 	
 	private Component createElementListItem(Element e) {
 		//TODO: implement
+		
 		return null;
 	}
 	
@@ -252,11 +276,26 @@ public class WCCView implements Observer {
 		} else  {
 			f.setTitle(title);
 		}
-		//TODO: implement rest (get pages and elements and fill the lists with them, then select correct page and element
+		fetchSettings();
+		pageList = new JPanel();
+		pageList.setLayout(new BoxLayout(pageList, BoxLayout.Y_AXIS));
+		pageList.setBackground(backgroundColor);
+		JScrollPane pagepane = new JScrollPane(pageList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		pagepane.getVerticalScrollBar().setUnitIncrement(16);
+		elementList = new JPanel();
+		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
+		elementList.setBackground(backgroundColor);
+		JScrollPane elementpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		elementpane.getVerticalScrollBar().setUnitIncrement(16);
+		mainPanel.setLeftComponent(pagepane);
+		mainPanel.setRightComponent(elementpane);
 		for(Page p : model.getDataStorage()) {
-			leftList.add(createPageListItem(p));
+			pageList.add(createPageListItem(p));
 		}
-		
+		if(arg instanceof Page) {
+			selectPage(model.getDataStorage().indexOf(arg));
+		}
+		applySettings();
 	}
 	
 	public void applySettings() {
@@ -281,6 +320,10 @@ public class WCCView implements Observer {
 		f.setVisible(b);
 	}
 	
+	public void showMessage(String message, String title, int type) {
+		JOptionPane.showMessageDialog(f, message, title, type);
+	}
+	
 	public void askForSaveBeforeExit() {
 		switch(JOptionPane.showConfirmDialog(f, "Es gibt nicht gespeicherte Änderungen. \nVor dem Schließen speichern?")) {
 		case JOptionPane.YES_OPTION:
@@ -294,5 +337,22 @@ public class WCCView implements Observer {
 			//Do nothing
 		}
 	}
-	
+
+	public void requestNewPageData(String previousFilename, String previousName) {
+		JPanel myPanel = new JPanel(new GridLayout(0, 3));
+		myPanel.add(new JLabel("Name:"));
+		JTextField nameField = new JTextField(previousName, 20);
+		myPanel.add(nameField);
+		myPanel.add(Box.createHorizontalStrut(15));
+		myPanel.add(new JLabel("Dateiname:"));
+		JTextField filenameField = new JTextField(previousFilename, 20);
+		myPanel.add(filenameField);
+		myPanel.add(new JLabel(".html"));
+		
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen (für das Menü) für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
+		if (result == JOptionPane.OK_OPTION) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewPage+":"+filenameField.getText()+".html:"+nameField.getText()));
+		}
+	}
+
 }

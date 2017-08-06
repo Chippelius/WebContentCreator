@@ -3,6 +3,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+import javax.swing.JOptionPane;
+
 /*
  * Control part of WebContentCreator (by concept of ModelViewControl)
  * 
@@ -33,6 +35,7 @@ public class WCCController implements ActionListener, WindowListener {
 	public static final String pageNewText = "pageNewText";
 	public static final String pageNewImage = "pageNewImage";
 	public static final String pageDelete = "pageDelete";
+	public static final String pageSelect = "pageSelect";
 	public static final String windowToggleMaximized = "windowToggleFullscreen";
 	public static final String windowCenterDivider = "windowCenterDivider";
 	public static final String helpInfo = "helpInfo";
@@ -106,6 +109,16 @@ public class WCCController implements ActionListener, WindowListener {
 			}
 			break;
 		case pageNewPage:
+			if(commandParts.length < 3) {
+				view.requestNewPageData(null, null);
+			} else {
+				if(model.getDataStorage().isValidFilename(commandParts[1])) {
+					model.getDataStorage().createPage(commandParts[1], commandParts[2]);
+				} else {
+					view.showMessage("Der Dateiname \""+commandParts[1]+"\" ist ungültig oder schon vergeben! \nBitte suchen Sie einen anderen aus.", "Dateiname ungültig", JOptionPane.ERROR_MESSAGE);
+					view.requestNewPageData(commandParts[1], commandParts[2]);
+				}
+			}
 			break;
 		case pageNewHeader:
 			break;
@@ -117,6 +130,9 @@ public class WCCController implements ActionListener, WindowListener {
 			break;
 		case pageDelete:
 			System.out.println(ae.getActionCommand());
+			break;
+		case pageSelect:
+			view.selectPage(Integer.parseInt(commandParts[1]));
 			break;
 		case windowToggleMaximized:
 			view.fetchSettings();

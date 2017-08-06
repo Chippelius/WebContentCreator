@@ -68,9 +68,9 @@ public class WCCModel extends Observable implements Observer {
 	
 	//Load project data or create new ones
 	private void loadDataStorage() {
-		//TODO: implement correctly (don't forget to call relink(this) at the end!)
 		if(!dataStorageFile.exists()) {
 			dataStorage = new DataStorage();
+			saveDataStorage();
 		} else {
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dataStorageFile));
@@ -109,7 +109,7 @@ public class WCCModel extends Observable implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		setChanged();
-		notifyObservers();
+		notifyObservers(arg);
 	}
 
 	
