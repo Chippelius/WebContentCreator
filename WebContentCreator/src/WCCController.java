@@ -30,12 +30,24 @@ public class WCCController implements ActionListener, WindowListener {
 	public static final String fileExport = "fileExport";
 	public static final String fileExit = "fileExit";
 	public static final String pageNewPage = "pageNewPage";
+	public static final String pageSelect = "pageSelect";
+	public static final String pageChangeData = "pageChangeData";
+	public static final String pageMoveTop = "pageMoveTop";
+	public static final String pageMoveBottom = "pageMoveBottom";
+	public static final String pageMoveUp = "pageMoveUp";
+	public static final String pageMoveDown = "pageMoveDown";
+	public static final String pageDelete = "pageDelete";
 	public static final String pageNewHeader = "pageNewHeader";
 	public static final String pageNewSubheader = "pageNewSubheader";
 	public static final String pageNewText = "pageNewText";
 	public static final String pageNewImage = "pageNewImage";
-	public static final String pageDelete = "pageDelete";
-	public static final String pageSelect = "pageSelect";
+	public static final String elementSelect = "elementSelect";
+	public static final String elementChangeData = "elementChangeData";
+	public static final String elementMoveTop = "elementMoveTop";
+	public static final String elementMoveBottom = "elementMoveBottom";
+	public static final String elementMoveUp = "elementMoveUp";
+	public static final String elementMoveDown = "elementMoveDown";
+	public static final String elementDelete = "elementDelete";
 	public static final String windowToggleMaximized = "windowToggleFullscreen";
 	public static final String windowCenterDivider = "windowCenterDivider";
 	public static final String helpInfo = "helpInfo";
@@ -100,6 +112,7 @@ public class WCCController implements ActionListener, WindowListener {
 		 * 	break;
 		 */
 		case fileExport:
+			//TODO: ask for location to export into
 			break;
 		case fileExit:
 			if(commandParts.length > 1) {
@@ -115,24 +128,66 @@ public class WCCController implements ActionListener, WindowListener {
 				if(model.getDataStorage().isValidFilename(commandParts[1])) {
 					model.getDataStorage().createPage(commandParts[1], commandParts[2]);
 				} else {
-					view.showMessage("Der Dateiname \""+commandParts[1]+"\" ist ungültig oder schon vergeben! \nBitte suchen Sie einen anderen aus.", "Dateiname ungültig", JOptionPane.ERROR_MESSAGE);
+					view.showMessage("Der Dateiname \""+commandParts[1]+"\" ist ungültig oder schon vergeben! \n"
+							+ "Bitte suchen Sie einen anderen aus. \n"
+							+ "Ein Dateiname muss eine Endung besitzen (z.B. '.html'), darf aber sonst keine Sonderzeichen enthalten", 
+							"Dateiname ungültig", JOptionPane.ERROR_MESSAGE);
 					view.requestNewPageData(commandParts[1], commandParts[2]);
 				}
 			}
 			break;
-		case pageNewHeader:
-			break;
-		case pageNewSubheader:
-			break;
-		case pageNewText:
-			break;
-		case pageNewImage:
-			break;
-		case pageDelete:
-			System.out.println(ae.getActionCommand());
-			break;
 		case pageSelect:
 			view.selectPage(Integer.parseInt(commandParts[1]));
+			break;
+		case pageChangeData:
+			if(Boolean.parseBoolean(commandParts[1])) {
+				Page p = model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[2]));
+				p.setFilename(commandParts[4]);
+				p.setName(commandParts[5]);
+			} else {
+				view.requestChangePageData(commandParts[2], commandParts[3]);
+			}
+			break;
+		case pageMoveTop:
+			break;
+		case pageMoveBottom:
+			break;
+		case pageMoveUp:
+			break;
+		case pageMoveDown:
+			break;
+		case pageDelete:
+			if(Boolean.parseBoolean(commandParts[1])) {
+				model.getDataStorage().remove(model.getDataStorage().indexOf(commandParts[2]));
+			} else { 
+				view.askForDeletePage(commandParts[2]);
+			}
+			break;
+		case pageNewHeader:
+			System.out.println("Action: "+ae.getActionCommand());
+			break;
+		case pageNewSubheader:
+			System.out.println(ae.getActionCommand());
+			break;
+		case pageNewText:
+			System.out.println(ae.getActionCommand());
+			break;
+		case pageNewImage:
+			System.out.println(ae.getActionCommand());
+			break;
+		case elementSelect:
+			break;
+		case elementChangeData:
+			break;
+		case elementMoveTop:
+			break;
+		case elementMoveBottom:
+			break;
+		case elementMoveUp:
+			break;
+		case elementMoveDown:
+			break;
+		case elementDelete:
 			break;
 		case windowToggleMaximized:
 			view.fetchSettings();

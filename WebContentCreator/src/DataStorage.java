@@ -30,6 +30,9 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		if(!editedSinceLastSave) {
 			editedSinceLastSave = true;
 		}
+		if(pages.size() == 0) {
+			pages.add(new Page("startpage.html", "Home", this));
+		}
 		setChanged();
 		notifyObservers(arg);
 	}
@@ -71,6 +74,8 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 				return false;
 			}
 		}
+		if(!s.contains(".") || s.endsWith("."))
+			return false;
 		if(pages.stream().filter(x -> x.getFilename().equalsIgnoreCase(s)).count() > 0)
 			return false;
 		
@@ -150,6 +155,14 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public int indexOf(Object o) {
 		return pages.indexOf(o);
 	}
+	
+	public int indexOf(String filename) {
+		for(int i=0; i<size(); ++i) {
+			if(get(i).getFilename().equalsIgnoreCase(filename))
+				return i;
+		}
+		return -1;
+	}
 
 	@Override
 	public boolean isEmpty() {
@@ -180,8 +193,6 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public boolean remove(Object o) {
 		boolean b = pages.remove(o);
 		((Page)o).deleteObserver(this);
-		if(pages.size() == 0)
-			pages.add(new Page("startpage.html", "Home", this));
 		update(this, null);
 		return b;
 	}

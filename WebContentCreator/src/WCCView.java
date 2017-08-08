@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -23,6 +24,7 @@ public class WCCView implements Observer {
 	private JSplitPane mainPanel;
 	private JPanel pageList, elementList;
 	private int selectedPage;
+	private ArrayList<AbstractButton> pageDependentButtons;
 	
 	//Constructor to initiate needed variables and create the window
 	public WCCView(WCCModel m, WCCController c) {
@@ -37,6 +39,7 @@ public class WCCView implements Observer {
 		selectedColor = new Color(210, 210, 210);
 		transparentColor = new Color(0, 0, 0, 0);
 		selectedPage = -1;
+		pageDependentButtons = new ArrayList<>();
 		
 		//Create window
 		f = new JFrame(title);
@@ -68,10 +71,10 @@ public class WCCView implements Observer {
 			//menuFileNew.addSeparator();
 			menuFileNew.add(createMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"), WCCController.pageNewPage));
 			menuFileNew.addSeparator();
-			menuFileNew.add(createMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader));
-			menuFileNew.add(createMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader));
-			menuFileNew.add(createMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText));
-			menuFileNew.add(createMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage));
+			menuFileNew.add(createPageDependentMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader+":"));
+			menuFileNew.add(createPageDependentMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader+":"));
+			menuFileNew.add(createPageDependentMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText+":"));
+			menuFileNew.add(createPageDependentMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage+":"));
 			menuFile.add(menuFileNew);
 			menuFile.addSeparator();
 		//Optional functionality for later:
@@ -90,13 +93,13 @@ public class WCCView implements Observer {
 		menuPage.add(createMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"), WCCController.pageNewPage));
 		menuPage.addSeparator();
 			JMenu menuPageNew = createMenu("Neues Element", new ImageIcon("icons/plusIcon.png"));
-			menuPageNew.add(createMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader));
-			menuPageNew.add(createMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader));
-			menuPageNew.add(createMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText));
-			menuPageNew.add(createMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage));
+			menuPageNew.add(createPageDependentMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader+":"));
+			menuPageNew.add(createPageDependentMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader+":"));
+			menuPageNew.add(createPageDependentMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText+":"));
+			menuPageNew.add(createPageDependentMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage+":"));
 			menuPage.add(menuPageNew);
 		menuPage.addSeparator();
-		menuPage.add(createMenuItem("Seite löschen", new ImageIcon("icons/deletePageIcon.png"), WCCController.pageDelete));
+		menuPage.add(createPageDependentMenuItem("Seite löschen", new ImageIcon("icons/deletePageIcon.png"), WCCController.pageDelete+":false:"));
 		menubar.add(menuPage);
 		
 		JMenu menuWindow = createMenu("Ansicht  ", null);
@@ -128,6 +131,12 @@ public class WCCView implements Observer {
 		return item;
 	}
 	
+	private JMenuItem createPageDependentMenuItem(String title, Icon icon, String actionCommand) {
+		JMenuItem item = createMenuItem(title, icon, actionCommand);
+		pageDependentButtons.add(item);
+		return item;
+	}
+	
 	//Method to create the window's toolbar
 	private JToolBar createToolBar () {
 		JToolBar toolbar = new JToolBar("Toolbar");
@@ -138,10 +147,10 @@ public class WCCView implements Observer {
 			JPopupMenu popupButtonNew = new JPopupMenu();
 			popupButtonNew.add(createMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"), WCCController.pageNewPage));
 			popupButtonNew.addSeparator();
-			popupButtonNew.add(createMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader));
-			popupButtonNew.add(createMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader));
-			popupButtonNew.add(createMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText));
-			popupButtonNew.add(createMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage));
+			popupButtonNew.add(createPageDependentMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader+":"));
+			popupButtonNew.add(createPageDependentMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader+":"));
+			popupButtonNew.add(createPageDependentMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText+":"));
+			popupButtonNew.add(createPageDependentMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage+":"));
 		buttonNew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				popupButtonNew.show(buttonNew, 0, buttonNew.getHeight());
@@ -155,10 +164,10 @@ public class WCCView implements Observer {
 		toolbar.addSeparator();
 		toolbar.add(createToolbarButton(new ImageIcon("icons/newPageIcon.png"), WCCController.pageNewPage, "Neue Seite"));
 		toolbar.addSeparator();
-		toolbar.add(createToolbarButton(new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader, "Neue Überschrift"));
-		toolbar.add(createToolbarButton(new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader, "Neue Unterüberschrift"));
-		toolbar.add(createToolbarButton(new ImageIcon("icons/textIcon.png"), WCCController.pageNewText, "Neuer Textinhalt"));
-		toolbar.add(createToolbarButton(new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage, "Neues Bild"));
+		toolbar.add(createPageDependentToolbarButton(new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader+":", "Neue Überschrift"));
+		toolbar.add(createPageDependentToolbarButton(new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader+":", "Neue Unterüberschrift"));
+		toolbar.add(createPageDependentToolbarButton(new ImageIcon("icons/textIcon.png"), WCCController.pageNewText+":", "Neuer Textinhalt"));
+		toolbar.add(createPageDependentToolbarButton(new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage+":", "Neues Bild"));
 		
 		return toolbar;
 	}
@@ -171,6 +180,12 @@ public class WCCView implements Observer {
 		button.setFocusable(false);
 		button.setContentAreaFilled(false);
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		return button;
+	}
+	
+	private JButton createPageDependentToolbarButton(Icon icon, String actionCommand, String tooltip) {
+		JButton button = createToolbarButton(icon, actionCommand, tooltip);
+		pageDependentButtons.add(button);
 		return button;
 	}
 	
@@ -189,8 +204,6 @@ public class WCCView implements Observer {
 		panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 		
-		//TODO: implement popup menu
-		
 			JPanel labelPanel = new JPanel(new BorderLayout());
 			labelPanel.setBackground(transparentColor);
 			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
@@ -207,10 +220,12 @@ public class WCCView implements Observer {
 				deleteButtonPanel.setBackground(transparentColor);
 					JButton deleteButton = new JButton("<html><a style='font-size: 15px;'>x</a></html>");
 					deleteButton.addActionListener(controller);
-					deleteButton.setActionCommand(WCCController.pageDelete + ":" + p.getFilename());
+					deleteButton.setActionCommand(WCCController.pageDelete + ":false:" + p.getFilename());
 					deleteButton.setToolTipText("Seite löschen");
 					deleteButton.setFocusable(false);
 					deleteButton.setContentAreaFilled(false);
+					deleteButton.setOpaque(true);
+					deleteButton.setBackground(transparentColor);
 					deleteButton.setMargin(new Insets(0, 0, 0, 0));
 					deleteButton.setPreferredSize(new Dimension(15, 15));
 					deleteButtonPanel.add(deleteButton);
@@ -226,23 +241,39 @@ public class WCCView implements Observer {
 				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
 					panel.setBackground(backgroundColor);
 				}
+				panel.repaint();
 			}
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
 					panel.setBackground(hoverColor);
 				}
+				panel.repaint();
 			}
-			@Override
-			public void mouseClicked(MouseEvent e) {}
+			@Override public void mouseClicked(MouseEvent e) {}
 		};
 		panel.addMouseListener(hoverListener);
 		deleteButton.addMouseListener(hoverListener);
+		JPopupMenu pageContextMenu = new JPopupMenu();
+		pageContextMenu.add(createMenuItem("Daten ändern", null, WCCController.pageChangeData+":false:"+p.getFilename()+":"+p.getName()));
+		pageContextMenu.addSeparator();
+		pageContextMenu.add(createMenuItem("an den Anfang bewegen", null, WCCController.pageMoveTop+":"+p.getFilename()));
+		pageContextMenu.add(createMenuItem("Nach oben bewegen", null, WCCController.pageMoveUp+":"+p.getFilename()));
+		pageContextMenu.add(createMenuItem("Nach unten bewegen", null, WCCController.pageMoveDown+":"+p.getFilename()));
+		pageContextMenu.add(createMenuItem("An das Ende bewegen", null, WCCController.pageMoveBottom+":"+p.getFilename()));
+		pageContextMenu.addSeparator();
+		pageContextMenu.add(createMenuItem("Seite löschen", null, WCCController.pageDelete+":false:"+p.getFilename()));
 		MouseListener clickListener = new MouseListener() {
-			@Override public void mouseReleased(MouseEvent e) {}
+			@Override 
+			public void mouseReleased(MouseEvent e) {
+				if(e.isPopupTrigger())
+					pageContextMenu.show(panel, e.getX(), e.getY());
+			}
 			@Override
 			public void mousePressed(MouseEvent e) {
 				controller.actionPerformed(new ActionEvent(panel, ActionEvent.ACTION_PERFORMED, WCCController.pageSelect+":"+model.getDataStorage().indexOf(p)));
+				if(e.isPopupTrigger())
+					pageContextMenu.show(panel, e.getX(), e.getY());
 			}
 			@Override public void mouseExited(MouseEvent e) {}
 			@Override public void mouseEntered(MouseEvent e) {}
@@ -260,6 +291,10 @@ public class WCCView implements Observer {
 		pageList.getComponent(id).setBackground(selectedColor);
 		for(Element e : model.getDataStorage().get(id)) {
 			elementList.add(createElementListItem(e));
+		}
+		for(AbstractButton a : pageDependentButtons) {
+			a.setEnabled(true);
+			a.setActionCommand(a.getActionCommand().substring(0, a.getActionCommand().lastIndexOf(":")+1)+model.getDataStorage().get(id).getFilename());
 		}
 	}
 	
@@ -294,6 +329,11 @@ public class WCCView implements Observer {
 		}
 		if(arg instanceof Page) {
 			selectPage(model.getDataStorage().indexOf(arg));
+		} else {
+			selectedPage = -1;
+			for(Component c : pageDependentButtons) {
+				c.setEnabled(false);
+			}
 		}
 		applySettings();
 	}
@@ -339,19 +379,39 @@ public class WCCView implements Observer {
 	}
 
 	public void requestNewPageData(String previousFilename, String previousName) {
-		JPanel myPanel = new JPanel(new GridLayout(0, 3));
+		JPanel myPanel = new JPanel(new GridLayout(0, 2));
 		myPanel.add(new JLabel("Name:"));
 		JTextField nameField = new JTextField(previousName, 20);
 		myPanel.add(nameField);
-		myPanel.add(Box.createHorizontalStrut(15));
 		myPanel.add(new JLabel("Dateiname:"));
 		JTextField filenameField = new JTextField(previousFilename, 20);
 		myPanel.add(filenameField);
-		myPanel.add(new JLabel(".html"));
 		
-		int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen (für das Menü) für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewPage+":"+filenameField.getText()+".html:"+nameField.getText()));
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewPage+":"+filenameField.getText()+":"+nameField.getText()));
+		}
+	}
+	
+	public void requestChangePageData(String oldFilename, String oldName) {
+		JPanel myPanel = new JPanel(new GridLayout(0, 2));
+		myPanel.add(new JLabel("Name:"));
+		JTextField nameField = new JTextField(oldName, 20);
+		myPanel.add(nameField);
+		myPanel.add(new JLabel("Dateiname:"));
+		JTextField filenameField = new JTextField(oldFilename, 20);
+		myPanel.add(filenameField);
+		
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neuen Namen und Dateinamen angeben:", JOptionPane.OK_CANCEL_OPTION);
+		if (result == JOptionPane.OK_OPTION) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageChangeData+":true:"+oldFilename+":"+oldName+":"+filenameField.getText()+":"+nameField.getText()));
+		}
+	}
+
+	public void askForDeletePage(String filename) {
+		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass sie die Seite '"+filename+"' löschen wollen?", "Seite löschen?", JOptionPane.YES_NO_OPTION);
+		if(result == JOptionPane.YES_OPTION) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageDelete+":true:"+filename));
 		}
 	}
 

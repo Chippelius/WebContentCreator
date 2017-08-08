@@ -122,6 +122,7 @@ public class WCCModel extends Observable implements Observer {
 		 * create html, css and js files
 		 * create QR-Codes for the pages
 		 */
+		System.out.println("Export not yet implemented.");
 	}
 	
 }
