@@ -16,6 +16,7 @@ public class Settings implements Serializable {
 	private Dimension windowSize;
 	private boolean maximized;
 	private int dividerLocation;
+	private String imageChooseLocation;
 	
 	public Settings () {
 		refresh();
@@ -30,7 +31,7 @@ public class Settings implements Serializable {
 			windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
 		if(dividerLocation == 0)
 			dividerLocation = (windowSize.width - 5)/2;
-		
+		imageChooseLocation = null;
 	}
 
 	
@@ -60,6 +61,14 @@ public class Settings implements Serializable {
 	}
 	public int getDividerLocation() {
 		return dividerLocation;
+	}
+	
+	public void setImageChooseLocation(String location) {
+		imageChooseLocation = location;
+	}
+	
+	public String getImageChooseLocation() {
+		return imageChooseLocation;
 	}
 	
 }

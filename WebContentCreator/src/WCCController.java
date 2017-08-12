@@ -95,6 +95,8 @@ public class WCCController implements ActionListener, WindowListener {
 	public void actionPerformed(ActionEvent ae) {
 		//TODO: implement rest
 		String[] commandParts = ae.getActionCommand().split(":");
+		Page p;
+		int index;
 		switch(commandParts[0]) {
 		/*
 		 * Optional functionality for later:
@@ -141,7 +143,7 @@ public class WCCController implements ActionListener, WindowListener {
 			break;
 		case pageChangeData:
 			if(Boolean.parseBoolean(commandParts[1])) {
-				Page p = model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[2]));
+				p = model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[2]));
 				p.setFilename(commandParts[4]);
 				p.setName(commandParts[5]);
 			} else {
@@ -149,12 +151,26 @@ public class WCCController implements ActionListener, WindowListener {
 			}
 			break;
 		case pageMoveTop:
+			p = model.getDataStorage().remove(model.getDataStorage().indexOf(commandParts[1]));
+			model.getDataStorage().add(0, p);
 			break;
 		case pageMoveBottom:
+			p = model.getDataStorage().remove(model.getDataStorage().indexOf(commandParts[1]));
+			model.getDataStorage().add(p);
 			break;
 		case pageMoveUp:
+			index = model.getDataStorage().indexOf(commandParts[1]);
+			if(index > 0) {
+				p = model.getDataStorage().set(index, model.getDataStorage().get(index-1));
+				model.getDataStorage().set(index-1, p);
+			}
 			break;
 		case pageMoveDown:
+			index = model.getDataStorage().indexOf(commandParts[1]);
+			if(index < model.getDataStorage().size()-1) {
+				p = model.getDataStorage().set(index, model.getDataStorage().get(index+1));
+				model.getDataStorage().set(index+1, p);
+			}
 			break;
 		case pageDelete:
 			if(Boolean.parseBoolean(commandParts[1])) {
@@ -164,16 +180,32 @@ public class WCCController implements ActionListener, WindowListener {
 			}
 			break;
 		case pageNewHeader:
-			System.out.println("Action: "+ae.getActionCommand());
+			if(commandParts.length < 3) {
+				view.requestNewElementData(commandParts[1], Element.HEADER);
+			} else {
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.HEADER, commandParts[2]);
+			}
 			break;
 		case pageNewSubheader:
-			System.out.println(ae.getActionCommand());
+			if(commandParts.length < 3) {
+				view.requestNewElementData(commandParts[1], Element.SUBHEADER);
+			} else {
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.SUBHEADER, commandParts[2]);
+			}
 			break;
 		case pageNewText:
-			System.out.println(ae.getActionCommand());
+			if(commandParts.length < 3) {
+				view.requestNewElementData(commandParts[1], Element.TEXT);
+			} else {
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.TEXT, commandParts[2]);
+			}
 			break;
 		case pageNewImage:
-			System.out.println(ae.getActionCommand());
+			if(commandParts.length < 3) {
+				view.requestNewElementData(commandParts[1], Element.IMAGE);
+			} else {
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.IMAGE, commandParts[2]+":"+commandParts[3]);
+			}
 			break;
 		case elementSelect:
 			break;

@@ -11,15 +11,16 @@ public class Element extends Observable implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final int HEADER = 0;
-	public static final int SUBHEADER = 1;
-	public static final int TEXT = 2;
-	public static final int IMAGE = 3;
+	public static final String HEADER = "Überschrift";
+	public static final String SUBHEADER = "Unterüberschrift";
+	public static final String TEXT = "Textinhalt";
+	public static final String IMAGE = "Bild";
+	public static final String[] TYPES = new String[] {HEADER, SUBHEADER, TEXT, IMAGE};
 	
-	private int type;
+	private String type;
 	private String value;
 	
-	public Element(int type, String value, Observer o) {
+	public Element(String type, String value, Observer o) {
 		this.type = type;
 		this.value = value;
 		addObserver(o);
@@ -38,12 +39,12 @@ public class Element extends Observable implements Serializable {
 		addObserver(o);
 	}
 	
-	public void setType(int newType) {
+	public void setType(String newType) {
 		type = newType;
 		update();
 	}
 	
-	public int getType() {
+	public String getType() {
 		return type;
 	}
 	

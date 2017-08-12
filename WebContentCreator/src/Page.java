@@ -88,7 +88,7 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 		return name;
 	}
 	
-	public boolean createElement(int type, String value) {
+	public boolean createElement(String type, String value) {
 		return add(new Element(type, value, this));
 	}
 	

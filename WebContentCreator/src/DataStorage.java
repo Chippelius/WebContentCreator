@@ -92,7 +92,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 			return false;
 		boolean b = pages.add(p);
 		p.addObserver(this);
-		update(this, this);
+		update(this, p);
 		return b;
 	}
 
@@ -102,7 +102,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 			throw new IllegalArgumentException("filename must not contain special characters!");
 		pages.add(index, p);
 		p.addObserver(this);
-		update(this, this);
+		update(this, p);
 	}
 
 	@Override
@@ -225,7 +225,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		Page p = pages.set(index, element);
 		element.addObserver(this);
 		p.deleteObserver(this);
-		update(this, this);
+		update(this, element);
 		return p;
 	}
 
