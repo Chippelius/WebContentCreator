@@ -31,7 +31,6 @@ public class Settings implements Serializable {
 			windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
 		if(dividerLocation == 0)
 			dividerLocation = (windowSize.width - 5)/2;
-		imageChooseLocation = null;
 	}
 
 	

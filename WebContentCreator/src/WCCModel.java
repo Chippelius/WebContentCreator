@@ -1,6 +1,9 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Observable;
@@ -123,6 +126,18 @@ public class WCCModel extends Observable implements Observer {
 		 * create QR-Codes for the pages
 		 */
 		System.out.println("Export not yet implemented.");
+	}
+
+	public String getReadmeText() {
+		String res = "";
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(programWorkspace+"readme.html"));
+			for(String s=""; (s=br.readLine())!=null; res+=s);
+			br.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return res;
 	}
 	
 }

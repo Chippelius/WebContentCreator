@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
  */
 public class WCCController implements ActionListener, WindowListener {
 	
+	public static final double VERSION = 1.0;
+	
 	private static WCCModel model;
 	private static WCCView view;
 	@SuppressWarnings("unused")
@@ -41,7 +43,10 @@ public class WCCController implements ActionListener, WindowListener {
 	public static final String pageNewSubheader = "pageNewSubheader";
 	public static final String pageNewText = "pageNewText";
 	public static final String pageNewImage = "pageNewImage";
-	public static final String elementSelect = "elementSelect";
+	public static final String elementChangeTypeToHeader = "elementChangeTypeToHeader";
+	public static final String elementChangeTypeToSubheader = "elementChangeTypeToSubheader";
+	public static final String elementChangeTypeToText = "elementChangeTypeToText";
+	public static final String elementChangeTypeToImage = "elementChangeTypeToImage";
 	public static final String elementChangeData = "elementChangeData";
 	public static final String elementMoveTop = "elementMoveTop";
 	public static final String elementMoveBottom = "elementMoveBottom";
@@ -73,6 +78,13 @@ public class WCCController implements ActionListener, WindowListener {
 			System.exit(0);
 		}
 	}
+	
+	public void checkForUpdates() {
+		view.showMessage("Die automatische Update-Funktion ist noch nicht verfügbar.\n"
+				+ "Ihre Version ist: "+VERSION+"\n"
+				+ "Wenn auf www.github.com/Chippelius/WebContentCreator/ eine neuere Version verfügbar ist,\n"
+				+ "laden Sie diese bitte manuell herunter.", "Noch nicht verfügbar.", JOptionPane.ERROR_MESSAGE);
+	}
 
 	@Override
 	public void windowActivated(WindowEvent arg0) {}
@@ -97,6 +109,7 @@ public class WCCController implements ActionListener, WindowListener {
 		String[] commandParts = ae.getActionCommand().split(":");
 		Page p;
 		int index;
+		Element e;
 		switch(commandParts[0]) {
 		/*
 		 * Optional functionality for later:
@@ -181,45 +194,81 @@ public class WCCController implements ActionListener, WindowListener {
 			break;
 		case pageNewHeader:
 			if(commandParts.length < 3) {
-				view.requestNewElementData(commandParts[1], Element.HEADER);
+				view.requestNewHeaderData(commandParts[1]);
 			} else {
 				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.HEADER, commandParts[2]);
 			}
 			break;
 		case pageNewSubheader:
 			if(commandParts.length < 3) {
-				view.requestNewElementData(commandParts[1], Element.SUBHEADER);
+				view.requestNewSubheaderData(commandParts[1]);
 			} else {
 				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.SUBHEADER, commandParts[2]);
 			}
 			break;
 		case pageNewText:
 			if(commandParts.length < 3) {
-				view.requestNewElementData(commandParts[1], Element.TEXT);
+				view.requestNewTextData(commandParts[1]);
 			} else {
 				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.TEXT, commandParts[2]);
 			}
 			break;
 		case pageNewImage:
 			if(commandParts.length < 3) {
-				view.requestNewElementData(commandParts[1], Element.IMAGE);
+				view.requestNewImageData(commandParts[1]);
 			} else {
 				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.IMAGE, commandParts[2]+":"+commandParts[3]);
 			}
 			break;
-		case elementSelect:
+		case elementChangeTypeToHeader:
+			model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setType(Element.HEADER);
+			break;
+		case elementChangeTypeToSubheader:
+			model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setType(Element.SUBHEADER);
+			break;
+		case elementChangeTypeToText:
+			model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setType(Element.TEXT);
+			break;
+		case elementChangeTypeToImage:
+			model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setType(Element.IMAGE);
 			break;
 		case elementChangeData:
+			if(commandParts.length < 4) {
+				view.requestChangeElementData(commandParts[1], Integer.parseInt(commandParts[2]));
+			} else {
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setValue(commandParts[3]);
+			}
 			break;
 		case elementMoveTop:
+			p =  model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1]));
+			p.add(0, p.remove(Integer.parseInt(commandParts[2])));
 			break;
 		case elementMoveBottom:
+			p =  model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1]));
+			p.add(p.remove(Integer.parseInt(commandParts[2])));
 			break;
 		case elementMoveUp:
+			p =  model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1]));
+			index = Integer.parseInt(commandParts[2]);
+			if(index > 0) {
+				e = p.set(index, p.get(index-1));
+				p.set(index-1, e);
+			}
 			break;
 		case elementMoveDown:
+			p =  model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1]));
+			index = Integer.parseInt(commandParts[2]);
+			if(index < p.size()-1) {
+				e = p.set(index, p.get(index+1));
+				p.set(index+1, e);
+			}
 			break;
 		case elementDelete:
+			if(Boolean.parseBoolean(commandParts[1])) {
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[2])).remove(Integer.parseInt(commandParts[3]));
+			} else {
+				view.askForDeleteElement(commandParts[2], Integer.parseInt(commandParts[3]));
+			}
 			break;
 		case windowToggleMaximized:
 			view.fetchSettings();
@@ -232,8 +281,10 @@ public class WCCController implements ActionListener, WindowListener {
 			view.applySettings();
 			break;
 		case helpInfo:
+			view.showMessage(model.getReadmeText(), "Info", JOptionPane.INFORMATION_MESSAGE);
 			break;
 		case helpCheckForUpdates:
+			checkForUpdates();
 			break;
 		default: 
 		}

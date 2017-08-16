@@ -1,15 +1,15 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.*;
+import javax.swing.JFormattedTextField.AbstractFormatterFactory;
 
 /*
  * View part of WebContentCreator (by concept of ModelViewController)
@@ -211,7 +211,7 @@ public class WCCView implements Observer {
 			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
 				JLabel nameLabel = new JLabel("<html><a style='font-size: 15px;'>"+p.getName()+"</a></html>");
 				labelPanel.add(nameLabel, BorderLayout.CENTER);
-				JLabel fileNameLabel = new JLabel("<html>&nbsp;"+p.getFilename()+"</html>");
+				JLabel fileNameLabel = new JLabel("<html>"+p.getFilename()+"</html>");
 				labelPanel.add(fileNameLabel, BorderLayout.SOUTH);
 			panel.add(labelPanel, BorderLayout.CENTER);
 			
@@ -302,6 +302,7 @@ public class WCCView implements Observer {
 		for(Element e : selected) {
 			elementList.add(createElementListItem(selected, e));
 		}
+		elementList.repaint();
 		for(AbstractButton a : pageDependentButtons) {
 			a.setEnabled(true);
 			a.setActionCommand(a.getActionCommand().substring(0, a.getActionCommand().lastIndexOf(":")+1)+model.getDataStorage().get(id).getFilename());
@@ -310,23 +311,26 @@ public class WCCView implements Observer {
 	}
 	
 	private Component createElementListItem(Page parent, Element e) {
-		//TODO: implement
-		System.out.println("Element: "+e.getType()+" "+e.getValue());
-		
-		
+		int elementIndex = parent.indexOf(e);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBackground(backgroundColor);
 		panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 		panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 		
 			JPanel labelPanel = new JPanel(new BorderLayout());
 			labelPanel.setBackground(transparentColor);
 			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
-				JLabel typeLabel = new JLabel("<html>&nbsp;"+e.getType()+"</html>");
+				JLabel typeLabel = new JLabel("<html>"+e.getType()+"</html>");
 				labelPanel.add(typeLabel, BorderLayout.NORTH);
-				JLabel valueLabel = new JLabel("<html><a style='font-size: "+((e.getType()==Element.HEADER || e.getType()==Element.SUBHEADER)?15:10)+"px;'>"+e.getValue()+"</a></html>");
+				JTextArea valueLabel = new JTextArea();
+				valueLabel.setText("<html><a style='font-size: "+((e.getType().equals(Element.HEADER) || e.getType().equals(Element.SUBHEADER))?15:10)+"px;'>"+e.getValue().replaceAll("<br>\n", "\n")+"</a></html>");
+				valueLabel.setEditable(false);
+				valueLabel.setBorder(BorderFactory.createEmptyBorder());
+				valueLabel.setBackground(backgroundColor);
+				valueLabel.setLineWrap(true);
+				valueLabel.setWrapStyleWord(true);
 				labelPanel.add(valueLabel, BorderLayout.CENTER);
+				valueLabel.setPreferredSize(new Dimension(elementList.getPreferredSize().width, valueLabel.getPreferredSize().height));
 			panel.add(labelPanel, BorderLayout.CENTER);
 			
 			JPanel sidePanel = new JPanel(new BorderLayout());
@@ -336,7 +340,7 @@ public class WCCView implements Observer {
 				deleteButtonPanel.setBackground(transparentColor);
 					JButton deleteButton = new JButton("<html><a style='font-size: 15px;'>x</a></html>");
 					deleteButton.addActionListener(controller);
-					deleteButton.setActionCommand(WCCController.elementDelete + ":false:" + parent.getFilename() + parent.indexOf(e));
+					deleteButton.setActionCommand(WCCController.elementDelete + ":false:" + parent.getFilename() + ":" + elementIndex);
 					deleteButton.setToolTipText("Element löschen");
 					deleteButton.setFocusable(false);
 					deleteButton.setContentAreaFilled(false);
@@ -347,6 +351,9 @@ public class WCCView implements Observer {
 					deleteButtonPanel.add(deleteButton);
 				sidePanel.add(deleteButtonPanel, BorderLayout.EAST);
 			panel.add(sidePanel, BorderLayout.EAST);
+		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, labelPanel.getPreferredSize().height+10));
+		
+		
 		MouseListener hoverListener = new MouseListener() {
 			@Override public void mouseReleased(MouseEvent e) {}
 			@Override public void mousePressed(MouseEvent e) {}
@@ -354,6 +361,7 @@ public class WCCView implements Observer {
 			public void mouseExited(MouseEvent e) {
 				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
 					panel.setBackground(backgroundColor);
+					valueLabel.setBackground(backgroundColor);
 				}
 				panel.repaint();
 			}
@@ -361,33 +369,40 @@ public class WCCView implements Observer {
 			public void mouseEntered(MouseEvent e) {
 				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
 					panel.setBackground(hoverColor);
+					valueLabel.setBackground(hoverColor);
 				}
 				panel.repaint();
 			}
 			@Override public void mouseClicked(MouseEvent e) {}
 		};
 		panel.addMouseListener(hoverListener);
+		valueLabel.addMouseListener(hoverListener);
 		deleteButton.addMouseListener(hoverListener);
-		JPopupMenu pageContextMenu = new JPopupMenu();
-		pageContextMenu.add(createMenuItem("Daten ändern", null, WCCController.pageChangeData+":false:"+p.getFilename()+":"+p.getName()));
-		pageContextMenu.addSeparator();
-		pageContextMenu.add(createMenuItem("an den Anfang bewegen", null, WCCController.pageMoveTop+":"+p.getFilename()));
-		pageContextMenu.add(createMenuItem("Nach oben bewegen", null, WCCController.pageMoveUp+":"+p.getFilename()));
-		pageContextMenu.add(createMenuItem("Nach unten bewegen", null, WCCController.pageMoveDown+":"+p.getFilename()));
-		pageContextMenu.add(createMenuItem("An das Ende bewegen", null, WCCController.pageMoveBottom+":"+p.getFilename()));
-		pageContextMenu.addSeparator();
-		pageContextMenu.add(createMenuItem("Seite löschen", null, WCCController.pageDelete+":false:"+p.getFilename()));
+		JPopupMenu elementContextMenu = new JPopupMenu();
+		JMenu changeTypeMenu = createMenu("Typ ändern zu:", null);
+			changeTypeMenu.add(createMenuItem("Überschrift", null, WCCController.elementChangeTypeToHeader+":"+parent.getFilename()+":"+elementIndex));
+			changeTypeMenu.add(createMenuItem("Unterüberschrift", null, WCCController.elementChangeTypeToSubheader+":"+parent.getFilename()+":"+elementIndex));
+			changeTypeMenu.add(createMenuItem("Textinhalt", null, WCCController.elementChangeTypeToText+":"+parent.getFilename()+":"+elementIndex));
+			changeTypeMenu.add(createMenuItem("Bild", null, WCCController.elementChangeTypeToImage+":"+parent.getFilename()+":"+elementIndex));
+		elementContextMenu.add(changeTypeMenu);
+		elementContextMenu.add(createMenuItem("Daten ändern", null, WCCController.elementChangeData+":"+parent.getFilename()+":"+elementIndex));
+		elementContextMenu.addSeparator();
+		elementContextMenu.add(createMenuItem("an den Anfang bewegen", null, WCCController.elementMoveTop+":"+parent.getFilename()+":"+elementIndex));
+		elementContextMenu.add(createMenuItem("Nach oben bewegen", null, WCCController.elementMoveUp+":"+parent.getFilename()+":"+elementIndex));
+		elementContextMenu.add(createMenuItem("Nach unten bewegen", null, WCCController.elementMoveDown+":"+parent.getFilename()+":"+elementIndex));
+		elementContextMenu.add(createMenuItem("An das Ende bewegen", null, WCCController.elementMoveBottom+":"+parent.getFilename()+":"+elementIndex));
+		elementContextMenu.addSeparator();
+		elementContextMenu.add(createMenuItem("Element löschen", null, WCCController.elementDelete+":false:"+parent.getFilename()+":"+elementIndex));
 		MouseListener clickListener = new MouseListener() {
 			@Override 
 			public void mouseReleased(MouseEvent e) {
 				if(e.isPopupTrigger())
-					pageContextMenu.show(panel, e.getX(), e.getY());
+					elementContextMenu.show(panel, e.getX(), e.getY());
 			}
 			@Override
 			public void mousePressed(MouseEvent e) {
-				controller.actionPerformed(new ActionEvent(panel, ActionEvent.ACTION_PERFORMED, WCCController.pageSelect+":"+model.getDataStorage().indexOf(p)));
 				if(e.isPopupTrigger())
-					pageContextMenu.show(panel, e.getX(), e.getY());
+					elementContextMenu.show(panel, e.getX(), e.getY());
 			}
 			@Override public void mouseExited(MouseEvent e) {}
 			@Override public void mouseEntered(MouseEvent e) {}
@@ -509,7 +524,7 @@ public class WCCView implements Observer {
 	}
 	
 
-	public void requestNewElementData(String filename, String type) {
+	/*public void requestNewElementData(String filename, String type) {
 		JPanel myPanel = new JPanel(new BorderLayout());
 			JPanel typePanel = new JPanel(new FlowLayout());
 			typePanel.add(new JLabel("Elementtyp: "));
@@ -563,6 +578,107 @@ public class WCCView implements Observer {
 				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewImage+":"+filename+":"+filechooser.getSelectedFile().getAbsolutePath()));
 				break;
 			}
+		}
+	}*/
+
+	public void askForDeleteElement(String filename, int elementIndex) {
+		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass Sie Element "+elementIndex+" der Seite '"+filename+"' löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION);
+		if(result == JOptionPane.YES_OPTION) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementDelete+":true:"+filename+":"+elementIndex));
+		}
+	}
+
+	public void requestNewHeaderData(String parentFilename) {
+		String result = JOptionPane.showInputDialog(f, "Neue Überschrift eingeben:", "Neue Überschrift", JOptionPane.QUESTION_MESSAGE);
+		if(result != null && !result.equals("")) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewHeader+":"+parentFilename+":"+result));
+		}
+	}
+
+	public void requestNewSubheaderData(String parentFilename) {
+		String result = JOptionPane.showInputDialog(f, "Neue Unterüberschrift eingeben:", "Neue Unterüberschrift", JOptionPane.QUESTION_MESSAGE);
+		if(result != null && !result.equals("")) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewSubheader+":"+parentFilename+":"+result));
+		}
+	}
+
+	public void requestNewTextData(String parentFilename) {
+		JPanel myPanel = new JPanel(new FlowLayout());
+		JTextArea textarea = new JTextArea(10, 60);
+		textarea.setLineWrap(true);
+		textarea.setWrapStyleWord(true);
+		myPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neuer Textinhalt", JOptionPane.OK_CANCEL_OPTION);
+		if(result == JOptionPane.OK_OPTION) {
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewText+":"+parentFilename+":"+textarea.getText().replaceAll("\n", "<br>\n")));
+		}
+	}
+
+	public void requestNewImageData(String parentFilename) {
+		JPanel myPanel = new JPanel(new FlowLayout());
+		JFileChooser filechooser = new JFileChooser(model.getSettings().getImageChooseLocation());
+		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		filechooser.setControlButtonsAreShown(false);
+		filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
+		filechooser.setMultiSelectionEnabled(false);
+		myPanel.add(filechooser);
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
+		if(result == JOptionPane.OK_OPTION && filechooser.getSelectedFile() != null) {
+			model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
+			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewImage+":"+parentFilename+":"+filechooser.getSelectedFile().getAbsolutePath()));
+		}
+	}
+
+	public void requestChangeElementData(String parentFilename, int elementIndex) {
+		Page parent = model.getDataStorage().get(model.getDataStorage().indexOf(parentFilename));
+		Element e = parent.get(elementIndex);
+		int result;
+		
+		JPanel myPanel = new JPanel(new BorderLayout());
+		myPanel.add(new JLabel("Neue Daten für Element angeben:"), BorderLayout.NORTH);
+		JPanel centerPanel = new JPanel(new FlowLayout());
+		myPanel.add(centerPanel, BorderLayout.CENTER);
+		
+		switch(e.getType()) {
+		case Element.HEADER:
+			JTextField headerField = new JTextField(e.getValue(), 30);
+			centerPanel.add(headerField);
+			result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.OK_OPTION) {
+				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+headerField.getText()));
+			}
+			break;
+		case Element.SUBHEADER:
+			JTextField subheaderField = new JTextField(e.getValue(), 30);
+			centerPanel.add(subheaderField);
+			result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.OK_OPTION) {
+				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+subheaderField.getText()));
+			}
+			break;
+		case Element.TEXT:
+			JTextArea textarea = new JTextArea(e.getValue().replaceAll("<br>\n", "\n"), 10, 60);
+			textarea.setLineWrap(true);
+			textarea.setWrapStyleWord(true);
+			centerPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+			result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.OK_OPTION) {
+				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+textarea.getText().replaceAll("\n", "<br>\n")));
+			}
+			break;
+		case Element.IMAGE:
+			JFileChooser filechooser = new JFileChooser(model.getSettings().getImageChooseLocation());
+			filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			filechooser.setControlButtonsAreShown(false);
+			filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
+			filechooser.setMultiSelectionEnabled(false);
+			centerPanel.add(filechooser);
+			result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.OK_OPTION && filechooser.getSelectedFile() != null) {
+				model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
+				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+filechooser.getSelectedFile().getAbsolutePath()));
+			}
+			break;
 		}
 	}
 
