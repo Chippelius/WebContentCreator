@@ -67,15 +67,13 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	}
 
 	public boolean isValidFilename(String s) {
-		if(s.equalsIgnoreCase("index.html"))
+		if(s.equalsIgnoreCase("index"))
 			return false;
 		for(char c : s.toLowerCase().toCharArray()) {
 			if(!"abcdefghijklmnopqrstuvwxyzäöüß.".contains("" + c)) {
 				return false;
 			}
 		}
-		if(!s.contains(".") || s.endsWith("."))
-			return false;
 		if(pages.stream().filter(x -> x.getFilename().equalsIgnoreCase(s)).count() > 0)
 			return false;
 		

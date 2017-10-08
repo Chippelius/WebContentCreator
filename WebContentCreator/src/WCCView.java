@@ -3,13 +3,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.*;
-import javax.swing.JFormattedTextField.AbstractFormatterFactory;
 
 /*
  * View part of WebContentCreator (by concept of ModelViewController)
@@ -320,17 +318,11 @@ public class WCCView implements Observer {
 			JPanel labelPanel = new JPanel(new BorderLayout());
 			labelPanel.setBackground(transparentColor);
 			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
-				JLabel typeLabel = new JLabel("<html>"+e.getType()+"</html>");
+				JLabel typeLabel = new JLabel("<html><a style='font-size: 10px;'>"+e.getType()+"</a></html>");
 				labelPanel.add(typeLabel, BorderLayout.NORTH);
-				JTextArea valueLabel = new JTextArea();
-				valueLabel.setText("<html><a style='font-size: "+((e.getType().equals(Element.HEADER) || e.getType().equals(Element.SUBHEADER))?15:10)+"px;'>"+e.getValue().replaceAll("<br>\n", "\n")+"</a></html>");
-				valueLabel.setEditable(false);
-				valueLabel.setBorder(BorderFactory.createEmptyBorder());
-				valueLabel.setBackground(backgroundColor);
-				valueLabel.setLineWrap(true);
-				valueLabel.setWrapStyleWord(true);
-				labelPanel.add(valueLabel, BorderLayout.CENTER);
-				valueLabel.setPreferredSize(new Dimension(elementList.getPreferredSize().width, valueLabel.getPreferredSize().height));
+				JLabel valueLabel = new JLabel();
+				valueLabel.setText("<html><body style='width: 220px'><a style='font-size: "+((e.getType().equals(Element.HEADER) || e.getType().equals(Element.SUBHEADER))?20:12)+"px;'>"+e.getValue().replaceAll("\n", "<br>\n")+"</a></body></html>");
+				labelPanel.add(valueLabel, BorderLayout.SOUTH);
 			panel.add(labelPanel, BorderLayout.CENTER);
 			
 			JPanel sidePanel = new JPanel(new BorderLayout());
@@ -376,7 +368,6 @@ public class WCCView implements Observer {
 			@Override public void mouseClicked(MouseEvent e) {}
 		};
 		panel.addMouseListener(hoverListener);
-		valueLabel.addMouseListener(hoverListener);
 		deleteButton.addMouseListener(hoverListener);
 		JPopupMenu elementContextMenu = new JPopupMenu();
 		JMenu changeTypeMenu = createMenu("Typ ändern zu:", null);
@@ -523,64 +514,6 @@ public class WCCView implements Observer {
 		}
 	}
 	
-
-	/*public void requestNewElementData(String filename, String type) {
-		JPanel myPanel = new JPanel(new BorderLayout());
-			JPanel typePanel = new JPanel(new FlowLayout());
-			typePanel.add(new JLabel("Elementtyp: "));
-			JComboBox<String> typeComboBox = new JComboBox<>(Element.TYPES);
-			typeComboBox.setSelectedItem(type);
-			typeComboBox.setEditable(false);
-			typePanel.add(typeComboBox);
-		myPanel.add(typePanel, BorderLayout.NORTH);
-		JPanel cardPanel = new JPanel(new CardLayout());
-			JPanel headerPanel = new JPanel(new FlowLayout());
-				JTextField headerfield = new JTextField(30);
-				headerPanel.add(headerfield);
-			cardPanel.add(headerPanel, Element.HEADER);
-			JPanel subheaderPanel = new JPanel(new FlowLayout());
-				JTextField subheaderfield = new JTextField(30);
-				subheaderPanel.add(subheaderfield);
-			cardPanel.add(subheaderPanel, Element.SUBHEADER);
-			JTextArea textarea = new JTextArea(10, 30);
-			cardPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), Element.TEXT);
-			JFileChooser filechooser = new JFileChooser(model.getSettings().getImageChooseLocation());
-			filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			filechooser.setControlButtonsAreShown(false);
-			filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			filechooser.setMultiSelectionEnabled(false);
-			cardPanel.add(filechooser, Element.IMAGE);
-		((CardLayout)cardPanel.getLayout()).show(cardPanel, type);
-		typeComboBox.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				((CardLayout)cardPanel.getLayout()).show(cardPanel, (String)e.getItem());
-			}
-		});
-		myPanel.add(cardPanel, BorderLayout.CENTER);
-		
-		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Element für Seite "+filename, JOptionPane.OK_CANCEL_OPTION);
-		if(filechooser.getSelectedFile() != null)
-			model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
-		
-		if(result == JOptionPane.OK_OPTION) {
-			switch((String)typeComboBox.getSelectedItem()) {
-			case Element.HEADER:
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewHeader+":"+filename+":"+headerfield.getText()));
-				break;
-			case Element.SUBHEADER:
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewSubheader+":"+filename+":"+subheaderfield.getText()));
-				break;
-			case Element.TEXT:
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewText+":"+filename+":"+textarea.getText()));
-				break;
-			case Element.IMAGE:
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewImage+":"+filename+":"+filechooser.getSelectedFile().getAbsolutePath()));
-				break;
-			}
-		}
-	}*/
-
 	public void askForDeleteElement(String filename, int elementIndex) {
 		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass Sie Element "+elementIndex+" der Seite '"+filename+"' löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION);
 		if(result == JOptionPane.YES_OPTION) {
@@ -623,9 +556,15 @@ public class WCCView implements Observer {
 		filechooser.setMultiSelectionEnabled(false);
 		myPanel.add(filechooser);
 		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
-		if(result == JOptionPane.OK_OPTION && filechooser.getSelectedFile() != null) {
-			model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewImage+":"+parentFilename+":"+filechooser.getSelectedFile().getAbsolutePath()));
+		if(result == JOptionPane.OK_OPTION) {
+			if(filechooser.getSelectedFile() != null && filechooser.getSelectedFile().exists()) {
+				model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
+				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewImage+":"+parentFilename+":"+filechooser.getSelectedFile().getAbsolutePath()));
+			} else {
+				System.out.println("Datei existiert nicht");
+				JOptionPane.showInternalMessageDialog(f, "Die ausgewählte Datei existiert nicht!", "Datei existiert nicht", JOptionPane.WARNING_MESSAGE);
+				requestNewImageData(parentFilename);
+			}
 		}
 	}
 
@@ -657,7 +596,7 @@ public class WCCView implements Observer {
 			}
 			break;
 		case Element.TEXT:
-			JTextArea textarea = new JTextArea(e.getValue().replaceAll("<br>\n", "\n"), 10, 60);
+			JTextArea textarea = new JTextArea(e.getValue(), 10, 60);
 			textarea.setLineWrap(true);
 			textarea.setWrapStyleWord(true);
 			centerPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
@@ -674,9 +613,17 @@ public class WCCView implements Observer {
 			filechooser.setMultiSelectionEnabled(false);
 			centerPanel.add(filechooser);
 			result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.OK_OPTION && filechooser.getSelectedFile() != null) {
-				model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+filechooser.getSelectedFile().getAbsolutePath()));
+			if(result == JOptionPane.OK_OPTION) {
+				System.out.println("OK gewählt");
+				if(filechooser.getSelectedFile() != null && filechooser.getSelectedFile().exists()) {
+					System.out.println("Datei existiert: "+filechooser.getSelectedFile().toString());
+					model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
+					controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+filechooser.getSelectedFile().getAbsolutePath()));
+				} else {
+					System.out.println("Datei existiert nicht");
+					JOptionPane.showMessageDialog(f, "Die ausgewählte Datei existiert nicht!", "Datei existiert nicht", JOptionPane.WARNING_MESSAGE);
+					requestNewImageData(parentFilename);
+				}
 			}
 			break;
 		}

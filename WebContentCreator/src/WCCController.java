@@ -128,6 +128,7 @@ public class WCCController implements ActionListener, WindowListener {
 		 */
 		case fileExport:
 			//TODO: ask for location to export into
+			model.export("export");
 			break;
 		case fileExit:
 			if(commandParts.length > 1) {
@@ -236,7 +237,7 @@ public class WCCController implements ActionListener, WindowListener {
 			if(commandParts.length < 4) {
 				view.requestChangeElementData(commandParts[1], Integer.parseInt(commandParts[2]));
 			} else {
-				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setValue(commandParts[3]);
+				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setValue(commandParts[3]+(commandParts.length>4?":"+commandParts[4]:""));
 			}
 			break;
 		case elementMoveTop:

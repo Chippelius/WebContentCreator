@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.ObjectInputStream;
@@ -28,8 +27,8 @@ public class WCCModel extends Observable implements Observer {
 			//Only used during development
 			programWorkspace = new File("");
 			
-			settingsFile = new File(programWorkspace.getAbsolutePath() + "/settings.dat");
-			dataStorageFile = new File(programWorkspace.getAbsolutePath() + "/dataStorage.dat");
+			settingsFile = new File(programWorkspace.getAbsolutePath() + "\\settings.dat");
+			dataStorageFile = new File(programWorkspace.getAbsolutePath() + "\\dataStorage.dat");
 			loadSettings();
 			loadDataStorage();
 		} catch (Exception e) {
@@ -117,7 +116,7 @@ public class WCCModel extends Observable implements Observer {
 
 	
 	//Export project
-	public void export() {
+	public void export(String location) {
 		/*
 		 * TODO: implement:
 		 * use the data-storages export()-method to get the current version-hash
@@ -126,12 +125,37 @@ public class WCCModel extends Observable implements Observer {
 		 * create QR-Codes for the pages
 		 */
 		System.out.println("Export not yet implemented.");
+		
+		//(create and) clear directory
+		File exportLocation = new File(location);
+		if(!exportLocation.exists()) 
+			exportLocation.mkdirs();
+		
+		
+		//Versions-file
+		File versionsFile = new File(location + "\\settings.dat");
+		
+		
+		//index-file
+		
+		
+		//page-files
+		
+		
+		//css-files
+		
+		
+		//js-files
+		
+		
+		//images
+		
 	}
 
 	public String getReadmeText() {
 		String res = "";
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(programWorkspace+"readme.html"));
+			BufferedReader br = new BufferedReader(new FileReader(programWorkspace.getAbsolutePath()+"\\readme.html"));
 			for(String s=""; (s=br.readLine())!=null; res+=s);
 			br.close();
 		} catch (Exception e) {
