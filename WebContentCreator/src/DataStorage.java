@@ -148,6 +148,10 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public Page get(int index) {
 		return pages.get(index);
 	}
+	
+	public Page get(String filename) {
+		return get(indexOf(filename));
+	}
 
 	@Override
 	public int indexOf(Object o) {
@@ -201,6 +205,10 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		p.deleteObserver(this);
 		update(this, this);
 		return p;
+	}
+	
+	public Page remove(String filename) {
+		return remove(indexOf(filename));
 	}
 
 	@Override

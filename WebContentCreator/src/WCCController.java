@@ -10,39 +10,140 @@ import javax.swing.JOptionPane;
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCController implements ActionListener, WindowListener {
+public class WCCController {
 	
-	public static final double VERSION = 1.0;
-	
-	private static WCCModel model;
-	private static WCCView view;
-	@SuppressWarnings("unused")
-	private static WCCController controler;
+	public static void main(String[] args) {
+		WCCModel.init();
+		WCCView.init();
+	}
 	
 	/*
 	 * Optional functionality for later:
 	 * public static final String fileNew = "fileNew";
 	 * public static final String fileOpen = "fileOpen";
 	 */
-	public static final String fileSave = "fileSave";
+	
+	public static void fileSave() {
+		WCCModel.saveDataStorage();
+	}
 	/*
 	 * Optional functionality for later:
 	 * public static final String fileSaveAs = "fileSaveAs";
 	 */
-	public static final String fileExport = "fileExport";
-	public static final String fileExit = "fileExit";
-	public static final String pageNewPage = "pageNewPage";
-	public static final String pageSelect = "pageSelect";
-	public static final String pageChangeData = "pageChangeData";
-	public static final String pageMoveTop = "pageMoveTop";
-	public static final String pageMoveBottom = "pageMoveBottom";
-	public static final String pageMoveUp = "pageMoveUp";
-	public static final String pageMoveDown = "pageMoveDown";
-	public static final String pageDelete = "pageDelete";
-	public static final String pageNewHeader = "pageNewHeader";
-	public static final String pageNewSubheader = "pageNewSubheader";
-	public static final String pageNewText = "pageNewText";
-	public static final String pageNewImage = "pageNewImage";
+	
+	public static void fileExport(String destination) {
+		if(destination == null)
+			WCCView.askForExportDestination();
+		else
+			WCCModel.export(destination);
+	}
+	
+	public static void fileExit(boolean forced) {
+		WCCView.fetchSettings();
+		WCCModel.saveSettings();
+		if(!forced && WCCModel.getDataStorage().isEditedSinceLastSave()) {
+			WCCView.askForSaveBeforeExit();
+		} else {
+			System.exit(0);
+		}
+	}
+	
+	public static void pageNewPage(String filename, String name) {
+		if(filename == null) {
+			WCCView.askForNewPageData(null, null);
+		} else {
+			if(WCCModel.getDataStorage().isValidFilename(filename)) {
+				WCCModel.getDataStorage().createPage(filename, name);
+			} else {
+				WCCView.showMessage("Der Dateiname \""+filename+"\" ist ungültig oder schon vergeben! \n"
+						+ "Bitte suchen Sie einen anderen aus. \n"
+						+ "Ein Dateiname muss eine Endung besitzen (z.B. '.html'), darf aber sonst keine Sonderzeichen enthalten", 
+						"Dateiname ungültig", JOptionPane.ERROR_MESSAGE);
+				WCCView.askForNewPageData(filename, name);
+			}
+		}
+	}
+	
+	public static void pageSelect(int pageNr) {
+		WCCView.selectPage(pageNr);
+	}
+	
+	public static void pageChangeData(String filename, String name, String newFilename, String newName) {
+		if(newFilename == null) {
+			WCCView.requestChangePageData(filename, name);
+		} else {
+			Page p = WCCModel.getDataStorage().get(filename);
+			p.setFilename(newFilename);
+			p.setName(newName);
+		}
+	}
+	
+	public static void pageMoveTop(String filename) {
+		Page p = WCCModel.getDataStorage().remove(WCCModel.getDataStorage().indexOf(filename));
+		WCCModel.getDataStorage().add(0, p);
+	}
+	
+	public static void pageMoveBottom(String filename) {
+		Page p = WCCModel.getDataStorage().remove(WCCModel.getDataStorage().indexOf(filename));
+		WCCModel.getDataStorage().add(p);
+	}
+	
+	public static void pageMoveUp(String filename) {
+		int index = WCCModel.getDataStorage().indexOf(filename);
+		if(index > 0) {
+			Page p = WCCModel.getDataStorage().set(index, WCCModel.getDataStorage().get(index-1));
+			WCCModel.getDataStorage().set(index-1, p);
+		}
+	}
+	
+	public static void pageMoveDown(String filename) {
+		int index = WCCModel.getDataStorage().indexOf(filename);
+		if(index < WCCModel.getDataStorage().size()-1) {
+			Page p = WCCModel.getDataStorage().set(index, WCCModel.getDataStorage().get(index+1));
+			WCCModel.getDataStorage().set(index+1, p);
+		}
+	}
+	
+	public static void pageDelete(boolean forced, String filename) {
+		if(forced) {
+			WCCModel.getDataStorage().remove(filename);
+		} else { 
+			WCCView.askForDeletePage(filename);
+		}
+	}
+	
+	public static void elementNewHeader(String parentFilename, String value) {
+		if(value == null) {
+			WCCView.requestNewHeaderData(parentFilename);
+		} else {
+			WCCModel.getDataStorage().get(parentFilename).createElement(Element.HEADER, value);
+		}
+	}
+	
+	public static void elementNewSubheader(String parentFilename, String value) {
+		if(value == null) {
+			WCCView.requestNewSubheaderData(parentFilename);
+		} else {
+			WCCModel.getDataStorage().get(parentFilename).createElement(Element.SUBHEADER, value);
+		}
+	}
+	
+	public static void elementNewText(String parentFilename, String value) {
+		if(value == null) {
+			WCCView.requestNewTextData(parentFilename);
+		} else {
+			WCCModel.getDataStorage().get(parentFilename).createElement(Element.TEXT, value);
+		}
+	}
+	
+	public static void elementNewImage(String parentFilename, String value) {
+		if(value == null) {
+			WCCView.requestNewImageData(parentFilename);
+		} else {
+			WCCModel.getDataStorage().get(parentFilename).createElement(Element.IMAGE, value);
+		}
+	}
+	
 	public static final String elementChangeTypeToHeader = "elementChangeTypeToHeader";
 	public static final String elementChangeTypeToSubheader = "elementChangeTypeToSubheader";
 	public static final String elementChangeTypeToText = "elementChangeTypeToText";
@@ -58,50 +159,12 @@ public class WCCController implements ActionListener, WindowListener {
 	public static final String helpInfo = "helpInfo";
 	public static final String helpCheckForUpdates = "helpCheckForUpdates";
 
-	public static void main(String[] args) {
-		controler = new WCCController();
-	}
-	
-	public WCCController() {
-		//Initialize components
-		model = new WCCModel();
-		view = new WCCView(model, this);
-		view.setVisible(true);
-	}
-	
-	public void shutdown(boolean forced) {
-		view.fetchSettings();
-		model.saveSettings();
-		if(!forced && model.getDataStorage().isEditedSinceLastSave()) {
-			view.askForSaveBeforeExit();
-		} else {
-			System.exit(0);
-		}
-	}
-	
 	public void checkForUpdates() {
 		view.showMessage("Die automatische Update-Funktion ist noch nicht verfügbar.\n"
 				+ "Ihre Version ist: "+VERSION+"\n"
 				+ "Wenn auf www.github.com/Chippelius/WebContentCreator/ eine neuere Version verfügbar ist,\n"
 				+ "laden Sie diese bitte manuell herunter.", "Noch nicht verfügbar.", JOptionPane.ERROR_MESSAGE);
 	}
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {}
-	@Override
-	public void windowClosed(WindowEvent arg0) {}
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		shutdown(false);
-	}
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {}
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {}
-	@Override
-	public void windowIconified(WindowEvent arg0) {}
-	@Override
-	public void windowOpened(WindowEvent arg0) {}
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
@@ -111,116 +174,6 @@ public class WCCController implements ActionListener, WindowListener {
 		int index;
 		Element e;
 		switch(commandParts[0]) {
-		/*
-		 * Optional functionality for later:
-		 * case fileNew:
-		 * 	break;
-		 * case fileOpen:
-		 * 	break;
-		 */
-		case fileSave:
-			model.saveDataStorage();
-			break;
-		/*
-		 * Optional functionality for later:
-		 * case fileSaveAs:
-		 * 	break;
-		 */
-		case fileExport:
-			//TODO: ask for location to export into
-			model.export("export");
-			break;
-		case fileExit:
-			if(commandParts.length > 1) {
-				shutdown(Boolean.parseBoolean(commandParts[1]));
-			} else {
-				shutdown(false);
-			}
-			break;
-		case pageNewPage:
-			if(commandParts.length < 3) {
-				view.requestNewPageData(null, null);
-			} else {
-				if(model.getDataStorage().isValidFilename(commandParts[1])) {
-					model.getDataStorage().createPage(commandParts[1], commandParts[2]);
-				} else {
-					view.showMessage("Der Dateiname \""+commandParts[1]+"\" ist ungültig oder schon vergeben! \n"
-							+ "Bitte suchen Sie einen anderen aus. \n"
-							+ "Ein Dateiname muss eine Endung besitzen (z.B. '.html'), darf aber sonst keine Sonderzeichen enthalten", 
-							"Dateiname ungültig", JOptionPane.ERROR_MESSAGE);
-					view.requestNewPageData(commandParts[1], commandParts[2]);
-				}
-			}
-			break;
-		case pageSelect:
-			view.selectPage(Integer.parseInt(commandParts[1]));
-			break;
-		case pageChangeData:
-			if(Boolean.parseBoolean(commandParts[1])) {
-				p = model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[2]));
-				p.setFilename(commandParts[4]);
-				p.setName(commandParts[5]);
-			} else {
-				view.requestChangePageData(commandParts[2], commandParts[3]);
-			}
-			break;
-		case pageMoveTop:
-			p = model.getDataStorage().remove(model.getDataStorage().indexOf(commandParts[1]));
-			model.getDataStorage().add(0, p);
-			break;
-		case pageMoveBottom:
-			p = model.getDataStorage().remove(model.getDataStorage().indexOf(commandParts[1]));
-			model.getDataStorage().add(p);
-			break;
-		case pageMoveUp:
-			index = model.getDataStorage().indexOf(commandParts[1]);
-			if(index > 0) {
-				p = model.getDataStorage().set(index, model.getDataStorage().get(index-1));
-				model.getDataStorage().set(index-1, p);
-			}
-			break;
-		case pageMoveDown:
-			index = model.getDataStorage().indexOf(commandParts[1]);
-			if(index < model.getDataStorage().size()-1) {
-				p = model.getDataStorage().set(index, model.getDataStorage().get(index+1));
-				model.getDataStorage().set(index+1, p);
-			}
-			break;
-		case pageDelete:
-			if(Boolean.parseBoolean(commandParts[1])) {
-				model.getDataStorage().remove(model.getDataStorage().indexOf(commandParts[2]));
-			} else { 
-				view.askForDeletePage(commandParts[2]);
-			}
-			break;
-		case pageNewHeader:
-			if(commandParts.length < 3) {
-				view.requestNewHeaderData(commandParts[1]);
-			} else {
-				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.HEADER, commandParts[2]);
-			}
-			break;
-		case pageNewSubheader:
-			if(commandParts.length < 3) {
-				view.requestNewSubheaderData(commandParts[1]);
-			} else {
-				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.SUBHEADER, commandParts[2]);
-			}
-			break;
-		case pageNewText:
-			if(commandParts.length < 3) {
-				view.requestNewTextData(commandParts[1]);
-			} else {
-				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.TEXT, commandParts[2]);
-			}
-			break;
-		case pageNewImage:
-			if(commandParts.length < 3) {
-				view.requestNewImageData(commandParts[1]);
-			} else {
-				model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).createElement(Element.IMAGE, commandParts[2]+":"+commandParts[3]);
-			}
-			break;
 		case elementChangeTypeToHeader:
 			model.getDataStorage().get(model.getDataStorage().indexOf(commandParts[1])).get(Integer.parseInt(commandParts[2])).setType(Element.HEADER);
 			break;

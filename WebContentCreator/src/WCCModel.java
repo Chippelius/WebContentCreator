@@ -5,7 +5,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Observable;
+import java.util.ArrayList;
 import java.util.Observer;
 
 /*
@@ -13,13 +13,14 @@ import java.util.Observer;
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCModel extends Observable implements Observer {
+public class WCCModel {
 
-	private File programWorkspace, settingsFile, dataStorageFile;
-	private Settings settings;
-	private DataStorage dataStorage;
+	private static File programWorkspace, settingsFile, dataStorageFile;
+	private static Settings settings;
+	private static DataStorage dataStorage;
+	private static ArrayList<Observer> observers;
 	
-	public WCCModel() {
+	public static void init() {
 		try {
 			//To be used when exportet into jar file
 			//programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -29,15 +30,16 @@ public class WCCModel extends Observable implements Observer {
 			
 			settingsFile = new File(programWorkspace.getAbsolutePath() + "\\settings.dat");
 			dataStorageFile = new File(programWorkspace.getAbsolutePath() + "\\dataStorage.dat");
-			loadSettings();
-			loadDataStorage();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		observers = new ArrayList<>();
+		loadSettings();
+		loadDataStorage();
 	}
 	
 	//Load existing settings or create new ones
-	private void loadSettings() {
+	private static void loadSettings() {
 		if(!settingsFile.exists()) {
 			settings = new Settings();
 		} else {
@@ -50,12 +52,12 @@ public class WCCModel extends Observable implements Observer {
 		}
 	}
 	
-	public Settings getSettings() {
+	public static Settings getSettings() {
 		return settings;
 	}
 	
 	//Save settings in settings file
-	public void saveSettings() {
+	public static void saveSettings() {
 		try {
 			if(!settingsFile.exists())
 				settingsFile.createNewFile();
@@ -69,7 +71,7 @@ public class WCCModel extends Observable implements Observer {
 	
 	
 	//Load project data or create new ones
-	private void loadDataStorage() {
+	public static void loadDataStorage() {
 		if(!dataStorageFile.exists()) {
 			dataStorage = new DataStorage();
 			saveDataStorage();
@@ -78,20 +80,22 @@ public class WCCModel extends Observable implements Observer {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dataStorageFile));
 				dataStorage = (DataStorage) ois.readObject();
 				ois.close();
-				dataStorage.relink(this);
-				update(this, this);
+				for(Observer o : observers) {
+					dataStorage.relink(o);
+				}
+				dataStorage.update(dataStorage, dataStorage);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	public DataStorage getDataStorage() {
+	public static DataStorage getDataStorage() {
 		return dataStorage;
 	}
 	
 	//Save project data
-	public void saveDataStorage() {
+	public static void saveDataStorage() {
 		try {
 			if(!dataStorageFile.exists())
 				dataStorageFile.createNewFile();
@@ -100,23 +104,25 @@ public class WCCModel extends Observable implements Observer {
 			oos.writeObject(dataStorage);
 			oos.flush();
 			oos.close();
-			dataStorage.relink(this);
-			update(this, this);
+			for(Observer o : observers) {
+				dataStorage.relink(o);
+			}
+			dataStorage.update(dataStorage, dataStorage);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	
-	@Override
-	public void update(Observable o, Object arg) {
-		setChanged();
-		notifyObservers(arg);
+	public static void link(Observer observer) {
+		observers.add(observer);
+		dataStorage.relink(observer);
+		dataStorage.update(dataStorage, dataStorage);
 	}
-
+	
 	
 	//Export project
-	public void export(String location) {
+	public static void export(String location) {
 		/*
 		 * TODO: implement:
 		 * use the data-storages export()-method to get the current version-hash
@@ -152,7 +158,7 @@ public class WCCModel extends Observable implements Observer {
 		
 	}
 
-	public String getReadmeText() {
+	public static String getReadmeText() {
 		String res = "";
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(programWorkspace.getAbsolutePath()+"\\readme.html"));

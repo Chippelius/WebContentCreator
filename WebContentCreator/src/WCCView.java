@@ -3,6 +3,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -14,37 +16,58 @@ import javax.swing.*;
  * 
  * Created by Leo Köberlein on 09.07.2017
  */
-public class WCCView implements Observer {
+public class WCCView {
 	
-	private WCCModel model;
-	private WCCController controller;
-	private Color backgroundColor, hoverColor, selectedColor, transparentColor;
-	private String title = "Web Content Creator";
-	private JFrame f;
-	private JSplitPane mainPanel;
-	private JPanel pageList, elementList;
-	private int selectedPage;
-	private ArrayList<AbstractButton> pageDependentButtons;
+	private static Observer modelObserver;
+	private static Color backgroundColor, hoverColor, selectedColor, transparentColor;
+	private static String title = "Web Content Creator";
+	private static JFrame f;
+	private static JSplitPane mainPanel;
+	private static JPanel pageList, elementList;
+	private static int selectedPage;
+	private static ArrayList<AbstractButton> pageDependentButtons;
 	
-	//Constructor to initiate needed variables and create the window
-	public WCCView(WCCModel m, WCCController c) {
-		this.model = m;
-		this.model.addObserver(this);
-		this.controller = c;
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {e.printStackTrace();}
+	public static void init() {
+		//initiate variables
 		backgroundColor = new Color(255, 255, 255);
 		hoverColor = new Color(235, 235, 235);
 		selectedColor = new Color(210, 210, 210);
 		transparentColor = new Color(0, 0, 0, 0);
 		selectedPage = -1;
 		pageDependentButtons = new ArrayList<>();
+		modelObserver = new Observer() {
+			@Override
+			public void update(Observable o, Object arg) {
+				WCCView.update(o, arg);
+			}
+		};
+		WCCModel.link(modelObserver);
 		
 		//Create window
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {e.printStackTrace();}
 		f = new JFrame(title);
 		f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		f.addWindowListener(controller);
+		f.addWindowListener(new WindowListener() {
+			@Override
+			public void windowActivated(WindowEvent arg0) {}
+			@Override
+			public void windowClosed(WindowEvent arg0) {}
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				WCCController.fileExit(false);
+			}
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {}
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {}
+			@Override
+			public void windowIconified(WindowEvent arg0) {}
+			@Override
+			public void windowOpened(WindowEvent arg0) {}
+
+		});
 		f.setBackground(backgroundColor);
 		
 		//Charge window with content
@@ -61,7 +84,7 @@ public class WCCView implements Observer {
 	}
 	
 	//Method to create the window's menubar
-	private JMenuBar createMenuBar() {
+	private static JMenuBar createMenuBar() {
 		JMenuBar menubar = new JMenuBar();
 		menubar.setBackground(backgroundColor);
 		JMenu menuFile = createMenu("Datei  ", null);
@@ -138,7 +161,7 @@ public class WCCView implements Observer {
 	}
 	
 	//Method to create the window's toolbar
-	private JToolBar createToolBar () {
+	private static JToolBar createToolBar () {
 		JToolBar toolbar = new JToolBar("Toolbar");
 		toolbar.setFloatable(true);
 		//toolbar.setBorder(BorderFactory.createRaisedBevelBorder());
@@ -190,7 +213,7 @@ public class WCCView implements Observer {
 	}
 	
 	//Method to create the window's content
-	private Component createMainPanel () {
+	private static Component createMainPanel () {
 		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		mainPanel.setBackground(backgroundColor);
 		mainPanel.setContinuousLayout(true);
@@ -283,7 +306,7 @@ public class WCCView implements Observer {
 		return panel;
 	}
 	
-	public void selectPage(int id) {
+	public static void selectPage(int id) {
 		fetchSettings();
 		selectedPage = id;
 		for(int i=0; i<model.getDataStorage().size(); ++i) {
@@ -403,9 +426,8 @@ public class WCCView implements Observer {
 		return panel;
 	}
 	
-	@Override
-	public void update(Observable o, Object arg) {
-		if(model.getDataStorage().isEditedSinceLastSave()) {
+	public static void update(Observable o, Object arg) {
+		if(WCCModel.getDataStorage().isEditedSinceLastSave()) {
 			f.setTitle("*" + title);
 		} else  {
 			f.setTitle(title);
@@ -423,11 +445,11 @@ public class WCCView implements Observer {
 		elementpane.getVerticalScrollBar().setUnitIncrement(16);
 		mainPanel.setLeftComponent(pagepane);
 		mainPanel.setRightComponent(elementpane);
-		for(Page p : model.getDataStorage()) {
+		for(Page p : WCCModel.getDataStorage()) {
 			pageList.add(createPageListItem(p));
 		}
 		if(arg instanceof Page) {
-			selectPage(model.getDataStorage().indexOf(arg));
+			selectPage(WCCModel.getDataStorage().indexOf(arg));
 		} else {
 			selectedPage = -1;
 			for(Component c : pageDependentButtons) {
@@ -437,33 +459,33 @@ public class WCCView implements Observer {
 		applySettings();
 	}
 	
-	public void applySettings() {
-		f.setLocation(model.getSettings().getLocation());
-		f.setSize(model.getSettings().getSize());
-		if(model.getSettings().isFullscreen()) {
+	public static void applySettings() {
+		f.setLocation(WCCModel.getSettings().getLocation());
+		f.setSize(WCCModel.getSettings().getSize());
+		if(WCCModel.getSettings().isFullscreen()) {
 			f.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		} else { 
 			f.setExtendedState(JFrame.NORMAL);
 		}
-		mainPanel.setDividerLocation(model.getSettings().getDividerLocation());
+		mainPanel.setDividerLocation(WCCModel.getSettings().getDividerLocation());
 	}
 	
-	public void fetchSettings() {
-		model.getSettings().setLocation(f.getLocation());
-		model.getSettings().setSize(f.getSize());
-		model.getSettings().setFullscreen(f.getExtendedState() == JFrame.MAXIMIZED_BOTH);
-		model.getSettings().setDividerLocation(mainPanel.getDividerLocation());
+	public static void fetchSettings() {
+		WCCModel.getSettings().setLocation(f.getLocation());
+		WCCModel.getSettings().setSize(f.getSize());
+		WCCModel.getSettings().setFullscreen(f.getExtendedState() == JFrame.MAXIMIZED_BOTH);
+		WCCModel.getSettings().setDividerLocation(mainPanel.getDividerLocation());
 	}
 	
 	public void setVisible(boolean b) {
 		f.setVisible(b);
 	}
 	
-	public void showMessage(String message, String title, int type) {
+	public static void showMessage(String message, String title, int type) {
 		JOptionPane.showMessageDialog(f, message, title, type);
 	}
 	
-	public void askForSaveBeforeExit() {
+	public static void askForSaveBeforeExit() {
 		switch(JOptionPane.showConfirmDialog(f, "Es gibt nicht gespeicherte Änderungen. \nVor dem Schließen speichern?")) {
 		case JOptionPane.YES_OPTION:
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.fileSave));
@@ -477,7 +499,7 @@ public class WCCView implements Observer {
 		}
 	}
 
-	public void requestNewPageData(String previousFilename, String previousName) {
+	public static void askForNewPageData(String previousFilename, String previousName) {
 		JPanel myPanel = new JPanel(new GridLayout(0, 2));
 		myPanel.add(new JLabel("Name:"));
 		JTextField nameField = new JTextField(previousName, 20);
@@ -492,7 +514,7 @@ public class WCCView implements Observer {
 		}
 	}
 	
-	public void requestChangePageData(String oldFilename, String oldName) {
+	public static void requestChangePageData(String oldFilename, String oldName) {
 		JPanel myPanel = new JPanel(new GridLayout(0, 2));
 		myPanel.add(new JLabel("Name:"));
 		JTextField nameField = new JTextField(oldName, 20);
@@ -507,7 +529,7 @@ public class WCCView implements Observer {
 		}
 	}
 
-	public void askForDeletePage(String filename) {
+	public static void askForDeletePage(String filename) {
 		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass sie die Seite '"+filename+"' löschen wollen?", "Seite löschen?", JOptionPane.YES_NO_OPTION);
 		if(result == JOptionPane.YES_OPTION) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageDelete+":true:"+filename));
@@ -521,21 +543,21 @@ public class WCCView implements Observer {
 		}
 	}
 
-	public void requestNewHeaderData(String parentFilename) {
+	public static void requestNewHeaderData(String parentFilename) {
 		String result = JOptionPane.showInputDialog(f, "Neue Überschrift eingeben:", "Neue Überschrift", JOptionPane.QUESTION_MESSAGE);
 		if(result != null && !result.equals("")) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewHeader+":"+parentFilename+":"+result));
 		}
 	}
 
-	public void requestNewSubheaderData(String parentFilename) {
+	public static void requestNewSubheaderData(String parentFilename) {
 		String result = JOptionPane.showInputDialog(f, "Neue Unterüberschrift eingeben:", "Neue Unterüberschrift", JOptionPane.QUESTION_MESSAGE);
 		if(result != null && !result.equals("")) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewSubheader+":"+parentFilename+":"+result));
 		}
 	}
 
-	public void requestNewTextData(String parentFilename) {
+	public static void requestNewTextData(String parentFilename) {
 		JPanel myPanel = new JPanel(new FlowLayout());
 		JTextArea textarea = new JTextArea(10, 60);
 		textarea.setLineWrap(true);
@@ -547,7 +569,7 @@ public class WCCView implements Observer {
 		}
 	}
 
-	public void requestNewImageData(String parentFilename) {
+	public static void requestNewImageData(String parentFilename) {
 		JPanel myPanel = new JPanel(new FlowLayout());
 		JFileChooser filechooser = new JFileChooser(model.getSettings().getImageChooseLocation());
 		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -627,6 +649,11 @@ public class WCCView implements Observer {
 			}
 			break;
 		}
+	}
+
+	public static void askForExportDestination() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
