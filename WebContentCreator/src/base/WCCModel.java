@@ -1,3 +1,5 @@
+package base;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,6 +10,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Observer;
 
+import data.*;
+import gui.GUISettings;
+
 /*
  * Model part of WebContentCreator (by concept of ModelViewControl)
  * 
@@ -16,7 +21,7 @@ import java.util.Observer;
 public class WCCModel {
 
 	private static File programWorkspace, settingsFile, dataStorageFile;
-	private static Settings settings;
+	private static GUISettings settings;
 	private static DataStorage dataStorage;
 	private static ArrayList<Observer> observers;
 	
@@ -41,18 +46,18 @@ public class WCCModel {
 	//Load existing settings or create new ones
 	private static void loadSettings() {
 		if(!settingsFile.exists()) {
-			settings = new Settings();
+			settings = new GUISettings();
 		} else {
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(settingsFile));
-				settings = (Settings) ois.readObject();
+				settings = (GUISettings) ois.readObject();
 				settings.refresh();
 				ois.close();
 			} catch (Exception e) {e.printStackTrace();}
 		}
 	}
 	
-	public static Settings getSettings() {
+	public static GUISettings getSettings() {
 		return settings;
 	}
 	

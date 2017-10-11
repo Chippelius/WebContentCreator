@@ -1,3 +1,5 @@
+package base;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +13,8 @@ import java.util.Observer;
 
 import javax.swing.*;
 
+import gui.*;
+
 /*
  * View part of WebContentCreator (by concept of ModelViewController)
  * 
@@ -18,23 +22,25 @@ import javax.swing.*;
  */
 public class WCCView {
 	
+	private static final String title = "Web Content Creator";
+	public static final Color backgroundColor = new Color(255, 255, 255);
+	public static final Color hoverColor = new Color(235, 235, 235);
+	public static final Color selectedColor = new Color(210, 210, 210);
+	public static final Color transparentColor = new Color(0, 0, 0, 0);
+	
+	public static final String fileSaveText = "Speichern";
+	public static final String fileExportText = "Exportieren";
+	//TODO: rest
+	
+	public static final ImageIcon fileSaveIcon = new ImageIcon("icons/saveIcon.png");
+	//TODO: rest
+	
+	private static MainWindow f;
 	private static Observer modelObserver;
-	private static Color backgroundColor, hoverColor, selectedColor, transparentColor;
-	private static String title = "Web Content Creator";
-	private static JFrame f;
-	private static JSplitPane mainPanel;
-	private static JPanel pageList, elementList;
-	private static int selectedPage;
-	private static ArrayList<AbstractButton> pageDependentButtons;
+	
 	
 	public static void init() {
 		//initiate variables
-		backgroundColor = new Color(255, 255, 255);
-		hoverColor = new Color(235, 235, 235);
-		selectedColor = new Color(210, 210, 210);
-		transparentColor = new Color(0, 0, 0, 0);
-		selectedPage = -1;
-		pageDependentButtons = new ArrayList<>();
 		modelObserver = new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
@@ -47,110 +53,20 @@ public class WCCView {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
-		f = new JFrame(title);
-		f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		f.addWindowListener(new WindowListener() {
-			@Override
-			public void windowActivated(WindowEvent arg0) {}
-			@Override
-			public void windowClosed(WindowEvent arg0) {}
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				WCCController.fileExit(false);
-			}
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {}
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {}
-			@Override
-			public void windowIconified(WindowEvent arg0) {}
-			@Override
-			public void windowOpened(WindowEvent arg0) {}
-
-		});
-		f.setBackground(backgroundColor);
-		
-		//Charge window with content
-		f.getContentPane().setLayout(new BorderLayout());
-		f.setJMenuBar(createMenuBar());
-		f.getContentPane().add(createToolBar(), BorderLayout.NORTH);
-		f.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
+		f = new MainWindow(title);
 		
 		//Apply settings to window and content
 		applySettings();
 		
 		//Make data visible for first time
-		update(model.getDataStorage(), model.getDataStorage());
+		update(WCCModel.getDataStorage(), WCCModel.getDataStorage());
 	}
 	
-	//Method to create the window's menubar
-	private static JMenuBar createMenuBar() {
-		JMenuBar menubar = new JMenuBar();
-		menubar.setBackground(backgroundColor);
-		JMenu menuFile = createMenu("Datei  ", null);
-			JMenu menuFileNew = createMenu("Neu", new ImageIcon("icons/plusIcon.png"));
-			//Optional functionality for later:
-			//menuFileNew.add(createMenuItem("Neues Projekt", new ImageIcon("icons/plusIcon.png"), WCCController.fileNew));
-			//menuFileNew.addSeparator();
-			menuFileNew.add(createMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"), WCCController.pageNewPage));
-			menuFileNew.addSeparator();
-			menuFileNew.add(createPageDependentMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader+":"));
-			menuFileNew.add(createPageDependentMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader+":"));
-			menuFileNew.add(createPageDependentMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText+":"));
-			menuFileNew.add(createPageDependentMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage+":"));
-			menuFile.add(menuFileNew);
-			menuFile.addSeparator();
-		//Optional functionality for later:
-		//menuFile.add(createMenuItem("Öffnen", new ImageIcon("icons/openIcon.png"), WCCController.fileOpen));
-		//menuFile.addSeparator();
-		menuFile.add(createMenuItem("Speichern", new ImageIcon("icons/saveIcon.png"), WCCController.fileSave));
-		//Optional functionality for later:
-		//menuFile.add(new JMenuItem("Speichern unter", new ImageIcon("icons/saveIcon.png"), WCCController.fileSaveAs));
-		menuFile.addSeparator();
-		menuFile.add(createMenuItem("Exportieren", new ImageIcon("icons/exportIcon.png"), WCCController.fileExport));
-		menuFile.addSeparator();
-		menuFile.add(createMenuItem("Schließen", null, WCCController.fileExit));
-		menubar.add(menuFile);
-		
-		JMenu menuPage = createMenu("Seite  ", null);
-		menuPage.add(createMenuItem("Neue Seite", new ImageIcon("icons/newPageIcon.png"), WCCController.pageNewPage));
-		menuPage.addSeparator();
-			JMenu menuPageNew = createMenu("Neues Element", new ImageIcon("icons/plusIcon.png"));
-			menuPageNew.add(createPageDependentMenuItem("Neue Überschrift", new ImageIcon("icons/headerIcon.png"), WCCController.pageNewHeader+":"));
-			menuPageNew.add(createPageDependentMenuItem("Neue Unterüberschrift", new ImageIcon("icons/subheaderIcon.png"), WCCController.pageNewSubheader+":"));
-			menuPageNew.add(createPageDependentMenuItem("Neuer Textinhalt", new ImageIcon("icons/textIcon.png"), WCCController.pageNewText+":"));
-			menuPageNew.add(createPageDependentMenuItem("Neues Bild", new ImageIcon("icons/imageIcon.png"), WCCController.pageNewImage+":"));
-			menuPage.add(menuPageNew);
-		menuPage.addSeparator();
-		menuPage.add(createPageDependentMenuItem("Seite löschen", new ImageIcon("icons/deletePageIcon.png"), WCCController.pageDelete+":false:"));
-		menubar.add(menuPage);
-		
-		JMenu menuWindow = createMenu("Ansicht  ", null);
-		menuWindow.add(createMenuItem("Maximieren/Minimieren", null, WCCController.windowToggleMaximized));
-		menuWindow.add(createMenuItem("Trennstrich zentrieren", null, WCCController.windowCenterDivider));
-		menubar.add(menuWindow);
-		
-		JMenu menuHelp = createMenu("Hilfe  ", null);
-		menuHelp.add(createMenuItem("Info", null, WCCController.helpInfo));
-		menuHelp.add(createMenuItem("Nach Updates suchen", null, WCCController.helpCheckForUpdates));
-		menubar.add(menuHelp);
-		
-		return menubar;
-	}
-	
-	private JMenu createMenu(String title, Icon icon) {
-		JMenu menu = new JMenu(title);
-		if(icon != null)
-			menu.setIcon(icon);
-		return menu;
-	}
-	
-	private JMenuItem createMenuItem(String title, Icon icon, String actionCommand) {
+	private static JMenuItem createMenuItem(String title, Icon icon, ActionListener actionListener) {
 		JMenuItem item = new JMenuItem(title);
 		if(icon != null)
 			item.setIcon(icon);
-		item.addActionListener(controller);
-		item.setActionCommand(actionCommand);
+		item.addActionListener(actionListener);
 		return item;
 	}
 	
@@ -536,14 +452,14 @@ public class WCCView {
 		}
 	}
 	
-	public void askForDeleteElement(String filename, int elementIndex) {
+	public static void askForDeleteElement(String filename, int elementIndex) {
 		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass Sie Element "+elementIndex+" der Seite '"+filename+"' löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION);
 		if(result == JOptionPane.YES_OPTION) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementDelete+":true:"+filename+":"+elementIndex));
 		}
 	}
 
-	public static void requestNewHeaderData(String parentFilename) {
+	public static void askForNewElementData(String parentFilename, String type) {
 		String result = JOptionPane.showInputDialog(f, "Neue Überschrift eingeben:", "Neue Überschrift", JOptionPane.QUESTION_MESSAGE);
 		if(result != null && !result.equals("")) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewHeader+":"+parentFilename+":"+result));
@@ -590,7 +506,7 @@ public class WCCView {
 		}
 	}
 
-	public void requestChangeElementData(String parentFilename, int elementIndex) {
+	public static void requestChangeElementData(String parentFilename, int elementIndex) {
 		Page parent = model.getDataStorage().get(model.getDataStorage().indexOf(parentFilename));
 		Element e = parent.get(elementIndex);
 		int result;

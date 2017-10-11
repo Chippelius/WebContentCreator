@@ -1,3 +1,5 @@
+package data;
+
 import java.io.Serializable;
 import java.util.Observable;
 import java.util.Observer;

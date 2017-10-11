@@ -1,3 +1,5 @@
+package data;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
@@ -17,12 +19,19 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<Page> pages;
+	private String selectedPage;
 	private boolean editedSinceLastSave;
+	private String imageChooseLocation;
+	private String exportLocation;
+	
 	
 	public DataStorage() {
 		pages = new ArrayList<>();
 		pages.add(new Page("startpage.html", "Home", this));
+		selectedPage = null;
 		editedSinceLastSave = true;
+		imageChooseLocation = "";
+		exportLocation = "";
 	}
 	
 	@Override
@@ -49,6 +58,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		}
 	}
 	
+	//Relink observers after being saved or loaded
 	public void relink(Observer o) {
 		addObserver(o);
 		for(Page p : pages) {
@@ -90,6 +100,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 			return false;
 		boolean b = pages.add(p);
 		p.addObserver(this);
+		selectedPage = p.getFilename();
 		update(this, p);
 		return b;
 	}
@@ -100,6 +111,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 			throw new IllegalArgumentException("filename must not contain special characters!");
 		pages.add(index, p);
 		p.addObserver(this);
+		selectedPage = p.getFilename();
 		update(this, p);
 	}
 
@@ -111,6 +123,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		}
 		boolean b = pages.addAll(c);
 		c.forEach(x -> x.addObserver(this));
+		selectedPage = c.iterator().next().getFilename();
 		update(this, this);
 		return b;
 	}
@@ -123,6 +136,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		}
 		boolean b = pages.addAll(index, c);
 		c.forEach(x -> x.addObserver(this));
+		selectedPage = c.iterator().next().getFilename();
 		update(this, this);
 		return b;
 	}
@@ -131,6 +145,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public void clear() {
 		pages.forEach(x -> x.deleteObserver(this));
 		pages.clear();
+		selectedPage = null;
 		update(this, this);
 	}
 
@@ -195,6 +210,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public boolean remove(Object o) {
 		boolean b = pages.remove(o);
 		((Page)o).deleteObserver(this);
+		selectedPage = null;
 		update(this, null);
 		return b;
 	}
@@ -203,6 +219,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public Page remove(int index) {
 		Page p = pages.remove(index);
 		p.deleteObserver(this);
+		selectedPage = null;
 		update(this, this);
 		return p;
 	}
@@ -215,6 +232,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	public boolean removeAll(Collection<?> c) {
 		boolean b = pages.removeAll(c);
 		c.forEach(x -> ((Page)x).deleteObserver(this));
+		selectedPage = null;
 		update(this, this);
 		return b;
 	}
@@ -222,6 +240,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		boolean b = pages.retainAll(c);
+		selectedPage = null;
 		update(this, this);
 		return b;
 	}
@@ -231,6 +250,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		Page p = pages.set(index, element);
 		element.addObserver(this);
 		p.deleteObserver(this);
+		selectedPage = element.getFilename();
 		update(this, element);
 		return p;
 	}
@@ -255,4 +275,30 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		return pages.toArray(a);
 	}
 	
+	
+	
+	public void setSelectedPage(String filename) {
+		selectedPage = filename;
+		update(this, filename);
+	}
+	
+	public String getSelectedPage() {
+		return selectedPage;
+	}
+
+	public void setImageChooseLocation(String location) {
+		imageChooseLocation = location;
+	}
+	
+	public String getImageChooseLocation() {
+		return imageChooseLocation;
+	}
+	
+	public void setExportLocation(String location) {
+		exportLocation = location;
+	}
+	
+	public String getExportLocation() {
+		return exportLocation;
+	}
 }

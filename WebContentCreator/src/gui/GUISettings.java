@@ -1,3 +1,5 @@
+package gui;
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -8,7 +10,7 @@ import java.io.Serializable;
  * 
  * Created by Leo Köberlein on 10.07.2017
  */
-public class Settings implements Serializable {
+public class GUISettings implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,9 +18,8 @@ public class Settings implements Serializable {
 	private Dimension windowSize;
 	private boolean maximized;
 	private int dividerLocation;
-	private String imageChooseLocation;
 	
-	public Settings () {
+	public GUISettings () {
 		refresh();
 	}
 	
@@ -60,14 +61,6 @@ public class Settings implements Serializable {
 	}
 	public int getDividerLocation() {
 		return dividerLocation;
-	}
-	
-	public void setImageChooseLocation(String location) {
-		imageChooseLocation = location;
-	}
-	
-	public String getImageChooseLocation() {
-		return imageChooseLocation;
 	}
 	
 }
