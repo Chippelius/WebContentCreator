@@ -25,7 +25,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	private long version;
 	private boolean editedSinceLastExport;
 	private ArrayList<Element> elements;
-	private int selectedElement;
 	
 	public Page(String filename, String name, Observer o) {
 		this.filename = filename;
@@ -33,7 +32,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 		version = 0;
 		editedSinceLastExport = true;
 		elements = new ArrayList<>();
-		selectedElement = -1;
 		addObserver(o);
 	}
 	
@@ -100,7 +98,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean add(Element e) {
 		boolean b = elements.add(e);
 		e.addObserver(this);
-		selectedElement = elements.indexOf(e);
 		update(this, this);
 		return b;
 	}
@@ -109,7 +106,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public void add(int index, Element element) {
 		elements.add(index, element);
 		element.addObserver(this);
-		selectedElement = index;
 		update(this, this);
 	}
 
@@ -117,7 +113,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean addAll(Collection<? extends Element> c) {
 		boolean b = elements.addAll(c);
 		c.forEach(x -> x.addObserver(this));
-		selectedElement = elements.indexOf(c.iterator().next());
 		update(this, this);
 		return b;
 	}
@@ -126,7 +121,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean addAll(int index, Collection<? extends Element> c) {
 		boolean b = elements.addAll(index, c);
 		c.forEach(x -> x.addObserver(this));
-		selectedElement = index;
 		update(this, this);
 		return b;
 	}
@@ -135,7 +129,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public void clear() {
 		elements.forEach(x -> x.deleteObserver(this));
 		elements.clear();
-		selectedElement = -1;
 		update(this, this);
 	}
 
@@ -188,7 +181,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean remove(Object o) {
 		if(elements.remove(o)) {
 			((Element)o).deleteObserver(this);
-			selectedElement = -1;
 			update(this, this);
 			return true;
 		} else {
@@ -200,7 +192,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public Element remove(int index) {
 		Element e = elements.remove(index);
 		e.deleteObserver(this);
-		selectedElement = -1;
 		update(this, this);
 		return e;
 	}
@@ -209,7 +200,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean removeAll(Collection<?> c) {
 		boolean b = elements.removeAll(c);
 		c.forEach(x -> ((Element)x).deleteObserver(this));
-		selectedElement = -1;
 		update(this, this);
 		return b;
 	}
@@ -217,7 +207,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		boolean b = elements.retainAll(c);
-		selectedElement = -1;
 		update(this, this);
 		return b;
 	}
@@ -227,7 +216,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 		Element e = elements.set(index, element);
 		element.addObserver(this);
 		e.deleteObserver(this);
-		selectedElement = index;
 		update(this, this);
 		return e;
 	}
@@ -250,14 +238,6 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	@Override
 	public <T> T[] toArray(T[] a) {
 		return elements.toArray(a);
-	}
-	
-	public void setSelectedElement(int index) {
-		selectedElement = index;
-	}
-	
-	public int getSelectedElement() {
-		return selectedElement;
 	}
 	
 }

@@ -18,14 +18,14 @@ import javax.swing.JSplitPane;
 
 import base.*;
 
-public class MainWindow extends JFrame {
+public class WCCWindow extends JFrame {
 
 	private static JSplitPane mainPanel;
 	private static JPanel pageList, elementList;
 	private static int selectedPage;
 	private static ArrayList<AbstractButton> pageDependentButtons;
 	
-	public MainWindow(String title) {
+	public WCCWindow(String title) {
 		super(title);
 		
 		selectedPage = -1;
