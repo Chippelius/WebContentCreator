@@ -20,6 +20,8 @@ import gui.GUISettings;
  */
 public class WCCModel {
 
+	public static final String VERSION = "0.2";
+
 	private static File programWorkspace, settingsFile, dataStorageFile;
 	private static GUISettings settings;
 	private static DataStorage dataStorage;
