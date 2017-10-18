@@ -13,7 +13,7 @@ import java.util.Observer;
 
 import javax.swing.*;
 
-import data.Element;
+import data.*;
 import gui.*;
 
 /*
@@ -33,14 +33,14 @@ public class WCCView {
 	//Runtime variables
 	private static WCCWindow f;
 	private static Observer modelObserver;
-	private static String selectedPage;
-	private static int selectedElement;
+	private static Page selectedPage;
+	private static Element selectedElement;
 	
 	
 	public static void init() {
 		//initiate variables
-		selectedPage = "";
-		selectedElement = -1;
+		selectedPage = null;
+		selectedElement = null;
 		modelObserver = new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
@@ -63,19 +63,44 @@ public class WCCView {
 		update(WCCModel.getDataStorage(), WCCModel.getDataStorage());
 	}
 	
-	public static void setSelectedPage(String filename) {
-		selectedPage = filename;
+	public static void setSelectedPage(Page page) {
+		//TODO
 	}
-	
-	public static String getSelectedPage() {
+
+	public static void selectPage(int id) {
+		fetchSettings();
+		selectedPage = id;
+		for(int i=0; i<model.getDataStorage().size(); ++i) {
+			pageList.getComponent(i).setBackground(backgroundColor);
+		}
+		pageList.getComponent(id).setBackground(selectedColor);
+		elementList = new JPanel();
+		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
+		elementList.setBackground(backgroundColor);
+		JScrollPane elementpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		elementpane.getVerticalScrollBar().setUnitIncrement(16);
+		mainPanel.setRightComponent(elementpane);
+		Page selected = model.getDataStorage().get(id);
+		for(Element e : selected) {
+			elementList.add(createElementListItem(selected, e));
+		}
+		elementList.repaint();
+		for(AbstractButton a : pageDependentButtons) {
+			a.setEnabled(true);
+			a.setActionCommand(a.getActionCommand().substring(0, a.getActionCommand().lastIndexOf(":")+1)+model.getDataStorage().get(id).getFilename());
+		}
+		applySettings();
+	}
+
+	public static Page getSelectedPage() {
 		return selectedPage;
 	}
 	
-	public static void setSelectedElement(int index) {
-		selectedElement = index;
+	public static void setSelectedElement(Element element) {
+		//TODO
 	}
 	
-	public static int getSelectedElement() {
+	public static Element getSelectedElement() {
 		return selectedElement;
 	}
 	

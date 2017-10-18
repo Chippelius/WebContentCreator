@@ -1,51 +1,25 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.ArrayList;
-
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import base.*;
-import data.Element;
+import base.WCCController;
+import base.WCCView;
 
 @SuppressWarnings("serial")
 public class WCCWindow extends JFrame {
 
 	private static JSplitPane mainPanel;
 	private static JPanel pageList, elementList;
-	private static int selectedPage;
-	private static ArrayList<AbstractButton> pageDependentButtons;
 	
 	public WCCWindow(String title) {
 		super(title);
-		
-		selectedPage = -1;
-		pageDependentButtons = new ArrayList<>();
 		
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowListener() {
@@ -74,25 +48,56 @@ public class WCCWindow extends JFrame {
 		setJMenuBar(new WCCMenubar());
 		getContentPane().add(new WCCToolbar(), BorderLayout.NORTH);
 		getContentPane().add(createMainPanel(), BorderLayout.CENTER);
-		
+		clearPageList();
+		clearElementList();
 	}
 
 	//Method to create the window's content
-	private static Component createMainPanel () {
+	private Component createMainPanel () {
 		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		mainPanel.setBackground(backgroundColor);
+		mainPanel.setBackground(WCCView.backgroundColor);
 		mainPanel.setContinuousLayout(true);
 		return mainPanel;
 	}
 	
+	public void addPageListItem(PageListItem item) {
+		int currentLocation = mainPanel.getDividerLocation();
+		pageList.add(item);
+		mainPanel.setDividerLocation(currentLocation);
+	}
+	
+	public PageListItem getPageListItem(int index) {
+		return (PageListItem) pageList.getComponent(index);
+	}
+	
+	public void clearPageList() {
+		int currentLocation = mainPanel.getDividerLocation();
+		pageList = new JPanel();
+		pageList.setLayout(new BoxLayout(pageList, BoxLayout.Y_AXIS));
+		mainPanel.setLeftComponent(pageList);
+		mainPanel.setDividerLocation(currentLocation);
+	}
+	
+	public void addElementListItem(ElementListItem item) {
+		int currentLocation = mainPanel.getDividerLocation();
+		elementList.add(item);
+		mainPanel.setDividerLocation(currentLocation);
+	}
+	
+	public ElementListItem getElementListItem(int index) {
+		return (ElementListItem) elementList.getComponent(index);
+	}
+	
+	public void clearElementList() {
+		int currentLocation = mainPanel.getDividerLocation();
+		elementList = new JPanel();
+		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
+		mainPanel.setRightComponent(elementList);
+		mainPanel.setDividerLocation(currentLocation);
+	}
 
+	/*
 	private Component createPageListItem(Page p) {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBackground(backgroundColor);
-		panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
-		panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
-		
 			JPanel labelPanel = new JPanel(new BorderLayout());
 			labelPanel.setBackground(transparentColor);
 			labelPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
@@ -172,32 +177,6 @@ public class WCCWindow extends JFrame {
 		return panel;
 	}
 	
-
-	public static void selectPage(int id) {
-		fetchSettings();
-		selectedPage = id;
-		for(int i=0; i<model.getDataStorage().size(); ++i) {
-			pageList.getComponent(i).setBackground(backgroundColor);
-		}
-		pageList.getComponent(id).setBackground(selectedColor);
-		elementList = new JPanel();
-		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
-		elementList.setBackground(backgroundColor);
-		JScrollPane elementpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		elementpane.getVerticalScrollBar().setUnitIncrement(16);
-		mainPanel.setRightComponent(elementpane);
-		Page selected = model.getDataStorage().get(id);
-		for(Element e : selected) {
-			elementList.add(createElementListItem(selected, e));
-		}
-		elementList.repaint();
-		for(AbstractButton a : pageDependentButtons) {
-			a.setEnabled(true);
-			a.setActionCommand(a.getActionCommand().substring(0, a.getActionCommand().lastIndexOf(":")+1)+model.getDataStorage().get(id).getFilename());
-		}
-		applySettings();
-	}
-
 	private Component createElementListItem(Page parent, Element e) {
 		int elementIndex = parent.indexOf(e);
 		JPanel panel = new JPanel(new BorderLayout());
@@ -236,62 +215,8 @@ public class WCCWindow extends JFrame {
 		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, labelPanel.getPreferredSize().height+10));
 		
 		
-		MouseListener hoverListener = new MouseListener() {
-			@Override public void mouseReleased(MouseEvent e) {}
-			@Override public void mousePressed(MouseEvent e) {}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
-					panel.setBackground(backgroundColor);
-					valueLabel.setBackground(backgroundColor);
-				}
-				panel.repaint();
-			}
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				if(selectedPage == -1 || (selectedPage != -1 && pageList.getComponent(selectedPage) != panel)) {
-					panel.setBackground(hoverColor);
-					valueLabel.setBackground(hoverColor);
-				}
-				panel.repaint();
-			}
-			@Override public void mouseClicked(MouseEvent e) {}
-		};
-		panel.addMouseListener(hoverListener);
-		deleteButton.addMouseListener(hoverListener);
-		JPopupMenu elementContextMenu = new JPopupMenu();
-		JMenu changeTypeMenu = createMenu("Typ ändern zu:", null);
-			changeTypeMenu.add(createMenuItem("Überschrift", null, WCCController.elementChangeTypeToHeader+":"+parent.getFilename()+":"+elementIndex));
-			changeTypeMenu.add(createMenuItem("Unterüberschrift", null, WCCController.elementChangeTypeToSubheader+":"+parent.getFilename()+":"+elementIndex));
-			changeTypeMenu.add(createMenuItem("Textinhalt", null, WCCController.elementChangeTypeToText+":"+parent.getFilename()+":"+elementIndex));
-			changeTypeMenu.add(createMenuItem("Bild", null, WCCController.elementChangeTypeToImage+":"+parent.getFilename()+":"+elementIndex));
-		elementContextMenu.add(changeTypeMenu);
-		elementContextMenu.add(createMenuItem("Daten ändern", null, WCCController.elementChangeData+":"+parent.getFilename()+":"+elementIndex));
-		elementContextMenu.addSeparator();
-		elementContextMenu.add(createMenuItem("an den Anfang bewegen", null, WCCController.elementMoveTop+":"+parent.getFilename()+":"+elementIndex));
-		elementContextMenu.add(createMenuItem("Nach oben bewegen", null, WCCController.elementMoveUp+":"+parent.getFilename()+":"+elementIndex));
-		elementContextMenu.add(createMenuItem("Nach unten bewegen", null, WCCController.elementMoveDown+":"+parent.getFilename()+":"+elementIndex));
-		elementContextMenu.add(createMenuItem("An das Ende bewegen", null, WCCController.elementMoveBottom+":"+parent.getFilename()+":"+elementIndex));
-		elementContextMenu.addSeparator();
-		elementContextMenu.add(createMenuItem("Element löschen", null, WCCController.elementDelete+":false:"+parent.getFilename()+":"+elementIndex));
-		MouseListener clickListener = new MouseListener() {
-			@Override 
-			public void mouseReleased(MouseEvent e) {
-				if(e.isPopupTrigger())
-					elementContextMenu.show(panel, e.getX(), e.getY());
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if(e.isPopupTrigger())
-					elementContextMenu.show(panel, e.getX(), e.getY());
-			}
-			@Override public void mouseExited(MouseEvent e) {}
-			@Override public void mouseEntered(MouseEvent e) {}
-			@Override public void mouseClicked(MouseEvent e) {}
-		};
-		panel.addMouseListener(clickListener);
 		return panel;
 	}
-	
+	*/
 
 }

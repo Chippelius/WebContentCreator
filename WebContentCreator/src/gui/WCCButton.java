@@ -6,6 +6,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
 
+@SuppressWarnings({ "unused", "serial" })
 public class WCCButton extends JButton {
 
 	private WCCButton() {}
@@ -16,24 +17,9 @@ public class WCCButton extends JButton {
 	public WCCButton(Action a) {
 		super(a);
 		setText("");
+		setFocusable(false);
+		setContentAreaFilled(false);
+		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	}
-
-	private JButton createToolbarButton(Icon icon, String actionCommand, String tooltip) {
-		JButton button = new JButton(icon);
-		button.addActionListener(controller);
-		button.setActionCommand(actionCommand);
-		button.setToolTipText(tooltip);
-		button.setFocusable(false);
-		button.setContentAreaFilled(false);
-		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		return button;
-	}
-
-	private JButton createPageDependentToolbarButton(Icon icon, String actionCommand, String tooltip) {
-		JButton button = createToolbarButton(icon, actionCommand, tooltip);
-		pageDependentButtons.add(button);
-		return button;
-	}
-	
 
 }
