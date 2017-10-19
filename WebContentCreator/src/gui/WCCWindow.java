@@ -7,6 +7,7 @@ import java.awt.event.WindowListener;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import base.WCCController;
@@ -74,7 +75,9 @@ public class WCCWindow extends JFrame {
 		int currentLocation = mainPanel.getDividerLocation();
 		pageList = new JPanel();
 		pageList.setLayout(new BoxLayout(pageList, BoxLayout.Y_AXIS));
-		mainPanel.setLeftComponent(pageList);
+		JScrollPane scrollpane = new JScrollPane(pageList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
+		mainPanel.setLeftComponent(scrollpane);
 		mainPanel.setDividerLocation(currentLocation);
 	}
 	
@@ -92,7 +95,9 @@ public class WCCWindow extends JFrame {
 		int currentLocation = mainPanel.getDividerLocation();
 		elementList = new JPanel();
 		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
-		mainPanel.setRightComponent(elementList);
+		JScrollPane scrollpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
+		mainPanel.setRightComponent(scrollpane);
 		mainPanel.setDividerLocation(currentLocation);
 	}
 

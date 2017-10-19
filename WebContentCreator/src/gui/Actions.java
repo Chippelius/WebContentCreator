@@ -219,7 +219,7 @@ public class Actions {
 
 
 
-	public static final AbstractAction[] pageDependentActions = new AbstractAction[] {
+	private static final AbstractAction[] pageDependentActions = new AbstractAction[] {
 			pageChangeData,
 			pageMoveTop,
 			pageMoveBottom,
@@ -231,8 +231,14 @@ public class Actions {
 			elementNewText,
 			elementNewImage
 	};
+	
+	public static void enablePageDependentActions(boolean value) {
+		for(AbstractAction a : pageDependentActions) {
+			a.setEnabled(value);
+		}
+	}
 
-	public static final AbstractAction[] elementDependentActions = new AbstractAction[] {
+	private static final AbstractAction[] elementDependentActions = new AbstractAction[] {
 			elementChangeToHeader,
 			elementChangeToSubheader,
 			elementChangeToText,
@@ -244,5 +250,11 @@ public class Actions {
 			elementMoveDown,
 			elementDelete
 	};
+
+	public static void enableElementDependentActions(boolean value) {
+		for(AbstractAction a : elementDependentActions) {
+			a.setEnabled(value);
+		}
+	}
 
 }

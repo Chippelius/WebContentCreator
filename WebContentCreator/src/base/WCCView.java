@@ -22,21 +22,21 @@ import gui.*;
  * Created by Leo Köberlein on 09.07.2017
  */
 public class WCCView {
-	
+
 	//View configs
 	private static final String title = "Web Content Creator";
 	public static final Color backgroundColor = new Color(255, 255, 255);
 	public static final Color hoverColor = new Color(235, 235, 235);
 	public static final Color selectedColor = new Color(210, 210, 210);
 	public static final Color transparentColor = new Color(0, 0, 0, 0);
-	
+
 	//Runtime variables
 	private static WCCWindow f;
 	private static Observer modelObserver;
 	private static Page selectedPage;
 	private static Element selectedElement;
-	
-	
+
+
 	public static void init() {
 		//initiate variables
 		selectedPage = null;
@@ -48,62 +48,69 @@ public class WCCView {
 			}
 		};
 		WCCModel.link(modelObserver);
-		
+
 		//Create window
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
 		f = new WCCWindow(title);
-		
-		
+
+
 		//Apply settings to window and content
 		applySettings();
-		
+
 		//Make data visible for first time
 		update(WCCModel.getDataStorage(), WCCModel.getDataStorage());
 	}
-	
-	public static void setSelectedPage(Page page) {
-		//TODO
-	}
 
-	public static void selectPage(int id) {
-		fetchSettings();
-		selectedPage = id;
-		for(int i=0; i<model.getDataStorage().size(); ++i) {
-			pageList.getComponent(i).setBackground(backgroundColor);
+	public static void setSelectedPage(Page page) {
+		selectedPage = page;
+		//set everything unselected
+		for(int i=0; i<WCCModel.getDataStorage().size(); ++i) {
+			f.getPageListItem(i).setSelected(false);
 		}
-		pageList.getComponent(id).setBackground(selectedColor);
-		elementList = new JPanel();
-		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
-		elementList.setBackground(backgroundColor);
-		JScrollPane elementpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		elementpane.getVerticalScrollBar().setUnitIncrement(16);
-		mainPanel.setRightComponent(elementpane);
-		Page selected = model.getDataStorage().get(id);
-		for(Element e : selected) {
-			elementList.add(createElementListItem(selected, e));
+		if(page != null) {
+			//set current page selected
+			f.getPageListItem(WCCModel.getDataStorage().indexOf(page)).setSelected(true);
+			//update element-list
+			for(int i=0; i<page.size(); ++i) {
+				f.addElementListItem(new ElementListItem(page.get(i)));
+			}
+			//update page-dependent actions
+			Actions.enablePageDependentActions(true);
+		} else {
+			//update element-list
+			f.clearPageList();
+			//update page-dependent actions
+			Actions.enablePageDependentActions(false);
 		}
-		elementList.repaint();
-		for(AbstractButton a : pageDependentButtons) {
-			a.setEnabled(true);
-			a.setActionCommand(a.getActionCommand().substring(0, a.getActionCommand().lastIndexOf(":")+1)+model.getDataStorage().get(id).getFilename());
-		}
-		applySettings();
 	}
 
 	public static Page getSelectedPage() {
 		return selectedPage;
 	}
-	
+
 	public static void setSelectedElement(Element element) {
-		//TODO
+		selectedElement = element;
+		//set everything unselected
+		for(int i=0; i<getSelectedPage().size(); ++i) {
+			f.getElementListItem(i).setSelected(false);
+		}
+		if(element != null) {
+			//set current element selected
+			f.getElementListItem(getSelectedPage().indexOf(element)).setSelected(true);
+			//update element-dependent actions
+			Actions.enableElementDependentActions(true);
+		} else {
+			//update element-dependent actions
+			Actions.enableElementDependentActions(false);
+		}
 	}
-	
+
 	public static Element getSelectedElement() {
 		return selectedElement;
 	}
-	
+
 	public static void update(Observable o, Object arg) {
 		//TODO
 		if(WCCModel.getDataStorage().isEditedSinceLastSave()) {
@@ -137,7 +144,7 @@ public class WCCView {
 		}
 		applySettings();
 	}
-	
+
 	public static void applySettings() {
 		//TODO
 		f.setLocation(WCCModel.getSettings().getLocation());
@@ -149,7 +156,7 @@ public class WCCView {
 		}
 		mainPanel.setDividerLocation(WCCModel.getSettings().getDividerLocation());
 	}
-	
+
 	public static void fetchSettings() {
 		//TODO
 		WCCModel.getSettings().setLocation(f.getLocation());
@@ -157,14 +164,14 @@ public class WCCView {
 		WCCModel.getSettings().setFullscreen(f.getExtendedState() == JFrame.MAXIMIZED_BOTH);
 		WCCModel.getSettings().setDividerLocation(mainPanel.getDividerLocation());
 	}
-	
+
 	public void setVisible(boolean b) {
 		f.setVisible(b);
 	}
-	
+
 	public static String requestExportDestination() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public static int requestSaveBeforeExit() {
@@ -191,13 +198,13 @@ public class WCCView {
 		myPanel.add(new JLabel("Dateiname:"));
 		JTextField filenameField = new JTextField(tmpPageFilename, 20);
 		myPanel.add(filenameField);
-		
+
 		int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewPage+":"+filenameField.getText()+":"+nameField.getText()));
 		}
 	}
-	
+
 	public static String[] requestChangePageData() {
 		//TODO
 		JPanel myPanel = new JPanel(new GridLayout(0, 2));
@@ -207,7 +214,7 @@ public class WCCView {
 		myPanel.add(new JLabel("Dateiname:"));
 		JTextField filenameField = new JTextField(oldFilename, 20);
 		myPanel.add(filenameField);
-		
+
 		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neuen Namen und Dateinamen angeben:", JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageChangeData+":true:"+oldFilename+":"+oldName+":"+filenameField.getText()+":"+nameField.getText()));
@@ -221,7 +228,7 @@ public class WCCView {
 			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageDelete+":true:"+selectedPage));
 		}
 	}
-	
+
 	public static String[] requestNewElementData(String type) {
 		switch (type) {
 		case Element.HEADER:
@@ -236,7 +243,7 @@ public class WCCView {
 			return null;
 		}
 	}
-	
+
 	public static String requestNewHeaderData() {
 		//TODO
 		String result = JOptionPane.showInputDialog(f, "Neue Überschrift eingeben:", "Neue Überschrift", JOptionPane.QUESTION_MESSAGE);
@@ -293,12 +300,12 @@ public class WCCView {
 		Page parent = model.getDataStorage().get(model.getDataStorage().indexOf(parentFilename));
 		Element e = parent.get(elementIndex);
 		int result;
-		
+
 		JPanel myPanel = new JPanel(new BorderLayout());
 		myPanel.add(new JLabel("Neue Daten für Element angeben:"), BorderLayout.NORTH);
 		JPanel centerPanel = new JPanel(new FlowLayout());
 		myPanel.add(centerPanel, BorderLayout.CENTER);
-		
+
 		switch(e.getType()) {
 		case Element.HEADER:
 			JTextField headerField = new JTextField(e.getValue(), 30);
@@ -372,12 +379,12 @@ public class WCCView {
 		//TODO
 		JOptionPane.showMessageDialog(f, message, title, JOptionPane.ERROR_MESSAGE);
 	}
-	
+
 	public static void showIllegalFilenameWarning(String filename) {
 		JOptionPane.showMessageDialog(f, "Der Dateiname \""+filename+"\" ist ungültig oder schon vergeben! \n"
 				+ "Bitte suchen Sie einen anderen aus. \n"
 				+ "Ein Dateiname muss eine Endung besitzen (z.B. '.html'), darf aber sonst keine Sonderzeichen enthalten", 
 				"Dateiname ungültig", JOptionPane.WARNING_MESSAGE);
 	}
-	
+
 }
