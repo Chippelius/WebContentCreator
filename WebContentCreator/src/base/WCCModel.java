@@ -124,7 +124,6 @@ public class WCCModel {
 	public static void link(Observer observer) {
 		observers.add(observer);
 		dataStorage.relink(observer);
-		dataStorage.update(dataStorage, dataStorage);
 	}
 	
 	

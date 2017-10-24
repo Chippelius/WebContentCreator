@@ -98,7 +98,7 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean add(Element e) {
 		boolean b = elements.add(e);
 		e.addObserver(this);
-		update(this, this);
+		update(this, e);
 		return b;
 	}
 
@@ -106,14 +106,14 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public void add(int index, Element element) {
 		elements.add(index, element);
 		element.addObserver(this);
-		update(this, this);
+		update(this, element);
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends Element> c) {
 		boolean b = elements.addAll(c);
 		c.forEach(x -> x.addObserver(this));
-		update(this, this);
+		update(this, c.iterator().next());
 		return b;
 	}
 
@@ -121,7 +121,7 @@ public class Page extends Observable  implements Serializable, List<Element>, Ob
 	public boolean addAll(int index, Collection<? extends Element> c) {
 		boolean b = elements.addAll(index, c);
 		c.forEach(x -> x.addObserver(this));
-		update(this, this);
+		update(this, c.iterator().next());
 		return b;
 	}
 

@@ -31,15 +31,49 @@ public abstract class WCCListItem extends JPanel {
 	public WCCListItem(String topText, String bottomText, String sideText) {
 		super(new BorderLayout());
 		selected = false;
-		setBackground(WCCView.backgroundColor);
-		setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
-		//setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 		addMouseListener(hoverListener);
-		//setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
 		createContent(topText, bottomText, sideText);
 	}
 
+	private void createContent(String topText, String bottomText, String sideText) {
+		setBackground(WCCView.backgroundColor);
+		setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+	
+		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.setBackground(WCCView.transparentColor);
+		topPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+			JPanel topTextContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			topTextContainer.setBackground(WCCView.transparentColor);
+				JLabel topTextLabel = new JLabel(topText, JLabel.LEFT);
+				topTextLabel.setBackground(WCCView.transparentColor);
+			topTextContainer.add(topTextLabel);
+		topPanel.add(topTextContainer, BorderLayout.CENTER);
+		if(sideText != null && !sideText.equals(""))
+			topPanel.add(new JLabel(sideText), BorderLayout.EAST);
+		add(topPanel, BorderLayout.NORTH);
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.setBackground(WCCView.transparentColor);
+		bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 10));
+			JPanel bottomTextContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			bottomTextContainer.setBackground(WCCView.transparentColor);
+				JLabel bottomTextLabel = new JLabel(bottomText, JLabel.LEFT);
+				bottomTextLabel.setBackground(WCCView.transparentColor);
+			bottomTextContainer.add(bottomTextLabel);
+		bottomPanel.add(bottomTextContainer, BorderLayout.CENTER);
+		add(bottomPanel, BorderLayout.CENTER);
+	}
+	
+	public void setSelected(boolean newStatus) {
+		if(newStatus) {
+			selected = true;
+			setBackground(WCCView.selectedColor);
+		} else {
+			selected = false;
+			setBackground(WCCView.backgroundColor);
+		}
+	}
+	
 	private MouseListener hoverListener = new MouseListener() {
 		@Override
 		public void mouseReleased(MouseEvent e) {}
@@ -61,34 +95,5 @@ public abstract class WCCListItem extends JPanel {
 		@Override
 		public void mouseClicked(MouseEvent e) {}
 	};
-	
-	private void createContent(String topText, String bottomText, String sideText) {
-		JPanel topPanel = new JPanel(new BorderLayout());
-		topPanel.setBackground(WCCView.transparentColor);
-			JPanel topTextContainer = new JPanel(new FlowLayout());
-			topTextContainer.setBackground(WCCView.transparentColor);
-				topTextContainer.add(new JLabel(topText));
-		topPanel.add(topTextContainer, BorderLayout.CENTER);
-		if(sideText != null && !sideText.equals(""))
-			topPanel.add(new JLabel(sideText), BorderLayout.EAST);
-		add(topPanel, BorderLayout.NORTH);
-		JPanel bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.setBackground(WCCView.transparentColor);
-			JPanel bottomTextContainer = new JPanel(new FlowLayout());
-			bottomTextContainer.setBackground(WCCView.transparentColor);
-				bottomTextContainer.add(new JLabel(bottomText));
-		bottomPanel.add(bottomTextContainer, BorderLayout.CENTER);
-		add(bottomPanel, BorderLayout.CENTER);
-	}
-	
-	public void setSelected(boolean newStatus) {
-		if(newStatus) {
-			selected = true;
-			setBackground(WCCView.selectedColor);
-		} else {
-			selected = false;
-			setBackground(WCCView.backgroundColor);
-		}
-	}
 	
 }

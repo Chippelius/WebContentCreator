@@ -1,17 +1,19 @@
 package base;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.*;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 import data.*;
 import gui.*;
@@ -33,13 +35,17 @@ public class WCCView {
 	//Runtime variables
 	private static WCCWindow f;
 	private static Observer modelObserver;
+	private static ArrayList<PageListItem> pageListItems;
 	private static Page selectedPage;
+	private static ArrayList<ElementListItem> elementListItems;
 	private static Element selectedElement;
 
 
 	public static void init() {
 		//initiate variables
+		pageListItems = new ArrayList<>();
 		selectedPage = null;
+		elementListItems = new ArrayList<>();
 		selectedElement = null;
 		modelObserver = new Observer() {
 			@Override
@@ -55,9 +61,10 @@ public class WCCView {
 		} catch (Exception e) {e.printStackTrace();}
 		f = new WCCWindow(title);
 
-
 		//Apply settings to window and content
 		applySettings();
+		
+		f.setVisible(true);
 
 		//Make data visible for first time
 		update(WCCModel.getDataStorage(), WCCModel.getDataStorage());
@@ -66,21 +73,25 @@ public class WCCView {
 	public static void setSelectedPage(Page page) {
 		selectedPage = page;
 		//set everything unselected
-		for(int i=0; i<WCCModel.getDataStorage().size(); ++i) {
-			f.getPageListItem(i).setSelected(false);
+		for(PageListItem item : pageListItems) {
+			item.setSelected(false);
 		}
+		//update element-list
+		setSelectedElement(null);
+		elementListItems = new ArrayList<>();
+		f.clearElementList();
 		if(page != null) {
 			//set current page selected
-			f.getPageListItem(WCCModel.getDataStorage().indexOf(page)).setSelected(true);
-			//update element-list
+			pageListItems.get(WCCModel.getDataStorage().indexOf(page)).setSelected(true);
+			
 			for(int i=0; i<page.size(); ++i) {
-				f.addElementListItem(new ElementListItem(page.get(i)));
+				ElementListItem item = new ElementListItem(page.get(i));
+				elementListItems.add(item);
+				f.addElementListItem(item);
 			}
 			//update page-dependent actions
 			Actions.enablePageDependentActions(true);
 		} else {
-			//update element-list
-			f.clearPageList();
 			//update page-dependent actions
 			Actions.enablePageDependentActions(false);
 		}
@@ -93,12 +104,12 @@ public class WCCView {
 	public static void setSelectedElement(Element element) {
 		selectedElement = element;
 		//set everything unselected
-		for(int i=0; i<getSelectedPage().size(); ++i) {
-			f.getElementListItem(i).setSelected(false);
+		for(ElementListItem item : elementListItems) {
+			item.setSelected(false);
 		}
 		if(element != null) {
 			//set current element selected
-			f.getElementListItem(getSelectedPage().indexOf(element)).setSelected(true);
+			elementListItems.get(getSelectedPage().indexOf(element)).setSelected(true);
 			//update element-dependent actions
 			Actions.enableElementDependentActions(true);
 		} else {
@@ -112,41 +123,38 @@ public class WCCView {
 	}
 
 	public static void update(Observable o, Object arg) {
-		//TODO
 		if(WCCModel.getDataStorage().isEditedSinceLastSave()) {
 			f.setTitle("*" + title);
 		} else  {
 			f.setTitle(title);
 		}
 		fetchSettings();
-		pageList = new JPanel();
-		pageList.setLayout(new BoxLayout(pageList, BoxLayout.Y_AXIS));
-		pageList.setBackground(backgroundColor);
-		JScrollPane pagepane = new JScrollPane(pageList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		pagepane.getVerticalScrollBar().setUnitIncrement(16);
-		elementList = new JPanel();
-		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
-		elementList.setBackground(backgroundColor);
-		JScrollPane elementpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		elementpane.getVerticalScrollBar().setUnitIncrement(16);
-		mainPanel.setLeftComponent(pagepane);
-		mainPanel.setRightComponent(elementpane);
-		for(Page p : WCCModel.getDataStorage()) {
-			pageList.add(createPageListItem(p));
-		}
 		if(arg instanceof Page) {
-			selectPage(WCCModel.getDataStorage().indexOf(arg));
-		} else {
-			selectedPage = -1;
-			for(Component c : pageDependentButtons) {
-				c.setEnabled(false);
+			pageListItems = new ArrayList<>();
+			f.clearPageList();
+			for(Page p : WCCModel.getDataStorage()) {
+				PageListItem item = new PageListItem(p);
+				pageListItems.add(item);
+				f.addPageListItem(item);
 			}
+			setSelectedPage((Page) arg);
+		} else if(arg instanceof Element) {
+			setSelectedPage(getSelectedPage());
+			setSelectedElement((Element) arg);
+		} else {
+			pageListItems = new ArrayList<>();
+			f.clearPageList();
+			for(Page p : WCCModel.getDataStorage()) {
+				PageListItem item = new PageListItem(p);
+				pageListItems.add(item);
+				f.addPageListItem(item);
+			}
+			setSelectedPage(null);
 		}
 		applySettings();
 	}
 
 	public static void applySettings() {
-		//TODO
 		f.setLocation(WCCModel.getSettings().getLocation());
 		f.setSize(WCCModel.getSettings().getSize());
 		if(WCCModel.getSettings().isFullscreen()) {
@@ -154,15 +162,14 @@ public class WCCView {
 		} else { 
 			f.setExtendedState(JFrame.NORMAL);
 		}
-		mainPanel.setDividerLocation(WCCModel.getSettings().getDividerLocation());
+		f.setDividerLocation(WCCModel.getSettings().getDividerLocation());
 	}
 
 	public static void fetchSettings() {
-		//TODO
 		WCCModel.getSettings().setLocation(f.getLocation());
 		WCCModel.getSettings().setSize(f.getSize());
 		WCCModel.getSettings().setFullscreen(f.getExtendedState() == JFrame.MAXIMIZED_BOTH);
-		WCCModel.getSettings().setDividerLocation(mainPanel.getDividerLocation());
+		WCCModel.getSettings().setDividerLocation(f.getDividerLocation());
 	}
 
 	public void setVisible(boolean b) {
@@ -171,42 +178,14 @@ public class WCCView {
 
 	public static String requestExportDestination() {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	public static int requestSaveBeforeExit() {
-		//TODO
-		switch(JOptionPane.showConfirmDialog(f, "Es gibt nicht gespeicherte Änderungen. \nVor dem Schließen speichern?")) {
-		case JOptionPane.YES_OPTION:
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.fileSave));
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.fileExit));
-			break;
-		case JOptionPane.NO_OPTION:
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.fileExit+":true"));
-			break;
-		default:
-			//Do nothing
-		}
+		return JOptionPane.showConfirmDialog(f, "Es gibt nicht gespeicherte Änderungen. \nVor dem Schließen speichern?");
 	}
 
-	public static String[] requestNewPageData() {
-		//TODO
-		JPanel myPanel = new JPanel(new GridLayout(0, 2));
-		myPanel.add(new JLabel("Name:"));
-		JTextField nameField = new JTextField(tmpPageName, 20);
-		myPanel.add(nameField);
-		myPanel.add(new JLabel("Dateiname:"));
-		JTextField filenameField = new JTextField(tmpPageFilename, 20);
-		myPanel.add(filenameField);
-
-		int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
-		if (result == JOptionPane.OK_OPTION) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewPage+":"+filenameField.getText()+":"+nameField.getText()));
-		}
-	}
-
-	public static String[] requestChangePageData() {
-		//TODO
+	public static String[] requestNewPageData(String oldFilename, String oldName) {
 		JPanel myPanel = new JPanel(new GridLayout(0, 2));
 		myPanel.add(new JLabel("Name:"));
 		JTextField nameField = new JTextField(oldName, 20);
@@ -215,154 +194,105 @@ public class WCCView {
 		JTextField filenameField = new JTextField(oldFilename, 20);
 		myPanel.add(filenameField);
 
-		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neuen Namen und Dateinamen angeben:", JOptionPane.OK_CANCEL_OPTION);
-		if (result == JOptionPane.OK_OPTION) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageChangeData+":true:"+oldFilename+":"+oldName+":"+filenameField.getText()+":"+nameField.getText()));
+		while(true) {
+			int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.CANCEL_OPTION)
+				return null;
+			if(WCCModel.getDataStorage().isValidFilename(filenameField.getText())) {
+				return new String[] {filenameField.getText(), nameField.getText()};
+			} else {
+				WCCView.showIllegalFilenameWarning(filenameField.getText());
+			}
 		}
 	}
 
 	public static boolean requestDeletePage() {
-		//TODO
-		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass sie die Seite '"+selectedPage+"' löschen wollen?", "Seite löschen?", JOptionPane.YES_NO_OPTION);
-		if(result == JOptionPane.YES_OPTION) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageDelete+":true:"+selectedPage));
-		}
+		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass sie die Seite '"+selectedPage.getFilename()+"' löschen wollen?", "Seite löschen?", JOptionPane.YES_NO_OPTION);
+		return result == JOptionPane.OK_OPTION;
 	}
 
-	public static String[] requestNewElementData(String type) {
+	public static String requestNewElementData(String type, String oldValue) {
 		switch (type) {
 		case Element.HEADER:
-			return new String[] {Element.HEADER, requestNewHeaderData()};
+			return  requestNewHeaderData(oldValue);
 		case Element.SUBHEADER:
-			return new String[] {Element.SUBHEADER, requestNewSubheaderData()};
+			return requestNewSubheaderData(oldValue);
 		case Element.TEXT:
-			return new String[] {Element.TEXT, requestNewTextData()};
+			return requestNewTextData(oldValue);
 		case Element.IMAGE:
-			return new String[] {Element.IMAGE, requestNewImageData()};
+			return requestNewImageData(oldValue);
 		default:
 			return null;
 		}
 	}
 
-	public static String requestNewHeaderData() {
-		//TODO
-		String result = JOptionPane.showInputDialog(f, "Neue Überschrift eingeben:", "Neue Überschrift", JOptionPane.QUESTION_MESSAGE);
-		if(result != null && !result.equals("")) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewHeader+":"+parentFilename+":"+result));
+	public static String requestNewHeaderData(String oldValue) {
+		JPanel myPanel = new JPanel(new GridLayout(0, 1));
+		myPanel.add(new JLabel("Bitte geben Sie die neue Überschrift an:"));
+		JTextField headerField = new JTextField(oldValue, 30);
+		myPanel.add(headerField);
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
+		if(result == JOptionPane.OK_OPTION) {
+			return headerField.getText();
+		} else {
+			return null;
 		}
 	}
 
-	public static String requestNewSubheaderData() {
-		//TODO
-		String result = JOptionPane.showInputDialog(f, "Neue Unterüberschrift eingeben:", "Neue Unterüberschrift", JOptionPane.QUESTION_MESSAGE);
-		if(result != null && !result.equals("")) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewSubheader+":"+parentFilename+":"+result));
+	public static String requestNewSubheaderData(String oldValue) {
+		JPanel myPanel = new JPanel(new GridLayout(0, 1));
+		myPanel.add(new JLabel("Bitte geben Sie die neue Unterüberschrift an:"));
+		JTextField subheaderField = new JTextField(oldValue, 30);
+		myPanel.add(subheaderField);
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
+		if(result == JOptionPane.OK_OPTION) {
+			return subheaderField.getText();
+		} else {
+			return null;
 		}
 	}
 
-	public static String requestNewTextData() {
-		//TODO
-		JPanel myPanel = new JPanel(new FlowLayout());
-		JTextArea textarea = new JTextArea(10, 60);
+	public static String requestNewTextData(String oldValue) {
+		JPanel myPanel = new JPanel(new GridLayout(0, 1));
+		myPanel.add(new JLabel("Bitte geben Sie den neuen Textinhalt an:"));
+		JTextArea textarea = new JTextArea(oldValue, 10, 60);
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
 		myPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neuer Textinhalt", JOptionPane.OK_CANCEL_OPTION);
+		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
 		if(result == JOptionPane.OK_OPTION) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewText+":"+parentFilename+":"+textarea.getText().replaceAll("\n", "<br>\n")));
+			return textarea.getText();
+		} else {
+			return null;
 		}
 	}
 
-	public static String requestNewImageData() {
-		//TODO
-		JPanel myPanel = new JPanel(new FlowLayout());
-		JFileChooser filechooser = new JFileChooser(model.getSettings().getImageChooseLocation());
+	public static String requestNewImageData(String oldValue) {
+		JPanel myPanel = new JPanel(new GridLayout(0, 1));
+		myPanel.add(new JLabel("Bitte geben Sie das neue Bild an:"));
+		JFileChooser filechooser = new JFileChooser(oldValue);
 		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		filechooser.setControlButtonsAreShown(false);
 		filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		filechooser.setMultiSelectionEnabled(false);
 		myPanel.add(filechooser);
-		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
-		if(result == JOptionPane.OK_OPTION) {
+		while(true) {
+			int result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.CANCEL_OPTION) {
+				return null;
+			}
 			if(filechooser.getSelectedFile() != null && filechooser.getSelectedFile().exists()) {
-				model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.pageNewImage+":"+parentFilename+":"+filechooser.getSelectedFile().getAbsolutePath()));
+				return filechooser.getSelectedFile().getAbsolutePath();
 			} else {
-				System.out.println("Datei existiert nicht");
-				JOptionPane.showInternalMessageDialog(f, "Die ausgewählte Datei existiert nicht!", "Datei existiert nicht", JOptionPane.WARNING_MESSAGE);
-				requestNewImageData(parentFilename);
+				showError("Die ausgewählte Datei existiert nicht!", "Datei existiert nicht");
 			}
-		}
-	}
-
-	public static String requestChangeElementData() {
-		//TODO
-		Page parent = model.getDataStorage().get(model.getDataStorage().indexOf(parentFilename));
-		Element e = parent.get(elementIndex);
-		int result;
-
-		JPanel myPanel = new JPanel(new BorderLayout());
-		myPanel.add(new JLabel("Neue Daten für Element angeben:"), BorderLayout.NORTH);
-		JPanel centerPanel = new JPanel(new FlowLayout());
-		myPanel.add(centerPanel, BorderLayout.CENTER);
-
-		switch(e.getType()) {
-		case Element.HEADER:
-			JTextField headerField = new JTextField(e.getValue(), 30);
-			centerPanel.add(headerField);
-			result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.OK_OPTION) {
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+headerField.getText()));
-			}
-			break;
-		case Element.SUBHEADER:
-			JTextField subheaderField = new JTextField(e.getValue(), 30);
-			centerPanel.add(subheaderField);
-			result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.OK_OPTION) {
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+subheaderField.getText()));
-			}
-			break;
-		case Element.TEXT:
-			JTextArea textarea = new JTextArea(e.getValue(), 10, 60);
-			textarea.setLineWrap(true);
-			textarea.setWrapStyleWord(true);
-			centerPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-			result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.OK_OPTION) {
-				controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+textarea.getText().replaceAll("\n", "<br>\n")));
-			}
-			break;
-		case Element.IMAGE:
-			JFileChooser filechooser = new JFileChooser(model.getSettings().getImageChooseLocation());
-			filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			filechooser.setControlButtonsAreShown(false);
-			filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			filechooser.setMultiSelectionEnabled(false);
-			centerPanel.add(filechooser);
-			result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.OK_OPTION) {
-				System.out.println("OK gewählt");
-				if(filechooser.getSelectedFile() != null && filechooser.getSelectedFile().exists()) {
-					System.out.println("Datei existiert: "+filechooser.getSelectedFile().toString());
-					model.getSettings().setImageChooseLocation((filechooser.getSelectedFile().isDirectory())?filechooser.getSelectedFile().getAbsolutePath():filechooser.getSelectedFile().getParent());
-					controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementChangeData+":"+parentFilename+":"+elementIndex+":"+filechooser.getSelectedFile().getAbsolutePath()));
-				} else {
-					System.out.println("Datei existiert nicht");
-					JOptionPane.showMessageDialog(f, "Die ausgewählte Datei existiert nicht!", "Datei existiert nicht", JOptionPane.WARNING_MESSAGE);
-					requestNewImageData(parentFilename);
-				}
-			}
-			break;
 		}
 	}
 
 	public static boolean requestDeleteElement() {
 		//TODO
-		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass Sie Element "+elementIndex+" der Seite '"+filename+"' löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION);
-		if(result == JOptionPane.YES_OPTION) {
-			controller.actionPerformed(new ActionEvent(f, ActionEvent.ACTION_PERFORMED, WCCController.elementDelete+":true:"+filename+":"+elementIndex));
-		}
+		int result = JOptionPane.showConfirmDialog(f, "Sind Sie sicher, dass Sie Element "+getSelectedPage().indexOf(getSelectedElement())+" \nder Seite '"+getSelectedPage().getFilename()+"' löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION);
+		return result == JOptionPane.OK_OPTION;
 	}
 
 	public static void showMessage(String message, String title) {
@@ -383,7 +313,7 @@ public class WCCView {
 	public static void showIllegalFilenameWarning(String filename) {
 		JOptionPane.showMessageDialog(f, "Der Dateiname \""+filename+"\" ist ungültig oder schon vergeben! \n"
 				+ "Bitte suchen Sie einen anderen aus. \n"
-				+ "Ein Dateiname muss eine Endung besitzen (z.B. '.html'), darf aber sonst keine Sonderzeichen enthalten", 
+				+ "Ein Dateiname darf keine Umlaute oder Sonderzeichen (außer Punkten) enthalten.", 
 				"Dateiname ungültig", JOptionPane.WARNING_MESSAGE);
 	}
 

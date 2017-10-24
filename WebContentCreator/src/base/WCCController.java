@@ -1,7 +1,5 @@
 package base;
 
-import data.*;
-
 /*
  * Control part of WebContentCreator (by concept of ModelViewControl)
  * 
@@ -48,42 +46,28 @@ public class WCCController {
 	}
 
 	public static void pageNew() {
-		while(true) {
-			String[] res = WCCView.requestNewPageData();
-			if(res == null)
-				return;
-
-			if(WCCModel.getDataStorage().isValidFilename(res[0])) {
-				WCCModel.getDataStorage().createPage(res[0], res[1]);
-				return;
-			} else {
-				WCCView.showIllegalFilenameWarning(res[0]);
-			}
+		String[] res = WCCView.requestNewPageData(null, null);
+		if(res != null) {
+			WCCModel.getDataStorage().createPage(res[0], res[1]);
 		}
 	}
 
 	public static void pageChangeData() {
-		while(true) {
-			String[] res = WCCView.requestChangePageData();
-			if(res == null)
-				return;
-			if(WCCModel.getDataStorage().isValidFilename(res[0])) {
-				Page p = WCCModel.getDataStorage().get(WCCView.getSelectedPage());
-				p.setFilename(res[0]);
-				p.setName(res[1]);
-				return;
-			} else {
-				WCCView.showIllegalFilenameWarning(res[0]);
-			}
+		String[] res = WCCView.requestNewPageData(WCCView.getSelectedPage().getFilename(), WCCView.getSelectedPage().getName());
+		if(res != null) {
+			WCCView.getSelectedPage().setFilename(res[0]);
+			WCCView.getSelectedPage().setName(res[1]);
 		}
 	}
 
 	public static void pageMoveTop() {
-		WCCModel.getDataStorage().add(0, WCCModel.getDataStorage().remove(WCCView.getSelectedPage()));
+		WCCModel.getDataStorage().remove(WCCView.getSelectedPage());
+		WCCModel.getDataStorage().add(0, WCCView.getSelectedPage());
 	}
 
 	public static void pageMoveBottom() {
-		WCCModel.getDataStorage().add(WCCModel.getDataStorage().remove(WCCView.getSelectedPage()));
+		WCCModel.getDataStorage().remove(WCCView.getSelectedPage());
+		WCCModel.getDataStorage().add(WCCView.getSelectedPage());
 	}
 
 	public static void pageMoveUp() {
@@ -107,52 +91,50 @@ public class WCCController {
 	}
 
 	public static void elementNew(String type) {
-		String[] res = WCCView.requestNewElementData(type);
+		String res = WCCView.requestNewElementData(type, null);
 		if(res != null) {
-			WCCModel.getDataStorage().get(WCCView.getSelectedPage()).createElement(res[0], res[1]);
+			WCCView.getSelectedPage().createElement(type, res);
 		}
 	}
 
 	public static void elementChangeType(String newType) {
-		WCCModel.getDataStorage().get(WCCView.getSelectedPage()).get(WCCView.getSelectedElement()).setType(newType);
+		WCCView.getSelectedElement().setType(newType);
 	}
 
 	public static void elementChangeValue() {
-		String res = WCCView.requestChangeElementData();
+		String res = WCCView.requestNewElementData(WCCView.getSelectedElement().getType(), WCCView.getSelectedElement().getValue());
 		if(res != null) {
-			WCCModel.getDataStorage().get(WCCView.getSelectedPage()).get(WCCView.getSelectedElement()).setValue(res);
+			WCCView.getSelectedElement().setValue(res);
 		}
 	}
 
 	public static void elementMoveTop() {
-		Page p =  WCCModel.getDataStorage().get(WCCView.getSelectedPage());
-		p.add(0, p.remove(WCCView.getSelectedElement()));
+		WCCView.getSelectedPage().remove(WCCView.getSelectedElement());
+		WCCView.getSelectedPage().add(0, WCCView.getSelectedElement());
 	}
 
 	public static void elementMoveBottom() {
-		Page p =  WCCModel.getDataStorage().get(WCCView.getSelectedPage());
-		p.add(p.remove(WCCView.getSelectedElement()));
+		WCCView.getSelectedPage().remove(WCCView.getSelectedElement());
+		WCCView.getSelectedPage().add(WCCView.getSelectedElement());
 	}
 
 	public static void elementMoveUp() {
-		Page p =  WCCModel.getDataStorage().get(WCCView.getSelectedPage());
-		int elementIndex = WCCView.getSelectedElement();
+		int elementIndex = WCCView.getSelectedPage().indexOf(WCCView.getSelectedElement());
 		if(elementIndex > 0) {
-			p.set(elementIndex-1, p.set(elementIndex, p.get(elementIndex-1)));
+			WCCView.getSelectedPage().set(elementIndex-1, WCCView.getSelectedPage().set(elementIndex, WCCView.getSelectedPage().get(elementIndex-1)));
 		}
 	}
 
 	public static void elementMoveDown() {
-		Page p =  WCCModel.getDataStorage().get(WCCView.getSelectedPage());
-		int elementIndex = WCCView.getSelectedElement();
-		if(elementIndex < p.size()-1) {
-			p.set(elementIndex+1, p.set(elementIndex, p.get(elementIndex+1)));
+		int elementIndex = WCCView.getSelectedPage().indexOf(WCCView.getSelectedElement());
+		if(elementIndex < WCCView.getSelectedPage().size()-1) {
+			WCCView.getSelectedPage().set(elementIndex+1, WCCView.getSelectedPage().set(elementIndex, WCCView.getSelectedPage().get(elementIndex+1)));
 		}
 	}
 
 	public static void elementDelete() {
 		if(WCCView.requestDeleteElement()) {
-			WCCModel.getDataStorage().get(WCCView.getSelectedPage()).remove(WCCView.getSelectedElement());
+			WCCView.getSelectedPage().remove(WCCView.getSelectedElement());
 		}
 	}
 

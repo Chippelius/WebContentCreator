@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -20,6 +21,7 @@ public class PageListItem extends WCCListItem {
 		super(createNameText(page.getName()), createFilenameText(page.getFilename()), page.getVersion()+"");
 		reference = page;
 		addMouseListener(clickListener);
+		setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
 	}
 
 	private static String createNameText(String input) {
@@ -27,7 +29,7 @@ public class PageListItem extends WCCListItem {
 	}
 
 	private static String createFilenameText(String input) {
-		return "<html>"+input+"</html>";
+		return "<html>"+input+".html</html>";
 	}
 
 	private MouseListener clickListener = new MouseListener() {

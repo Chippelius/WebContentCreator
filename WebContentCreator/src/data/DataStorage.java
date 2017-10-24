@@ -26,7 +26,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	
 	public DataStorage() {
 		pages = new ArrayList<>();
-		pages.add(new Page("startpage.html", "Home", this));
+		pages.add(new Page("startpage", "Home", this));
 		editedSinceLastSave = true;
 		lastImageChooseLocation = "";
 		lastExportLocation = "";
@@ -38,7 +38,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 			editedSinceLastSave = true;
 		}
 		if(pages.size() == 0) {
-			pages.add(new Page("startpage.html", "Home", this));
+			pages.add(new Page("startpage", "Home", this));
 		}
 		setChanged();
 		notifyObservers(arg);
@@ -79,7 +79,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 		if(s.equalsIgnoreCase("index"))
 			return false;
 		for(char c : s.toLowerCase().toCharArray()) {
-			if(!"abcdefghijklmnopqrstuvwxyzäöüß.".contains("" + c)) {
+			if(!"abcdefghijklmnopqrstuvwxyz.".contains("" + c)) {
 				return false;
 			}
 		}

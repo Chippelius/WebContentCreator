@@ -21,7 +21,6 @@ public class WCCWindow extends JFrame {
 	
 	public WCCWindow(String title) {
 		super(title);
-		
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowListener() {
 			@Override
@@ -61,44 +60,44 @@ public class WCCWindow extends JFrame {
 		return mainPanel;
 	}
 	
-	public void addPageListItem(PageListItem item) {
-		int currentLocation = mainPanel.getDividerLocation();
-		pageList.add(item);
-		mainPanel.setDividerLocation(currentLocation);
+	public void setDividerLocation(int location) {
+		mainPanel.setDividerLocation(location);
 	}
 	
-	public PageListItem getPageListItem(int index) {
-		return (PageListItem) pageList.getComponent(index);
+	public int getDividerLocation() {
+		return mainPanel.getDividerLocation();
+	}
+	
+	public void addPageListItem(PageListItem item) {
+		int currentLocation = getDividerLocation();
+		pageList.add(item);
+		setDividerLocation(currentLocation);
 	}
 	
 	public void clearPageList() {
-		int currentLocation = mainPanel.getDividerLocation();
+		int currentLocation = getDividerLocation();
 		pageList = new JPanel();
 		pageList.setLayout(new BoxLayout(pageList, BoxLayout.Y_AXIS));
 		JScrollPane scrollpane = new JScrollPane(pageList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
 		mainPanel.setLeftComponent(scrollpane);
-		mainPanel.setDividerLocation(currentLocation);
+		setDividerLocation(currentLocation);
 	}
 	
 	public void addElementListItem(ElementListItem item) {
-		int currentLocation = mainPanel.getDividerLocation();
+		int currentLocation = getDividerLocation();
 		elementList.add(item);
-		mainPanel.setDividerLocation(currentLocation);
-	}
-	
-	public ElementListItem getElementListItem(int index) {
-		return (ElementListItem) elementList.getComponent(index);
+		setDividerLocation(currentLocation);
 	}
 	
 	public void clearElementList() {
-		int currentLocation = mainPanel.getDividerLocation();
+		int currentLocation = getDividerLocation();
 		elementList = new JPanel();
 		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
 		JScrollPane scrollpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
 		mainPanel.setRightComponent(scrollpane);
-		mainPanel.setDividerLocation(currentLocation);
+		setDividerLocation(currentLocation);
 	}
 
 	/*
