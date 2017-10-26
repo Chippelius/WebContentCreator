@@ -30,7 +30,7 @@ public class ElementListItem extends WCCListItem {
 		case Element.HEADER:
 			return "<html><body style='width: 220px'><a style='font-size: 20px;'>"+input.replaceAll("\n", "<br>\n")+"</a></body></html>";
 		case Element.SUBHEADER:
-			return "<html><body style='width: 220px'><a style='font-size: 20px;'>"+input.replaceAll("\n", "<br>\n")+"</a></body></html>";
+			return "<html><body style='width: 220px'><a style='font-size: 16px;'>"+input.replaceAll("\n", "<br>\n")+"</a></body></html>";
 		case Element.TEXT:
 			return "<html><body style='width: 220px'><a style='font-size: 12px;'>"+input.replaceAll("\n", "<br>\n")+"</a></body></html>";
 		case Element.IMAGE:

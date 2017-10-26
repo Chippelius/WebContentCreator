@@ -146,7 +146,7 @@ public class WCCController {
 
 	public static void windowCenterDivider() {
 		WCCView.fetchSettings();
-		WCCModel.getSettings().setDividerLocation((WCCModel.getSettings().getSize().width - 5)/2);
+		WCCModel.getSettings().setDividerLocation((WCCView.getMainPanelSize().width - 5)/2);
 		WCCView.applySettings();
 	}
 

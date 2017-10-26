@@ -9,6 +9,8 @@ import java.util.ListIterator;
 import java.util.Observable;
 import java.util.Observer;
 
+import base.WCCModel;
+
 /*
  * Represents a storage file's content.
  * 
@@ -34,7 +36,7 @@ public class DataStorage extends Observable implements Serializable, List<Page>,
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		if(!editedSinceLastSave) {
+		if(!editedSinceLastSave && arg!=WCCModel.class) {
 			editedSinceLastSave = true;
 		}
 		if(pages.size() == 0) {

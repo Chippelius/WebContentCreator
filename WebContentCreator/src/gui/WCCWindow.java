@@ -2,6 +2,9 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.BoxLayout;
@@ -60,6 +63,10 @@ public class WCCWindow extends JFrame {
 		return mainPanel;
 	}
 	
+	public Dimension getMainPanelSize() {
+		return mainPanel.getSize();
+	}
+	
 	public void setDividerLocation(int location) {
 		mainPanel.setDividerLocation(location);
 	}
@@ -80,6 +87,12 @@ public class WCCWindow extends JFrame {
 		pageList.setLayout(new BoxLayout(pageList, BoxLayout.Y_AXIS));
 		JScrollPane scrollpane = new JScrollPane(pageList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
+		scrollpane.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				scrollpane.repaint();
+			}
+		});
 		mainPanel.setLeftComponent(scrollpane);
 		setDividerLocation(currentLocation);
 	}
@@ -96,6 +109,12 @@ public class WCCWindow extends JFrame {
 		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
 		JScrollPane scrollpane = new JScrollPane(elementList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
+		scrollpane.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				scrollpane.repaint();
+			}
+		});
 		mainPanel.setRightComponent(scrollpane);
 		setDividerLocation(currentLocation);
 	}

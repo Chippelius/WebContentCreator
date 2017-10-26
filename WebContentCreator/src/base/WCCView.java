@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -14,6 +15,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import data.*;
 import gui.*;
@@ -171,6 +174,10 @@ public class WCCView {
 		WCCModel.getSettings().setFullscreen(f.getExtendedState() == JFrame.MAXIMIZED_BOTH);
 		WCCModel.getSettings().setDividerLocation(f.getDividerLocation());
 	}
+	
+	public static Dimension getMainPanelSize() {
+		return f.getMainPanelSize();
+	}
 
 	public void setVisible(boolean b) {
 		f.setVisible(b);
@@ -189,14 +196,15 @@ public class WCCView {
 		JPanel myPanel = new JPanel(new GridLayout(0, 2));
 		myPanel.add(new JLabel("Name:"));
 		JTextField nameField = new JTextField(oldName, 20);
+		nameField.addAncestorListener(createFocusListener());
 		myPanel.add(nameField);
 		myPanel.add(new JLabel("Dateiname:"));
 		JTextField filenameField = new JTextField(oldFilename, 20);
 		myPanel.add(filenameField);
 
 		while(true) {
-			int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen für die Seite angeben:", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.CANCEL_OPTION)
+			int result = JOptionPane.showConfirmDialog(f, myPanel, "Bitte einen Dateinamen und einen Namen für die Seite angeben", JOptionPane.OK_CANCEL_OPTION);
+			if(result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION)
 				return null;
 			if(WCCModel.getDataStorage().isValidFilename(filenameField.getText())) {
 				return new String[] {filenameField.getText(), nameField.getText()};
@@ -230,6 +238,7 @@ public class WCCView {
 		JPanel myPanel = new JPanel(new GridLayout(0, 1));
 		myPanel.add(new JLabel("Bitte geben Sie die neue Überschrift an:"));
 		JTextField headerField = new JTextField(oldValue, 30);
+		headerField.addAncestorListener(createFocusListener());
 		myPanel.add(headerField);
 		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
 		if(result == JOptionPane.OK_OPTION) {
@@ -243,6 +252,7 @@ public class WCCView {
 		JPanel myPanel = new JPanel(new GridLayout(0, 1));
 		myPanel.add(new JLabel("Bitte geben Sie die neue Unterüberschrift an:"));
 		JTextField subheaderField = new JTextField(oldValue, 30);
+		subheaderField.addAncestorListener(createFocusListener());
 		myPanel.add(subheaderField);
 		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
 		if(result == JOptionPane.OK_OPTION) {
@@ -253,12 +263,14 @@ public class WCCView {
 	}
 
 	public static String requestNewTextData(String oldValue) {
-		JPanel myPanel = new JPanel(new GridLayout(0, 1));
-		myPanel.add(new JLabel("Bitte geben Sie den neuen Textinhalt an:"));
-		JTextArea textarea = new JTextArea(oldValue, 10, 60);
+		JPanel myPanel = new JPanel(new BorderLayout());
+		JLabel descriptionLabel = new JLabel("Bitte geben Sie den neuen Textinhalt an:");
+		myPanel.add(descriptionLabel, BorderLayout.NORTH);
+		JTextArea textarea = new JTextArea(oldValue, 10, 40);
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
-		myPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+		textarea.addAncestorListener(createFocusListener());
+		myPanel.add(new JScrollPane(textarea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
 		int result = JOptionPane.showConfirmDialog(f, myPanel, "Neue Daten für Element", JOptionPane.OK_CANCEL_OPTION);
 		if(result == JOptionPane.OK_OPTION) {
 			return textarea.getText();
@@ -268,17 +280,18 @@ public class WCCView {
 	}
 
 	public static String requestNewImageData(String oldValue) {
-		JPanel myPanel = new JPanel(new GridLayout(0, 1));
-		myPanel.add(new JLabel("Bitte geben Sie das neue Bild an:"));
+		JPanel myPanel = new JPanel(new BorderLayout());
+		JLabel descriptionLabel = new JLabel("Bitte geben Sie das neue Bild an:", JLabel.LEFT);
+		myPanel.add(descriptionLabel, BorderLayout.NORTH);
 		JFileChooser filechooser = new JFileChooser(oldValue);
 		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		filechooser.setControlButtonsAreShown(false);
 		filechooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		filechooser.setMultiSelectionEnabled(false);
-		myPanel.add(filechooser);
+		myPanel.add(filechooser, BorderLayout.CENTER);
 		while(true) {
 			int result = JOptionPane.showConfirmDialog(f, myPanel, "Neues Bild", JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.CANCEL_OPTION) {
+			if(result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
 				return null;
 			}
 			if(filechooser.getSelectedFile() != null && filechooser.getSelectedFile().exists()) {
@@ -315,6 +328,19 @@ public class WCCView {
 				+ "Bitte suchen Sie einen anderen aus. \n"
 				+ "Ein Dateiname darf keine Umlaute oder Sonderzeichen (außer Punkten) enthalten.", 
 				"Dateiname ungültig", JOptionPane.WARNING_MESSAGE);
+	}
+	
+	private static AncestorListener createFocusListener() {
+		return new AncestorListener() {
+			@Override public void ancestorRemoved(AncestorEvent event) {}
+			@Override public void ancestorMoved(AncestorEvent event) {}
+			@Override
+			public void ancestorAdded(AncestorEvent event) {
+				JComponent component = event.getComponent();
+				component.requestFocusInWindow();
+				component.removeAncestorListener( this );
+			}
+		};
 	}
 
 }

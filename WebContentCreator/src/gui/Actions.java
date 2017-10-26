@@ -89,28 +89,28 @@ public class Actions {
 		}
 	};
 
-	public static final AbstractAction elementNewHeader = new AbstractAction(Language.elementNewHeaderText) {
+	public static final AbstractAction elementNewHeader = new AbstractAction(Language.elementNewHeaderText, Icons.headerIcon) {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			WCCController.elementNew(Element.HEADER);
 		}
 	};
 
-	public static final AbstractAction elementNewSubheader = new AbstractAction(Language.elementNewSubheaderText) {
+	public static final AbstractAction elementNewSubheader = new AbstractAction(Language.elementNewSubheaderText, Icons.subheaderIcon) {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			WCCController.elementNew(Element.SUBHEADER);
 		}
 	};
 
-	public static final AbstractAction elementNewText = new AbstractAction(Language.elementNewTextText) {
+	public static final AbstractAction elementNewText = new AbstractAction(Language.elementNewTextText, Icons.textIcon) {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			WCCController.elementNew(Element.TEXT);
 		}
 	};
 
-	public static final AbstractAction elementNewImage = new AbstractAction(Language.elementNewImageText) {
+	public static final AbstractAction elementNewImage = new AbstractAction(Language.elementNewImageText, Icons.imageIcon) {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			WCCController.elementNew(Element.IMAGE);

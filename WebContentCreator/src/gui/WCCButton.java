@@ -17,6 +17,7 @@ public class WCCButton extends JButton {
 	public WCCButton(Action a) {
 		super(a);
 		setText("");
+		setToolTipText((String) a.getValue(Action.NAME));
 		setFocusable(false);
 		setContentAreaFilled(false);
 		setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

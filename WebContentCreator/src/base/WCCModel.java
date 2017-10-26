@@ -81,7 +81,6 @@ public class WCCModel {
 	public static void loadDataStorage() {
 		if(!dataStorageFile.exists()) {
 			dataStorage = new DataStorage();
-			saveDataStorage();
 		} else {
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dataStorageFile));
@@ -90,7 +89,7 @@ public class WCCModel {
 				for(Observer o : observers) {
 					dataStorage.relink(o);
 				}
-				dataStorage.update(dataStorage, dataStorage);
+				dataStorage.update(dataStorage, WCCModel.class);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -108,13 +107,14 @@ public class WCCModel {
 				dataStorageFile.createNewFile();
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dataStorageFile, false));
 			dataStorage.save();
+			System.out.println(dataStorage.isEditedSinceLastSave());
 			oos.writeObject(dataStorage);
 			oos.flush();
 			oos.close();
 			for(Observer o : observers) {
 				dataStorage.relink(o);
 			}
-			dataStorage.update(dataStorage, dataStorage);
+			dataStorage.update(dataStorage, WCCModel.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
