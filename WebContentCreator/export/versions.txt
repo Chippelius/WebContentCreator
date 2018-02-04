@@ -1,0 +1,16 @@
+f030a202b48a18b521ef1ed65b864473
+\images\startbild.jpg:18df8a15a47a0f12b58eb9e3a436893f
+\index.html:ce4fcc2b0d25612ac455885e0856e172
+\pages\beispiel1.html:a22dc3e64c6e9d4b9ca6192f20fd8a2d
+\pages\bsp10.html:97f1a9253a8909ba6b55a30edb5a8e5f
+\pages\bsp2.html:a5554dff3ec15752483d2e557e8f136f
+\pages\bsp3.html:d725e5f38d1cbd624625a9d76f32537f
+\pages\bsp4.html:fcad16b810f0da7fb06d41a68c355eef
+\pages\bsp5.html:8cbc0800920ff3b12b648558c42638ee
+\pages\bsp6.html:a918a28f4f402b8f1b883a47f724d42f
+\pages\bsp7.html:815c39c410b029eface76580fd15cf30
+\pages\bsp8.html:a32bcee19256e245d808ad41b4f3f1d7
+\pages\bsp9.html:af94eff876d98045464284bc6a6ffcff
+\pages\startpage.html:c02687d65c45a2007f9571576a785690
+\standardize.css:ad8c1b672a48b0b64b52bb31c5642dc3
+\styles.css:e58a2fb63506ce5274d38e4d164b869b

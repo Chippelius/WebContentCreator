@@ -1,0 +1,10 @@
+WindowLocationX=480
+WindowLocationY=270
+WindowWidth=960
+WindowHeight=540
+Maximized=false
+DividerLocation=477
+ImageChooseLocation=D:\Leo\Documents\Meine Websites\Museum\Version 2\Tmp\images
+CurrentlyOpenedFile=D:\Leo\Downloads\test\test4.xml
+SaveLocation=D:\Leo\Downloads\test
+OpenLocation=D:\Leo\Downloads\test

@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0">
+    <title>Fischereimuseum unterer Aischgrund</title>
+    <link rel="stylesheet" href="standardize.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="body clearfix">
+    <div id="sidenav" class="sidenav clearfix" onclick="window.hideMenubar()">
+        <div id="closebutton" class="closebutton clearfix" onclick="window.hideMenubar()">
+            <p class="sidenav-header">Seiten:</p>
+            <div class="closebuttonline turn-45-right"></div>
+            <div class="closebuttonline turn-45-left"></div>
+        </div>
+        <a href="pages/startpage.html" target="frame" class="menuitem">Home</a>
+        <a href="pages/beispiel1.html" target="frame" class="menuitem">Beispiel Station 1</a>
+        <a href="pages/bsp2.html" target="frame" class="menuitem">Beispiel2</a>
+        <a href="pages/bsp3.html" target="frame" class="menuitem">Beispiel3</a>
+        <a href="pages/bsp4.html" target="frame" class="menuitem">Beispiel4</a>
+        <a href="pages/bsp5.html" target="frame" class="menuitem">Beispiel5</a>
+        <a href="pages/bsp6.html" target="frame" class="menuitem">Beispiel6</a>
+        <a href="pages/bsp7.html" target="frame" class="menuitem">Beispiel7</a>
+        <a href="pages/bsp8.html" target="frame" class="menuitem">Beispiel8</a>
+        <a href="pages/bsp9.html" target="frame" class="menuitem">Beispiel9</a>
+        <a href="pages/bsp10.html" target="frame" class="menuitem">Beispiel10</a>
+
+    </div>
+    <div id="canvas" class="canvas" onclick="window.hideMenubar()"></div>
+    <div id="contextbutton" class="contextbutton clearfix" onclick="window.showMenubar()">
+        <div class="contextbuttonline"></div>
+        <div class="contextbuttonline"></div>
+        <div class="contextbuttonline"></div>
+    </div>
+    <div class="i-frame-wrapper"><iframe id="frame" frameborder="0" name="frame" style="height: 100%; width: 100%; border: none;">
+	Der Browser unterstützt keine Inlineframes oder ist aktuell so konfiguriert,
+	dass Inlineframes nicht angezeigt werden. 		</iframe></div>
+
+
+    <script type="text/javascript">
+        var pageDefined = false;
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == "page") {
+                pageDefined = true;
+                document.getElementById("frame").src = pair[1];
+            }
+        }
+        if (pageDefined == false) {
+            document.getElementById("frame").src = "pages/startpage.html";
+        }
+
+        var contextbutton = document.getElementById("contextbutton");
+        var canvas = document.getElementById("canvas");
+        var sidenav = document.getElementById("sidenav");
+        window.showMenubar = function(e) {
+            canvas.style.width = "100%";
+            canvas.style.opacity = "0.8";
+            sidenav.style.left = "0";
+            try {
+                window.AndroidApp.onOpenMenu();
+            } catch (e) {}
+        }
+        window.hideMenubar = function(e) {
+            canvas.style.width = "0";
+            canvas.style.opacity = "0";
+            sidenav.style.left = "-" + getComputedStyle(sidenav).getPropertyValue("width");
+            try {
+                window.AndroidApp.onCloseMenu();
+            } catch (e) {}
+        }
+    </script>
+</body>
+
+</html>
