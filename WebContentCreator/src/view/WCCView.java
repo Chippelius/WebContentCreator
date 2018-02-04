@@ -86,6 +86,8 @@ public class WCCView {
 		WCCController.fileSaveAs.putValue(Action.LARGE_ICON_KEY, Icons.saveAsIcon);
 		WCCController.fileExport.putValue(Action.NAME, Language.fileExportText);
 		WCCController.fileExport.putValue(Action.LARGE_ICON_KEY, Icons.exportIcon);
+		WCCController.fileGenerateQRCodes.putValue(Action.NAME, Language.fileGenerateQRCodesText);
+		WCCController.fileGenerateQRCodes.putValue(Action.LARGE_ICON_KEY, Icons.qrIcon);
 		WCCController.fileExit.putValue(Action.NAME, Language.fileExitText);
 		WCCController.pageNew.putValue(Action.NAME, Language.pageNewText);
 		WCCController.pageNew.putValue(Action.LARGE_ICON_KEY, Icons.pageNewIcon);
@@ -199,7 +201,11 @@ public class WCCView {
 		return JOptionPane.showConfirmDialog(frame, "Die Datei "+fileToSave.getAbsolutePath()+" existiert bereits.\nSoll sie überschrieben werden?", 
 				"Datei überschreiben?", JOptionPane.YES_NO_OPTION)==YES_OPTION;
 	}
-	
+
+	public static String requestQRBaseUrl(String previousURL) {
+		return JOptionPane.showInputDialog(frame, "Basis-URL für die QR-Codes angeben:", previousURL);
+	}
+
 	public static void showInformationMessage(String message) {
 		JOptionPane.showMessageDialog(frame, message, "Info", JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -209,7 +215,7 @@ public class WCCView {
 	}
 
 
-	
+
 
 
 	public static void clearPageList() {
@@ -291,7 +297,7 @@ public class WCCView {
 			return new String[] {filenameField.getText(), nameField.getText()};
 		}
 	}
-	
+
 	public static boolean confirmDeletePage(String filename, String name) {
 		return JOptionPane.showConfirmDialog(frame, "Sind Sie sicher, dass sie die Seite \""+name+"\" ("+filename+") "
 				+ "und alle Inhalte löschen wollen?", "Seite löschen?", 
@@ -351,19 +357,20 @@ public class WCCView {
 	public static String requestNewImageData(String oldValue) {
 		JFileChooser filechooser = new JFileChooser(oldValue);
 		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		filechooser.setAccessory(new ImagePreview(filechooser));
 		filechooser.setMultiSelectionEnabled(false);
-		filechooser.showOpenDialog(frame);
-		if(filechooser.getSelectedFile()==null) {
-				return null;
+		int i = filechooser.showOpenDialog(frame);
+		if(i!=JFileChooser.APPROVE_OPTION||filechooser.getSelectedFile()==null) {
+			return null;
 		} else {
 			return filechooser.getSelectedFile().getAbsolutePath();
 		}
 	}
-	
+
 
 	public static boolean confirmDeleteElement(String filename, String name, String value) {
 		return JOptionPane.showConfirmDialog(frame, "Sind Sie sicher, dass Sie das Element mit dem Inhalt\n\""
-		+value+"\"\nvon der Seite \""+name+"\" ("+filename+") löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
+				+value+"\"\nvon der Seite \""+name+"\" ("+filename+") löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
 	}
 
 	private static AncestorListener createFocusListener() {

@@ -19,6 +19,7 @@ public class WCCToolbar extends JToolBar {
 		add(new WCCButton(WCCController.fileSave));
 		addSeparator();
 		add(new WCCButton(WCCController.fileExport));
+		add(new WCCButton(WCCController.fileGenerateQRCodes));
 		addSeparator();
 		add(new WCCButton(WCCController.pageNew));
 		addSeparator();

@@ -18,6 +18,7 @@ public class WCCModel {
 	//public static final File programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 	public static final File templateFolder = new File(programWorkspace.getAbsolutePath()+"\\template");
 	public static final File exportFolder = new File(programWorkspace.getAbsolutePath()+"\\export");
+	public static final File qrFolder = new File(programWorkspace.getAbsolutePath()+"\\qr");
 	
 	private static final File settingsFile = new File(programWorkspace.getAbsolutePath() + "\\settings.txt");
 	

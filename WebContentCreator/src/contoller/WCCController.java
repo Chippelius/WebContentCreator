@@ -1,5 +1,6 @@
 package contoller;
 
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class WCCController {
 		refreshSavedStateView();
 		refreshProjectView();
 	}
-	
+
 	public static void refreshSavedStateView() {
 		WCCView.setSavedState(WCCModel.getDataStorage().isEditedSinceLastSave());
 		enableSaveDependentActions(WCCModel.getDataStorage().isEditedSinceLastSave());
@@ -188,6 +189,27 @@ public class WCCController {
 		}
 	};
 
+	public static final AbstractAction fileGenerateQRCodes = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				enableQRActions(false);
+				String s = WCCView.requestQRBaseUrl(WCCModel.getSettings().getQRCodeBaseUrl());
+				if(s!=null) {
+					WCCModel.getSettings().setQRCodeBaseUrl(s);
+					QRController.generateQRCodes(WCCModel.qrFolder, s, 750);
+					WCCView.showInformationMessage("QR-Codes erfolgreich generiert.");
+					Desktop.getDesktop().open(WCCModel.qrFolder);
+				}
+			} catch(Exception e1) {
+				e1.printStackTrace();
+				WCCView.showErrorMessage("Error occurred while generating qr-codes: \n\n" + e1.getMessage());
+			} finally {
+				enableQRActions(true);
+			}
+		}
+	};
+
 	public static final AbstractAction fileExit = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -296,7 +318,7 @@ public class WCCController {
 			setSelectedPage(tmp+1);
 		}
 	};
-	
+
 	public static final AbstractAction pageDelete = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -546,7 +568,7 @@ public class WCCController {
 			WCCView.applySettings(WCCModel.getSettings());
 		}
 	};
-	
+
 	public static final AbstractAction windowRestoreDefaultState = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -589,9 +611,13 @@ public class WCCController {
 	public static void enableSaveDependentActions(boolean value) {
 		fileSave.setEnabled(value);
 	}
-	
+
 	public static void enableExportActions(boolean value) {
 		fileExport.setEnabled(value);
+	}
+
+	public static void enableQRActions(boolean value) {
+		fileGenerateQRCodes.setEnabled(value);
 	}
 
 	private static final AbstractAction[] pageDependentActions = new AbstractAction[] {

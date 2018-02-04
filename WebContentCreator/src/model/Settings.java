@@ -30,6 +30,8 @@ public class Settings {
 	private String saveLocation;
 	private static final String openLocationString = "OpenLocation";
 	private String openLocation;
+	private static final String qrCodeBaseUrlString = "QR-CodeBaseURL";
+	private String qrCodeBaseUrl;
 
 	public Settings () {
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
@@ -41,6 +43,7 @@ public class Settings {
 		currentlyOpenedFile = null;
 		saveLocation = "";
 		openLocation = "";
+		qrCodeBaseUrl = "";
 	}
 	
 	public void restoreDefaultWindowState() {
@@ -85,6 +88,10 @@ public class Settings {
 			break;
 		case openLocationString:
 			openLocation = value;
+			break;
+		case qrCodeBaseUrlString:
+			qrCodeBaseUrl = value;
+			break;
 		default:
 			return false;
 		}
@@ -104,6 +111,7 @@ public class Settings {
 		res += currentlyOpenedFileString+separator+currentlyOpenedFile+"\n";
 		res += saveLocationString+separator+saveLocation+"\n";
 		res += openLocationString+separator+openLocation+"\n";
+		res += qrCodeBaseUrlString+separator+qrCodeBaseUrl+"\n";
 		return res;
 	}
 
@@ -171,4 +179,11 @@ public class Settings {
 		this.openLocation = openLocation;
 	}
 
+	public synchronized String getQRCodeBaseUrl() {
+		return qrCodeBaseUrl;
+	}
+	public synchronized void setQRCodeBaseUrl(String baseUrl) {
+		this.qrCodeBaseUrl = baseUrl;
+	}
+	
 }
