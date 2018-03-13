@@ -12,18 +12,30 @@ import model.Page;
 import model.WCCModel;
 import view.WCCView;
 
-/*
- * Control part of WebContentCreator (by concept of ModelViewController)
- * 
+/**
+ * Controller part of WebContentCreator (by concept of ModelViewController) <br>
+ * <br>
  * Created by Leo Köberlein on 09.07.2017
+ * 
+ * @author Leo Köberlein
+ * @see {@link model.WCCModel}, {@link view.WCCView}
  */
 @SuppressWarnings("serial")
 public class WCCController {
 
-	public static final double VERSION = 0.3;
+	//public static final double VERSION = 0.3;
 
+	/**
+	 * The currently selected page/element.<br>
+	 * If no page/element is currently selected, the value is -1.
+	 */
 	private static int selectedPage, selectedElement = -1;
 
+	/**
+	 * Entry point for the program.
+	 * 
+	 * @param args Not currently used.
+	 */
 	public static void main(String[] args) {
 		enablePageDependentActions(false);
 		enableElementDependentActions(false);
@@ -44,16 +56,26 @@ public class WCCController {
 		WCCView.setVisible(true);
 	}
 
+	/**
+	 * Refreshes the view.
+	 */
 	public static void refreshView() {
 		refreshSavedStateView();
 		refreshProjectView();
 	}
 
+	/**
+	 * Refreshes the part of the view that indicates whether the current state of the project is saved or not.
+	 */
 	public static void refreshSavedStateView() {
 		WCCView.setSavedState(WCCModel.getDataStorage().isEditedSinceLastSave());
 		enableSaveDependentActions(WCCModel.getDataStorage().isEditedSinceLastSave());
 	}
 
+	/**
+	 * Refreshes the pagelist. <br>
+	 * Deselects all pages and resets selectedPage to -1.
+	 */
 	public static void refreshProjectView() {
 		selectedPage = -1;
 		WCCView.clearPageList();
@@ -62,6 +84,11 @@ public class WCCController {
 		}
 	}
 
+	/**
+	 * Selects the page with the given index and shows the contained elements.
+	 * 
+	 * @param selectedPage The index of the page to be selected
+	 */
 	public static void setSelectedPage(int selectedPage) {
 		if(selectedPage>=WCCModel.getDataStorage().size())
 			return;
@@ -80,6 +107,11 @@ public class WCCController {
 		}
 	}
 
+	/**
+	 * Selects the element with the given index.
+	 * 
+	 * @param selectedElement The index of the element to be selected
+	 */
 	public static void setSelectedElement(int selectedElement) {
 		if(selectedPage==-1||selectedElement>=WCCModel.getDataStorage().get(selectedPage).size())
 			return;
@@ -97,6 +129,9 @@ public class WCCController {
 
 
 
+	/**
+	 * The action to be fired when a new project should be created.
+	 */
 	public static final AbstractAction fileNew = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -113,6 +148,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when an existing project should be opened.
+	 */
 	public static final AbstractAction fileOpen = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -139,6 +177,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the current state of the project should be saved in the associated file. <br>
+	 * Calls fileSaveAs if this project has no file associated with it (if it hasn't been saved before).
+	 */
 	public static final AbstractAction fileSave = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -156,6 +198,11 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the current state of the project should be saved in a specific file. 
+	 * (Other than the one associated with it.) <br>
+	 * Will ask the user for the destination-file.
+	 */
 	public static final AbstractAction fileSaveAs = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -176,6 +223,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the current state of the project shoud be exportet into html code.
+	 */
 	public static final AbstractAction fileExport = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -189,6 +239,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the qr codes linking to the pages should be created.
+	 */
 	public static final AbstractAction fileGenerateQRCodes = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -210,6 +263,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the current project should be closed. <br>
+	 * Closes the whole program if the project is closed.
+	 */
 	public static final AbstractAction fileExit = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -227,6 +284,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when a new page should be created. <br>
+	 * Will ask the user for required data.
+	 */
 	public static final AbstractAction pageNew = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -245,6 +306,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the attributes of the currently selected page should be modified. <br>
+	 * Will ask the user for new data.
+	 */
 	public static final AbstractAction pageChangeData = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -269,6 +334,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected page should be moved to the top of the pagelist.
+	 */
 	public static final AbstractAction pageMoveTop = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -281,6 +349,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected page should be moved to the bottom of the pagelist.
+	 */
 	public static final AbstractAction pageMoveBottom = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -293,6 +364,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected page should be moved up in the pagelist.
+	 */
 	public static final AbstractAction pageMoveUp = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -306,6 +380,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected page should be moved down in the pagelist.
+	 */
 	public static final AbstractAction pageMoveDown = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -319,6 +396,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected page should be deleted.
+	 */
 	public static final AbstractAction pageDelete = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -331,6 +411,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when a new header should be created at the end of the currently selected page. <br>
+	 * Will ask the user for required data.
+	 */
 	public static final AbstractAction elementNewHeader = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -347,6 +431,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when a new subheader should be created at the end of the currently selected page. <br>
+	 * Will ask the user for required data.
+	 */
 	public static final AbstractAction elementNewSubheader = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -363,6 +451,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when a new text should be created at the end of the currently selected page. <br>
+	 * Will ask the user for required data.
+	 */
 	public static final AbstractAction elementNewText = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -379,6 +471,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when a new image should be created at the end of the currently selected page. <br>
+	 * Will ask the user for required data.
+	 */
 	public static final AbstractAction elementNewImage = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -396,6 +492,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the type of the currently selected element should be changed into header.
+	 */
 	public static final AbstractAction elementChangeToHeader = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -411,6 +510,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the type of the currently selected element should be changed into subheader.
+	 */
 	public static final AbstractAction elementChangeToSubheader = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -426,6 +528,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the type of the currently selected element should be changed into text.
+	 */
 	public static final AbstractAction elementChangeToText = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -441,6 +546,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the type of the currently selected element should be changed into image.
+	 */
 	public static final AbstractAction elementChangeToImage = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -456,6 +564,10 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the value of the currently selected element should be altered. <br>
+	 * Will ask the user for new data.
+	 */
 	public static final AbstractAction elementChangeValue = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -489,6 +601,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected element should be moved to the top of the page.
+	 */
 	public static final AbstractAction elementMoveTop = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -503,6 +618,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected element should be moved to the bottom of the page.
+	 */
 	public static final AbstractAction elementMoveBottom = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -517,6 +635,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected element should be moved up in the page.
+	 */
 	public static final AbstractAction elementMoveUp = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -532,6 +653,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected element should be moved down in the page.
+	 */
 	public static final AbstractAction elementMoveDown = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -547,6 +671,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the currently selected element should be deleted.
+	 */
 	public static final AbstractAction elementDelete = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -561,6 +688,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the window shoud be maximized.
+	 */
 	public static final AbstractAction windowToggleMaximized = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -569,6 +699,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the window should return to the state of the first launch.
+	 */
 	public static final AbstractAction windowRestoreDefaultState = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -577,6 +710,9 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the divider between the pagelist and elementlist shoud be centered.
+	 */
 	public static final AbstractAction windowCenterDivider = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
@@ -585,20 +721,25 @@ public class WCCController {
 		}
 	};
 
+	/**
+	 * The action to be fired when the readme file should be opened.
+	 */
 	public static final AbstractAction helpInfo = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			try {
-				java.awt.Desktop.getDesktop().open(WCCModel.getReadmeFile());
+				java.awt.Desktop.getDesktop().open(WCCModel.openReadmeFile());
 			} catch (IOException e) {e.printStackTrace();}
 		}
 	};
 
+	/**
+	 * The action to be fired when the program should check for updates.
+	 */
 	public static final AbstractAction helpCheckForUpdates = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
-			WCCView.showErrorMessage("Die automatische Update-Funktion ist noch nicht verfügbar.\n"
-					+ "Ihre Version ist: "+VERSION+"\n"
+			WCCView.showErrorMessage("Die automatische Update-Funktion ist noch nicht verfügbar.\n\n"
 					+ "Wenn auf www.github.com/Chippelius/WebContentCreator/ eine neuere Version verfügbar ist,\n"
 					+ "laden Sie diese bitte manuell herunter.");
 		}
@@ -608,14 +749,29 @@ public class WCCController {
 
 
 
+	/**
+	 * Enables or disables actions regarding saving.
+	 * 
+	 * @param value whether save-dependent actions should be enabled or not
+	 */
 	public static void enableSaveDependentActions(boolean value) {
 		fileSave.setEnabled(value);
 	}
 
+	/**
+	 * Enables or disables actions regarding exporting.
+	 * 
+	 * @param value whether export-dependent actions should be enabled or not
+	 */
 	public static void enableExportActions(boolean value) {
 		fileExport.setEnabled(value);
 	}
 
+	/**
+	 * Enables or disables actions regarding qr-code generation.
+	 * 
+	 * @param value whether qr-code-dependent actions should be enabled or not
+	 */
 	public static void enableQRActions(boolean value) {
 		fileGenerateQRCodes.setEnabled(value);
 	}
@@ -633,6 +789,11 @@ public class WCCController {
 			elementNewImage
 	};
 
+	/**
+	 * Enables or disables actions regarding a specific page.
+	 * 
+	 * @param value whether page-dependent actions should be enabled or not
+	 */
 	public static void enablePageDependentActions(boolean value) {
 		for(AbstractAction a : pageDependentActions) {
 			a.setEnabled(value);
@@ -652,6 +813,11 @@ public class WCCController {
 			elementDelete
 	};
 
+	/**
+	 * Enables or disables actions regarding a specific element.
+	 * 
+	 * @param value whether element-dependent actions should be enabled or not
+	 */
 	public static void enableElementDependentActions(boolean value) {
 		for(AbstractAction a : elementDependentActions) {
 			a.setEnabled(value);

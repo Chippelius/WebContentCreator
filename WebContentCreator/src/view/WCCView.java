@@ -28,21 +28,48 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import contoller.WCCController;
 import model.Settings;
 
-/*
- * View part of WebContentCreator (by concept of ModelViewController)
- * 
+/**
+ * View part of WebContentCreator (by concept of ModelViewController) <br>
+ * <br>
  * Created by Leo Köberlein on 09.07.2017
+ * 
+ * @author Leo Köberlein
+ * @see {@link model.WCCModel}, {@link contoller.WCCController}
  */
 public class WCCView {
 
+	/**
+	 * Return value from class method if OK is chosen.
+	 */
 	public static final int OK_OPTION = JOptionPane.OK_OPTION;
+	/**
+	 * Return value from class method if YES is chosen.
+	 */
 	public static final int YES_OPTION = JOptionPane.YES_OPTION;
+	/**
+	 * Return value from class method if NO is chosen.
+	 */
 	public static final int NO_OPTION = JOptionPane.NO_OPTION;
+	/**
+	 * Return value from class method if CANCEL is chosen.
+	 */
 	public static final int CANCEL_OPTION = JOptionPane.CANCEL_OPTION;
 
+	/**
+	 * The background color used for most components.
+	 */
 	public static final Color backgroundColor = new Color(255, 255, 255);
+	/**
+	 * The color that the background of an hover-enabled element changes to when the cursor hovers over it. 
+	 */
 	public static final Color hoverColor = new Color(235, 235, 235);
+	/**
+	 * The background color of an element that is selected.
+	 */
 	public static final Color selectedColor = new Color(210, 210, 210);
+	/**
+	 * A transparent color. Duh.
+	 */
 	public static final Color transparentColor = new Color(0, 0, 0, 0);
 
 	private static JFrame frame;
@@ -50,12 +77,18 @@ public class WCCView {
 	private static JPanel pageListContainer, pageList, elementListContainer, elementList;
 	private static ArrayList<WCCListItem> pages, elements;
 
+	/**
+	 * Initiates the view: <br>
+	 *  - sets the look and feel <br>
+	 *  - initializes the main window <br>
+	 *  - configures the main window
+	 */
 	public static void init() {
 		prepareActions();
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
-		frame = new JFrame(Language.title+" v"+WCCController.VERSION);
+		frame = new JFrame(Language.title);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowListener() {
 			@Override public void windowOpened(WindowEvent e) {}
@@ -75,6 +108,11 @@ public class WCCView {
 		frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
 	}
 
+	/**
+	 * Prepares the controller's actions. (Adds language-specific texts and icons.) 
+	 * 
+	 * @see contoller.WCCController
+	 */
 	private static void prepareActions() {
 		WCCController.fileNew.putValue(Action.NAME, Language.fileNewText);
 		WCCController.fileNew.putValue(Action.LARGE_ICON_KEY, Icons.plusIcon);
@@ -123,6 +161,11 @@ public class WCCView {
 		WCCController.helpCheckForUpdates.putValue(Action.NAME, Language.helpCheckForUpdatesText);
 	}
 
+	/**
+	 * Creates the main window's main panel.
+	 * 
+	 * @return the main window's main panel
+	 */
 	private static JSplitPane createMainPanel() {
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setBackground(backgroundColor);
@@ -158,10 +201,20 @@ public class WCCView {
 		return splitPane;
 	}
 
+	/**
+	 * Shows or hides this Window depending on the value of parameter b. 
+	 * 
+	 * @param b if true, makes the Window visible, otherwise hides the Window.
+	 */
 	public static void setVisible(boolean b) {
 		frame.setVisible(b);
 	}
 
+	/**
+	 * Applies the provided settings to the main window.
+	 * 
+	 * @param s
+	 */
 	public static void applySettings(Settings s) {
 		frame.setLocation(s.getLocation());
 		frame.setSize(s.getSize());
@@ -169,7 +222,11 @@ public class WCCView {
 		splitPane.setDividerLocation(s.getDividerLocation());
 	}
 
-	//Writes settings into reference
+	/**
+	 * Fetches the main window's settings and writes them into the given reference.
+	 * 
+	 * @param s the reference to write the settings into
+	 */
 	public static void fetchSettings(Settings s) {
 		s.setLocation(frame.getLocation());
 		s.setSize(frame.getSize());
@@ -394,6 +451,6 @@ public class WCCView {
 	}
 
 	public static void setSavedState(boolean editedSinceLastSave) {
-		frame.setTitle((editedSinceLastSave?"*":"")+Language.title+" v"+WCCController.VERSION);
+		frame.setTitle((editedSinceLastSave?"*":"")+Language.title);
 	}
 }

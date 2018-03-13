@@ -13,6 +13,14 @@ import model.WCCModel;
 
 public class QRController {
 
+	/**
+	 * Generates *.png image files in the given size that contain QR-codes linking to the pages of the project based on a given base-URL. 
+	 * 
+	 * @param destination the destination folder for the image files
+	 * @param baseURL the URL pointing to where the exported project will be found online
+	 * @param size the size of the image files
+	 * @throws Exception
+	 */
 	public static void generateQRCodes(File destination, String baseURL, int size) throws Exception {
 		String url = baseURL+(baseURL.contains("?")?"&":"?")+"page=";
 
