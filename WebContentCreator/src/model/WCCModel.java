@@ -15,10 +15,7 @@ public class WCCModel {
 	/**
 	 * Points to the programs workspace folder.
 	 */
-	//Only used during development:
 	public static final File programWorkspace = new File("");
-	//For release use:
-	//public static final File programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 	/**
 	 * Points to the programs template folder.
 	 */
