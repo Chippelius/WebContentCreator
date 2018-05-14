@@ -20,6 +20,7 @@ public class Language {
 	public static final String fileSaveText = "Speichern";
 	public static final String fileSaveAsText = "Speichern unter";
 	public static final String fileExportText = "Exportieren";
+	public static final String fileGenerateQRCodesText = "QR-Codes generieren";
 	public static final String fileExitText = "Schlieﬂen";
 	
 	public static final String pageNewText = "Neue Seite";

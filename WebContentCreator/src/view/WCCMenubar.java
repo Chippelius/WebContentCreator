@@ -28,6 +28,7 @@ public class WCCMenubar extends JMenuBar {
 		menuFile.add(new WCCMenuItem(WCCController.fileSaveAs));
 		menuFile.addSeparator();
 		menuFile.add(new WCCMenuItem(WCCController.fileExport));
+		menuFile.add(new WCCMenuItem(WCCController.fileGenerateQRCodes));
 		menuFile.addSeparator();
 		menuFile.add(new WCCMenuItem(WCCController.fileExit));
 		return menuFile;

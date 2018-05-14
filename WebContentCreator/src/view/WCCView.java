@@ -28,21 +28,48 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import contoller.WCCController;
 import model.Settings;
 
-/*
- * View part of WebContentCreator (by concept of ModelViewController)
- * 
+/**
+ * View part of WebContentCreator (by concept of ModelViewController) <br>
+ * <br>
  * Created by Leo Köberlein on 09.07.2017
+ * 
+ * @author Leo Köberlein
+ * @see {@link model.WCCModel}, {@link contoller.WCCController}
  */
 public class WCCView {
 
+	/**
+	 * Return value from class method if OK is chosen.
+	 */
 	public static final int OK_OPTION = JOptionPane.OK_OPTION;
+	/**
+	 * Return value from class method if YES is chosen.
+	 */
 	public static final int YES_OPTION = JOptionPane.YES_OPTION;
+	/**
+	 * Return value from class method if NO is chosen.
+	 */
 	public static final int NO_OPTION = JOptionPane.NO_OPTION;
+	/**
+	 * Return value from class method if CANCEL is chosen.
+	 */
 	public static final int CANCEL_OPTION = JOptionPane.CANCEL_OPTION;
 
+	/**
+	 * The background color used for most components.
+	 */
 	public static final Color backgroundColor = new Color(255, 255, 255);
+	/**
+	 * The color that the background of an hover-enabled element changes to when the cursor hovers over it. 
+	 */
 	public static final Color hoverColor = new Color(235, 235, 235);
+	/**
+	 * The background color of an element that is selected.
+	 */
 	public static final Color selectedColor = new Color(210, 210, 210);
+	/**
+	 * A transparent color. Duh.
+	 */
 	public static final Color transparentColor = new Color(0, 0, 0, 0);
 
 	private static JFrame frame;
@@ -50,12 +77,18 @@ public class WCCView {
 	private static JPanel pageListContainer, pageList, elementListContainer, elementList;
 	private static ArrayList<WCCListItem> pages, elements;
 
+	/**
+	 * Initiates the view: <br>
+	 *  - sets the look and feel <br>
+	 *  - initializes the main window <br>
+	 *  - configures the main window
+	 */
 	public static void init() {
 		prepareActions();
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {e.printStackTrace();}
-		frame = new JFrame(Language.title+" v"+WCCController.VERSION);
+		frame = new JFrame(Language.title);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowListener() {
 			@Override public void windowOpened(WindowEvent e) {}
@@ -75,6 +108,11 @@ public class WCCView {
 		frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
 	}
 
+	/**
+	 * Prepares the controller's actions. (Adds language-specific texts and icons.) 
+	 * 
+	 * @see contoller.WCCController
+	 */
 	private static void prepareActions() {
 		WCCController.fileNew.putValue(Action.NAME, Language.fileNewText);
 		WCCController.fileNew.putValue(Action.LARGE_ICON_KEY, Icons.plusIcon);
@@ -86,6 +124,8 @@ public class WCCView {
 		WCCController.fileSaveAs.putValue(Action.LARGE_ICON_KEY, Icons.saveAsIcon);
 		WCCController.fileExport.putValue(Action.NAME, Language.fileExportText);
 		WCCController.fileExport.putValue(Action.LARGE_ICON_KEY, Icons.exportIcon);
+		WCCController.fileGenerateQRCodes.putValue(Action.NAME, Language.fileGenerateQRCodesText);
+		WCCController.fileGenerateQRCodes.putValue(Action.LARGE_ICON_KEY, Icons.qrIcon);
 		WCCController.fileExit.putValue(Action.NAME, Language.fileExitText);
 		WCCController.pageNew.putValue(Action.NAME, Language.pageNewText);
 		WCCController.pageNew.putValue(Action.LARGE_ICON_KEY, Icons.pageNewIcon);
@@ -121,6 +161,11 @@ public class WCCView {
 		WCCController.helpCheckForUpdates.putValue(Action.NAME, Language.helpCheckForUpdatesText);
 	}
 
+	/**
+	 * Creates the main window's main panel.
+	 * 
+	 * @return the main window's main panel
+	 */
 	private static JSplitPane createMainPanel() {
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setBackground(backgroundColor);
@@ -156,10 +201,20 @@ public class WCCView {
 		return splitPane;
 	}
 
+	/**
+	 * Shows or hides this Window depending on the value of parameter b. 
+	 * 
+	 * @param b if true, makes the Window visible, otherwise hides the Window.
+	 */
 	public static void setVisible(boolean b) {
 		frame.setVisible(b);
 	}
 
+	/**
+	 * Applies the provided settings to the main window.
+	 * 
+	 * @param s
+	 */
 	public static void applySettings(Settings s) {
 		frame.setLocation(s.getLocation());
 		frame.setSize(s.getSize());
@@ -167,7 +222,11 @@ public class WCCView {
 		splitPane.setDividerLocation(s.getDividerLocation());
 	}
 
-	//Writes settings into reference
+	/**
+	 * Fetches the main window's settings and writes them into the given reference.
+	 * 
+	 * @param s the reference to write the settings into
+	 */
 	public static void fetchSettings(Settings s) {
 		s.setLocation(frame.getLocation());
 		s.setSize(frame.getSize());
@@ -199,7 +258,11 @@ public class WCCView {
 		return JOptionPane.showConfirmDialog(frame, "Die Datei "+fileToSave.getAbsolutePath()+" existiert bereits.\nSoll sie überschrieben werden?", 
 				"Datei überschreiben?", JOptionPane.YES_NO_OPTION)==YES_OPTION;
 	}
-	
+
+	public static String requestQRBaseUrl(String previousURL) {
+		return JOptionPane.showInputDialog(frame, "Basis-URL für die QR-Codes angeben:", previousURL);
+	}
+
 	public static void showInformationMessage(String message) {
 		JOptionPane.showMessageDialog(frame, message, "Info", JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -209,7 +272,7 @@ public class WCCView {
 	}
 
 
-	
+
 
 
 	public static void clearPageList() {
@@ -291,7 +354,7 @@ public class WCCView {
 			return new String[] {filenameField.getText(), nameField.getText()};
 		}
 	}
-	
+
 	public static boolean confirmDeletePage(String filename, String name) {
 		return JOptionPane.showConfirmDialog(frame, "Sind Sie sicher, dass sie die Seite \""+name+"\" ("+filename+") "
 				+ "und alle Inhalte löschen wollen?", "Seite löschen?", 
@@ -351,19 +414,20 @@ public class WCCView {
 	public static String requestNewImageData(String oldValue) {
 		JFileChooser filechooser = new JFileChooser(oldValue);
 		filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		filechooser.setAccessory(new ImagePreview(filechooser));
 		filechooser.setMultiSelectionEnabled(false);
-		filechooser.showOpenDialog(frame);
-		if(filechooser.getSelectedFile()==null) {
-				return null;
+		int i = filechooser.showOpenDialog(frame);
+		if(i!=JFileChooser.APPROVE_OPTION||filechooser.getSelectedFile()==null) {
+			return null;
 		} else {
 			return filechooser.getSelectedFile().getAbsolutePath();
 		}
 	}
-	
+
 
 	public static boolean confirmDeleteElement(String filename, String name, String value) {
 		return JOptionPane.showConfirmDialog(frame, "Sind Sie sicher, dass Sie das Element mit dem Inhalt\n\""
-		+value+"\"\nvon der Seite \""+name+"\" ("+filename+") löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
+				+value+"\"\nvon der Seite \""+name+"\" ("+filename+") löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
 	}
 
 	private static AncestorListener createFocusListener() {
@@ -387,6 +451,6 @@ public class WCCView {
 	}
 
 	public static void setSavedState(boolean editedSinceLastSave) {
-		frame.setTitle((editedSinceLastSave?"*":"")+Language.title+" v"+WCCController.VERSION);
+		frame.setTitle((editedSinceLastSave?"*":"")+Language.title);
 	}
 }

@@ -47,7 +47,7 @@ class ExportController implements Runnable {
 			exportIndexFile();
 			exportPages();
 			createVersionsFile();
-
+			
 			WCCView.showInformationMessage("Exportieren erfolgreich angeschlossen.");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -57,7 +57,7 @@ class ExportController implements Runnable {
 		}
 	}
 
-	private void delete(File f) {
+	public static void delete(File f) {
 		if(f.exists()) {
 			if(f.isDirectory()) {
 				for(File file : f.listFiles()) {

@@ -37,7 +37,7 @@
             var pair = vars[i].split("=");
             if (pair[0] == "page") {
                 pageDefined = true;
-                document.getElementById("frame").src = pair[1];
+                document.getElementById("frame").src = "pages/"+pair[1]+".html";
             }
         }
         if (pageDefined == false) {

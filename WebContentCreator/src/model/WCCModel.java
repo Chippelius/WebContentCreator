@@ -12,19 +12,34 @@ import java.io.FileWriter;
  */
 public class WCCModel {
 
-	//Only used during development:
+	/**
+	 * Points to the programs workspace folder.
+	 */
 	public static final File programWorkspace = new File("");
-	//For release use:
-	//public static final File programWorkspace = new File(WCCModel.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+	/**
+	 * Points to the programs template folder.
+	 */
 	public static final File templateFolder = new File(programWorkspace.getAbsolutePath()+"\\template");
+	/**
+	 * Points to the programs export folder.
+	 */
 	public static final File exportFolder = new File(programWorkspace.getAbsolutePath()+"\\export");
-	
+	/**
+	 * Points to the programs qr folder.
+	 */
+	public static final File qrFolder = new File(programWorkspace.getAbsolutePath()+"\\qr");
+
+	/**
+	 * Points to the programs settings file.
+	 */
 	private static final File settingsFile = new File(programWorkspace.getAbsolutePath() + "\\settings.txt");
 	
 	private static Settings settings = null;
 	private static DataStorage dataStorage = null;
 	
-	//Load existing settings or create new ones
+	/**
+	 * Loads existing settings or creates new ones.
+	 */
 	public static void loadSettings() {
 		settings = new Settings();
 		if(settingsFile.exists()) {
@@ -36,15 +51,27 @@ public class WCCModel {
 		}
 	}
 	
+	/**
+	 * Returns the current settings.
+	 * 
+	 * @return the current settings
+	 */
 	public static Settings getSettings() {
 		return settings;
 	}
 	
+	/**
+	 * Sets the current settings.
+	 * 
+	 * @param s the new settings
+	 */
 	public static void setSettings(Settings s) {
 		settings = s;
 	}
 	
-	//Save settings in settings file
+	/**
+	 * Saves settings in the settings file.
+	 */
 	public static void saveSettings() {
 		try {
 			if(!settingsFile.exists()) {
@@ -57,21 +84,40 @@ public class WCCModel {
 		} catch (Exception e) {e.printStackTrace();}
 	}
 	
+	/**
+	 * Creates a new data storage.
+	 */
 	public static void newDataStorage() {
 		settings.setCurrentlyOpenedFile(null);
 		dataStorage = new DataStorage();
 	}
 	
+	/**
+	 * Loads a data storage from the given file.
+	 * 
+	 * @param file the file to load from
+	 * @throws Exception
+	 */
 	public static void loadDataStorage(File file) throws Exception {
 		settings.setCurrentlyOpenedFile(file.getAbsolutePath());
 		dataStorage = XMLHandler.loadDataStorage(file);
 	}
 	
+	/**
+	 * Returns the currently opened project.
+	 * 
+	 * @return the currently opened project
+	 */
 	public static DataStorage getDataStorage() {
 		return dataStorage;
 	}
 	
-	//Save project data
+	/**
+	 * Saves the project's current state into the given file.
+	 * 
+	 * @param file the file to write into
+	 * @throws Exception
+	 */
 	public static void saveDataStorage(File file) throws Exception {
 		settings.setSaveLocation(file.getParent());
 		settings.setCurrentlyOpenedFile(file.getAbsolutePath());
@@ -79,7 +125,12 @@ public class WCCModel {
 		XMLHandler.saveDataStorage(file, dataStorage);
 	}
 	
-	public static File getReadmeFile() {
+	/**
+	 * Returns the readme file.
+	 * 
+	 * @return the readme file
+	 */
+	public static File openReadmeFile() {
 		return new File(programWorkspace.getAbsolutePath()+"\\readme.html");
 	}
 	

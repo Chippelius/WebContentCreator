@@ -18,15 +18,13 @@
         </div>
         <a href="pages/startpage.html" target="frame" class="menuitem">Home</a>
         <a href="pages/beispiel1.html" target="frame" class="menuitem">Beispiel Station 1</a>
-        <a href="pages/bsp2.html" target="frame" class="menuitem">Beispiel2</a>
-        <a href="pages/bsp3.html" target="frame" class="menuitem">Beispiel3</a>
-        <a href="pages/bsp4.html" target="frame" class="menuitem">Beispiel4</a>
-        <a href="pages/bsp5.html" target="frame" class="menuitem">Beispiel5</a>
-        <a href="pages/bsp6.html" target="frame" class="menuitem">Beispiel6</a>
-        <a href="pages/bsp7.html" target="frame" class="menuitem">Beispiel7</a>
-        <a href="pages/bsp8.html" target="frame" class="menuitem">Beispiel8</a>
-        <a href="pages/bsp9.html" target="frame" class="menuitem">Beispiel9</a>
-        <a href="pages/bsp10.html" target="frame" class="menuitem">Beispiel10</a>
+        <a href="pages/beispiel2.html" target="frame" class="menuitem">Beispiel Station 2</a>
+        <a href="pages/beispiel3.html" target="frame" class="menuitem">Beispiel Staion 3</a>
+        <a href="pages/beispiel4.html" target="frame" class="menuitem">Beispiel Station 4</a>
+        <a href="pages/beispiel5.html" target="frame" class="menuitem">Beispiel Station 5</a>
+        <a href="pages/beispiel6.html" target="frame" class="menuitem">Beispiel Station 6</a>
+        <a href="pages/beispiel7.html" target="frame" class="menuitem">Beispiel Station 7</a>
+        <a href="pages/beispiel8.html" target="frame" class="menuitem">Beispiel Station 8</a>
 
     </div>
     <div id="canvas" class="canvas" onclick="window.hideMenubar()"></div>
@@ -48,7 +46,7 @@
             var pair = vars[i].split("=");
             if (pair[0] == "page") {
                 pageDefined = true;
-                document.getElementById("frame").src = pair[1];
+                document.getElementById("frame").src = "pages/"+pair[1]+".html";
             }
         }
         if (pageDefined == false) {
