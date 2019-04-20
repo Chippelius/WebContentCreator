@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-/*
- * Model part of WebContentCreator (by concept of ModelViewController)
- * 
+/**
+ * Model part of WebContentCreator (by concept of ModelViewController)<br>
+ * <br>
  * Created by Leo Köberlein on 09.07.2017
  */
 public class WCCModel {
@@ -28,7 +28,13 @@ public class WCCModel {
 	 * Points to the programs qr folder.
 	 */
 	public static final File qrFolder = new File(programWorkspace.getAbsolutePath()+"\\qr");
+	/**
+	 * Points to the programs readme file.
+	 */
+	public static final File readmeFile = new File(programWorkspace.getAbsolutePath()+"\\readme.html");
 
+	
+	
 	/**
 	 * Points to the programs settings file.
 	 */
@@ -99,8 +105,8 @@ public class WCCModel {
 	 * @throws Exception
 	 */
 	public static void loadDataStorage(File file) throws Exception {
-		settings.setCurrentlyOpenedFile(file.getAbsolutePath());
 		dataStorage = XMLHandler.loadDataStorage(file);
+		settings.setCurrentlyOpenedFile(file.getAbsolutePath());
 	}
 	
 	/**
@@ -123,15 +129,6 @@ public class WCCModel {
 		settings.setCurrentlyOpenedFile(file.getAbsolutePath());
 		dataStorage.setEditedSinceLastSave(false);
 		XMLHandler.saveDataStorage(file, dataStorage);
-	}
-	
-	/**
-	 * Returns the readme file.
-	 * 
-	 * @return the readme file
-	 */
-	public static File openReadmeFile() {
-		return new File(programWorkspace.getAbsolutePath()+"\\readme.html");
 	}
 	
 }

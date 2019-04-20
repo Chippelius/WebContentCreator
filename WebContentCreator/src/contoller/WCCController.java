@@ -2,12 +2,17 @@ package contoller;
 
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.AbstractAction;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-import model.Element;
 import model.Page;
 import model.WCCModel;
 import view.WCCView;
@@ -29,8 +34,8 @@ public class WCCController {
 	 * The currently selected page/element.<br>
 	 * If no page/element is currently selected, the value is -1.
 	 */
-	private static int selectedPage, selectedElement = -1;
-
+	private static int selectedPage = -1;
+	
 	/**
 	 * Entry point for the program.
 	 * 
@@ -38,11 +43,10 @@ public class WCCController {
 	 */
 	public static void main(String[] args) {
 		enablePageDependentActions(false);
-		enableElementDependentActions(false);
-		WCCView.init();
 		WCCModel.loadSettings();
 		WCCView.applySettings(WCCModel.getSettings());
-		if(WCCModel.getSettings().getCurrentlyOpenedFile()==null||WCCModel.getSettings().getCurrentlyOpenedFile().equals("")) {
+		if(WCCModel.getSettings().getCurrentlyOpenedFile()==null
+				||WCCModel.getSettings().getCurrentlyOpenedFile().equals("")) {
 			WCCModel.newDataStorage();
 		} else {
 			try {
@@ -55,74 +59,8 @@ public class WCCController {
 		refreshView();
 		WCCView.setVisible(true);
 	}
+	
 
-	/**
-	 * Refreshes the view.
-	 */
-	public static void refreshView() {
-		refreshSavedStateView();
-		refreshProjectView();
-	}
-
-	/**
-	 * Refreshes the part of the view that indicates whether the current state of the project is saved or not.
-	 */
-	public static void refreshSavedStateView() {
-		WCCView.setSavedState(WCCModel.getDataStorage().isEditedSinceLastSave());
-		enableSaveDependentActions(WCCModel.getDataStorage().isEditedSinceLastSave());
-	}
-
-	/**
-	 * Refreshes the pagelist. <br>
-	 * Deselects all pages and resets selectedPage to -1.
-	 */
-	public static void refreshProjectView() {
-		selectedPage = -1;
-		WCCView.clearPageList();
-		for(Page p : WCCModel.getDataStorage()) {
-			WCCView.addPageListItem(p.getFilename(), p.getName());
-		}
-	}
-
-	/**
-	 * Selects the page with the given index and shows the contained elements.
-	 * 
-	 * @param selectedPage The index of the page to be selected
-	 */
-	public static void setSelectedPage(int selectedPage) {
-		if(selectedPage>=WCCModel.getDataStorage().size())
-			return;
-		WCCController.selectedPage = selectedPage;
-		if(selectedPage>=0) {
-			WCCView.setSelectedPage(selectedPage);
-			WCCView.clearElementList();
-			for(Element e : WCCModel.getDataStorage().get(selectedPage)) {
-				WCCView.addElementListItem(e.getType(), e.getValue());
-			}
-			enablePageDependentActions(true);
-			enableElementDependentActions(false);
-		} else {
-			enablePageDependentActions(false);
-			enableElementDependentActions(false);
-		}
-	}
-
-	/**
-	 * Selects the element with the given index.
-	 * 
-	 * @param selectedElement The index of the element to be selected
-	 */
-	public static void setSelectedElement(int selectedElement) {
-		if(selectedPage==-1||selectedElement>=WCCModel.getDataStorage().get(selectedPage).size())
-			return;
-		WCCController.selectedElement = selectedElement;
-		if(selectedElement>=0) {
-			WCCView.setSelectedElement(selectedElement);
-			enableElementDependentActions(true);
-		} else {
-			enableElementDependentActions(false);
-		}
-	}
 
 
 
@@ -169,7 +107,6 @@ public class WCCController {
 					WCCModel.loadDataStorage(fileToOpen);
 					refreshView();
 				} catch (Exception e) {
-					WCCModel.getSettings().setCurrentlyOpenedFile(null);
 					e.printStackTrace();
 					WCCView.showErrorMessage("Unable to load file "+fileToOpen.getAbsolutePath()+": \n\n" + e.getMessage());
 				}
@@ -189,7 +126,7 @@ public class WCCController {
 			} else {
 				try {
 					WCCModel.saveDataStorage(new File(WCCModel.getSettings().getCurrentlyOpenedFile()));
-					refreshSavedStateView();
+					refreshView();
 				} catch (Exception e) {
 					e.printStackTrace();
 					WCCView.showErrorMessage("Error occurred while saving: \n\n" + e.getMessage());
@@ -213,7 +150,7 @@ public class WCCController {
 				if((!fileToSave.exists())||WCCView.confirmFileOverride(fileToSave)) {
 					try {
 						WCCModel.saveDataStorage(fileToSave);
-						refreshSavedStateView();
+						refreshView();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 						WCCView.showErrorMessage("Error occurred while saving: \n\n" + e1.getMessage());
@@ -301,8 +238,27 @@ public class WCCController {
 					return;
 			}
 			WCCModel.getDataStorage().add(new Page(res[0], res[1]));
+			selectedPage = WCCModel.getDataStorage().size()-1;
 			refreshView();
-			setSelectedPage(WCCModel.getDataStorage().size()-1);
+		}
+	};
+	
+	/**
+	 * The action to be fired when a page should be selected.<br>
+	 * The page-number is passed via the action command. <br>
+	 * If the passed number is -1, every page will be deselected.
+	 */
+	public static final AbstractAction pageSelect = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent a) {
+			try {
+				int pageNr = Integer.parseInt(a.getActionCommand());
+				selectedPage = pageNr;
+				refreshView();
+			} catch(Exception e) {
+				e.printStackTrace();
+				WCCView.showErrorMessage("Error occurred while trying to select a page: \n\n" + e.getMessage());
+			}
 		}
 	};
 
@@ -328,9 +284,7 @@ public class WCCController {
 			}
 			WCCModel.getDataStorage().get(selectedPage).setFilename(res[0]);
 			WCCModel.getDataStorage().get(selectedPage).setName(res[1]);
-			int tmp = selectedPage;
 			refreshView();
-			setSelectedPage(tmp);
 		}
 	};
 
@@ -340,12 +294,12 @@ public class WCCController {
 	public static final AbstractAction pageMoveTop = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1) {
+			if(selectedPage<0) {
 				return;
 			}
 			WCCModel.getDataStorage().add(0, WCCModel.getDataStorage().remove(selectedPage));
+			selectedPage = 0;
 			refreshView();
-			setSelectedPage(0);
 		}
 	};
 
@@ -359,8 +313,8 @@ public class WCCController {
 				return;
 			}
 			WCCModel.getDataStorage().add(WCCModel.getDataStorage().remove(selectedPage));
+			selectedPage = WCCModel.getDataStorage().size()-1;
 			refreshView();
-			setSelectedPage(WCCModel.getDataStorage().size()-1);
 		}
 	};
 
@@ -374,9 +328,8 @@ public class WCCController {
 				return;
 			}
 			WCCModel.getDataStorage().add(selectedPage-1, WCCModel.getDataStorage().remove(selectedPage));
-			int tmp = selectedPage;
+			selectedPage--;
 			refreshView();
-			setSelectedPage(tmp-1);
 		}
 	};
 
@@ -390,9 +343,8 @@ public class WCCController {
 				return;
 			}
 			WCCModel.getDataStorage().add(selectedPage+1, WCCModel.getDataStorage().remove(selectedPage));
-			int tmp = selectedPage;
+			selectedPage++;
 			refreshView();
-			setSelectedPage(tmp+1);
 		}
 	};
 
@@ -407,67 +359,8 @@ public class WCCController {
 				return;
 			}
 			WCCModel.getDataStorage().remove(selectedPage);
+			selectedPage = -1;
 			refreshView();
-		}
-	};
-
-	/**
-	 * The action to be fired when a new header should be created at the end of the currently selected page. <br>
-	 * Will ask the user for required data.
-	 */
-	public static final AbstractAction elementNewHeader = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1) {
-				return;
-			}
-			String res = WCCView.requestNewHeaderData(null);
-			if(res == null)
-				return;
-			WCCModel.getDataStorage().get(selectedPage).add(new Element(Element.HEADER, res));
-			int tmp = selectedPage;
-			refreshView();
-			setSelectedPage(tmp);
-		}
-	};
-
-	/**
-	 * The action to be fired when a new subheader should be created at the end of the currently selected page. <br>
-	 * Will ask the user for required data.
-	 */
-	public static final AbstractAction elementNewSubheader = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1) {
-				return;
-			}
-			String res = WCCView.requestNewSubheaderData(null);
-			if(res == null)
-				return;
-			WCCModel.getDataStorage().get(selectedPage).add(new Element(Element.SUBHEADER, res));
-			int tmp = selectedPage;
-			refreshView();
-			setSelectedPage(tmp);
-		}
-	};
-
-	/**
-	 * The action to be fired when a new text should be created at the end of the currently selected page. <br>
-	 * Will ask the user for required data.
-	 */
-	public static final AbstractAction elementNewText = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1) {
-				return;
-			}
-			String res = WCCView.requestNewTextData(null);
-			if(res == null)
-				return;
-			WCCModel.getDataStorage().get(selectedPage).add(new Element(Element.TEXT, res));
-			int tmp = selectedPage;
-			refreshView();
-			setSelectedPage(tmp);
 		}
 	};
 
@@ -486,205 +379,7 @@ public class WCCController {
 				return;
 			WCCModel.getSettings().setImageChooseLocation(new File(res).getParent());
 			WCCModel.getDataStorage().get(selectedPage).add(new Element(Element.IMAGE, res));
-			int tmp = selectedPage;
 			refreshView();
-			setSelectedPage(tmp);
-		}
-	};
-
-	/**
-	 * The action to be fired when the type of the currently selected element should be changed into header.
-	 */
-	public static final AbstractAction elementChangeToHeader = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).get(selectedElement).setType(Element.HEADER);
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the type of the currently selected element should be changed into subheader.
-	 */
-	public static final AbstractAction elementChangeToSubheader = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).get(selectedElement).setType(Element.SUBHEADER);
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the type of the currently selected element should be changed into text.
-	 */
-	public static final AbstractAction elementChangeToText = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).get(selectedElement).setType(Element.TEXT);
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the type of the currently selected element should be changed into image.
-	 */
-	public static final AbstractAction elementChangeToImage = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).get(selectedElement).setType(Element.IMAGE);
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the value of the currently selected element should be altered. <br>
-	 * Will ask the user for new data.
-	 */
-	public static final AbstractAction elementChangeValue = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			String res = null;
-			switch(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getType()) {
-			case Element.HEADER:
-				res = WCCView.requestNewHeaderData(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue());
-				break;
-			case Element.SUBHEADER:
-				res = WCCView.requestNewSubheaderData(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue());
-				break;
-			case Element.TEXT:
-				res = WCCView.requestNewTextData(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue());
-				break;
-			case Element.IMAGE:
-				String value = WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue();
-				res = WCCView.requestNewImageData(value.substring(0, value.indexOf("\n")));
-				break;
-			}
-			if(res==null)
-				return;
-			WCCModel.getDataStorage().get(selectedPage).get(selectedElement).setValue(res);
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the currently selected element should be moved to the top of the page.
-	 */
-	public static final AbstractAction elementMoveTop = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).add(0, WCCModel.getDataStorage().get(selectedPage).remove(selectedElement));
-			int tmp = selectedPage;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(0);
-		}
-	};
-
-	/**
-	 * The action to be fired when the currently selected element should be moved to the bottom of the page.
-	 */
-	public static final AbstractAction elementMoveBottom = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).add(WCCModel.getDataStorage().get(selectedPage).remove(selectedElement));
-			int tmp = selectedPage;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(0);
-		}
-	};
-
-	/**
-	 * The action to be fired when the currently selected element should be moved up in the page.
-	 */
-	public static final AbstractAction elementMoveUp = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1||selectedElement==0) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).add(selectedElement-1, WCCModel.getDataStorage().get(selectedPage).remove(selectedElement));
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the currently selected element should be moved down in the page.
-	 */
-	public static final AbstractAction elementMoveDown = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1||selectedElement==WCCModel.getDataStorage().get(selectedPage).size()-1) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).add(selectedElement+1, WCCModel.getDataStorage().get(selectedPage).remove(selectedElement));
-			int tmp = selectedPage;
-			int tmp1 = selectedElement;
-			refreshView();
-			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
-		}
-	};
-
-	/**
-	 * The action to be fired when the currently selected element should be deleted.
-	 */
-	public static final AbstractAction elementDelete = new AbstractAction() {
-		@Override
-		public void actionPerformed(ActionEvent a) {
-			if(selectedPage==-1||selectedElement==-1||!WCCView.confirmDeleteElement(WCCModel.getDataStorage().get(selectedPage).getFilename(), 
-					WCCModel.getDataStorage().get(selectedPage).getName(), WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue())) {
-				return;
-			}
-			WCCModel.getDataStorage().get(selectedPage).remove(selectedElement);
-			int tmp = selectedPage;
-			refreshView();
-			setSelectedPage(tmp);
 		}
 	};
 
@@ -728,7 +423,7 @@ public class WCCController {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			try {
-				java.awt.Desktop.getDesktop().open(WCCModel.openReadmeFile());
+				java.awt.Desktop.getDesktop().open(WCCModel.readmeFile);
 			} catch (IOException e) {e.printStackTrace();}
 		}
 	};
@@ -749,12 +444,42 @@ public class WCCController {
 
 
 
+	
+	public static DocumentListener documentlistener = new DocumentListener() {
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			update(e);
+		}
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			update(e);
+		}
+		private void update(DocumentEvent e) {
+			//TODO
+		}
+		@Override public void changedUpdate(DocumentEvent e) {}
+	};
+	public static CaretListener caretListener = new CaretListener() {
+		@Override
+		public void caretUpdate(CaretEvent e) {
+			if(selectedPage != -1) {
+				WCCModel.getDataStorage().get(selectedPage).setCaretPosition(e.getDot());
+			}
+			//TODO
+		}
+	};
+	
+	
+	
+	
+	
+	
 	/**
 	 * Enables or disables actions regarding saving.
 	 * 
 	 * @param value whether save-dependent actions should be enabled or not
 	 */
-	public static void enableSaveDependentActions(boolean value) {
+	private static void enableSaveDependentActions(boolean value) {
 		fileSave.setEnabled(value);
 	}
 
@@ -763,7 +488,7 @@ public class WCCController {
 	 * 
 	 * @param value whether export-dependent actions should be enabled or not
 	 */
-	public static void enableExportActions(boolean value) {
+	private static void enableExportActions(boolean value) {
 		fileExport.setEnabled(value);
 	}
 
@@ -772,7 +497,7 @@ public class WCCController {
 	 * 
 	 * @param value whether qr-code-dependent actions should be enabled or not
 	 */
-	public static void enableQRActions(boolean value) {
+	private static void enableQRActions(boolean value) {
 		fileGenerateQRCodes.setEnabled(value);
 	}
 
@@ -783,9 +508,6 @@ public class WCCController {
 			pageMoveUp,
 			pageMoveDown,
 			pageDelete,
-			elementNewHeader,
-			elementNewSubheader,
-			elementNewText,
 			elementNewImage
 	};
 
@@ -794,34 +516,32 @@ public class WCCController {
 	 * 
 	 * @param value whether page-dependent actions should be enabled or not
 	 */
-	public static void enablePageDependentActions(boolean value) {
+	private static void enablePageDependentActions(boolean value) {
 		for(AbstractAction a : pageDependentActions) {
 			a.setEnabled(value);
 		}
 	}
 
-	private static final AbstractAction[] elementDependentActions = new AbstractAction[] {
-			elementChangeToHeader,
-			elementChangeToSubheader,
-			elementChangeToText,
-			elementChangeToImage,
-			elementChangeValue,
-			elementMoveTop,
-			elementMoveBottom,
-			elementMoveUp,
-			elementMoveDown,
-			elementDelete
-	};
-
-	/**
-	 * Enables or disables actions regarding a specific element.
-	 * 
-	 * @param value whether element-dependent actions should be enabled or not
-	 */
-	public static void enableElementDependentActions(boolean value) {
-		for(AbstractAction a : elementDependentActions) {
-			a.setEnabled(value);
+	
+	
+	
+	
+	
+	private static void refreshView() {
+		WCCView.setSavedState(WCCModel.getDataStorage().isEditedSinceLastSave());
+		enableSaveDependentActions(WCCModel.getDataStorage().isEditedSinceLastSave());
+		
+		WCCView.clearPageList();
+		for(Page p : WCCModel.getDataStorage()) {
+			WCCView.addPageListItem(p.getFilename(), p.getName());
+		}
+		if(selectedPage == -1) {
+			WCCView.clearContentArea();
+		} else {
+			WCCView.setSelectedPage(selectedPage);
+			WCCView.setContent(WCCModel.getDataStorage().get(selectedPage).getContent());
+			WCCView.setCaretPosition(WCCModel.getDataStorage().get(selectedPage).getCaretPosition());
 		}
 	}
-
+	
 }

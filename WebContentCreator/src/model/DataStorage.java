@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-/*
- * Represents a storage file's content.
- * 
+/**
+ * Represents a storage file's content.<br>
+ * <br>
  * Created by Leo Köberlein on 10.07.2017
  */
 public class DataStorage implements List<Page> {
 
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 	private ArrayList<Page> pages;
 	private boolean editedSinceLastSave;
 

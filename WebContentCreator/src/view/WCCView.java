@@ -19,7 +19,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.event.AncestorEvent;
@@ -74,46 +73,19 @@ public class WCCView {
 
 	private static JFrame frame;
 	private static JSplitPane splitPane;
-	private static JPanel pageListContainer, pageList, elementListContainer, elementList;
-	private static ArrayList<WCCListItem> pages, elements;
+	private static JPanel pageListContainer, pageList;
+	private static ArrayList<WCCListItem> pages;
+	private static WCCTextArea contentArea;
 
 	/**
 	 * Initiates the view: <br>
+	 *  - Prepares the controller's actions. (Adds language-specific texts and icons.) <br>
 	 *  - sets the look and feel <br>
 	 *  - initializes the main window <br>
 	 *  - configures the main window
 	 */
-	public static void init() {
-		prepareActions();
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {e.printStackTrace();}
-		frame = new JFrame(Language.title);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowListener() {
-			@Override public void windowOpened(WindowEvent e) {}
-			@Override public void windowIconified(WindowEvent e) {}
-			@Override public void windowDeiconified(WindowEvent e) {}
-			@Override public void windowDeactivated(WindowEvent e) {}
-			@Override public void windowClosing(WindowEvent e) {
-				WCCController.fileExit.actionPerformed(null);
-			}
-			@Override public void windowClosed(WindowEvent e) {}
-			@Override public void windowActivated(WindowEvent e) {}
-		});
-		frame.setBackground(backgroundColor);
-		frame.setJMenuBar(new WCCMenubar());
-		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(new WCCToolbar(), BorderLayout.NORTH);
-		frame.getContentPane().add(createMainPanel(), BorderLayout.CENTER);
-	}
-
-	/**
-	 * Prepares the controller's actions. (Adds language-specific texts and icons.) 
-	 * 
-	 * @see contoller.WCCController
-	 */
-	private static void prepareActions() {
+	static {
+		//Extend UI Properties of Controller's actions
 		WCCController.fileNew.putValue(Action.NAME, Language.fileNewText);
 		WCCController.fileNew.putValue(Action.LARGE_ICON_KEY, Icons.plusIcon);
 		WCCController.fileOpen.putValue(Action.NAME, Language.fileOpenText);
@@ -136,44 +108,47 @@ public class WCCView {
 		WCCController.pageMoveDown.putValue(Action.NAME, Language.pageMoveDownText);
 		WCCController.pageDelete.putValue(Action.NAME, Language.pageDeleteText);
 		WCCController.pageDelete.putValue(Action.LARGE_ICON_KEY, Icons.pageDeleteIcon);
-		WCCController.elementNewHeader.putValue(Action.NAME, Language.elementNewHeaderText);
-		WCCController.elementNewHeader.putValue(Action.LARGE_ICON_KEY, Icons.headerIcon);
-		WCCController.elementNewSubheader.putValue(Action.NAME, Language.elementNewSubheaderText);
-		WCCController.elementNewSubheader.putValue(Action.LARGE_ICON_KEY, Icons.subheaderIcon);
-		WCCController.elementNewText.putValue(Action.NAME, Language.elementNewTextText);
-		WCCController.elementNewText.putValue(Action.LARGE_ICON_KEY, Icons.textIcon);
 		WCCController.elementNewImage.putValue(Action.NAME, Language.elementNewImageText);
 		WCCController.elementNewImage.putValue(Action.LARGE_ICON_KEY, Icons.imageIcon);
-		WCCController.elementChangeToHeader.putValue(Action.NAME, Language.elementChangeToHeaderText);
-		WCCController.elementChangeToSubheader.putValue(Action.NAME, Language.elementChangeToSubheaderText);
-		WCCController.elementChangeToText.putValue(Action.NAME, Language.elementChangeToTextText);
-		WCCController.elementChangeToImage.putValue(Action.NAME, Language.elementChangeToImageText);
-		WCCController.elementChangeValue.putValue(Action.NAME, Language.elementChangeValueText);
-		WCCController.elementMoveTop.putValue(Action.NAME, Language.elementMoveTopText);
-		WCCController.elementMoveBottom.putValue(Action.NAME, Language.elementMoveBottomText);
-		WCCController.elementMoveUp.putValue(Action.NAME, Language.elementMoveUpText);
-		WCCController.elementMoveDown.putValue(Action.NAME, Language.elementMoveDownText);
-		WCCController.elementDelete.putValue(Action.NAME, Language.elementDeleteText);
 		WCCController.windowToggleMaximized.putValue(Action.NAME, Language.windowToggleMaximizedText);
 		WCCController.windowRestoreDefaultState.putValue(Action.NAME, Language.windowRestoreDefaultState);
 		WCCController.windowCenterDivider.putValue(Action.NAME, Language.windowCenterDividerText);
 		WCCController.helpInfo.putValue(Action.NAME, Language.helpInfoText);
 		WCCController.helpCheckForUpdates.putValue(Action.NAME, Language.helpCheckForUpdatesText);
-	}
-
-	/**
-	 * Creates the main window's main panel.
-	 * 
-	 * @return the main window's main panel
-	 */
-	private static JSplitPane createMainPanel() {
+		
+		
+		
+		//Prepare UI itself
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {e.printStackTrace();}
+		frame = new JFrame(Language.title);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowListener() {
+			@Override public void windowOpened(WindowEvent e) {}
+			@Override public void windowIconified(WindowEvent e) {}
+			@Override public void windowDeiconified(WindowEvent e) {}
+			@Override public void windowDeactivated(WindowEvent e) {}
+			@Override public void windowClosing(WindowEvent e) {
+				WCCController.fileExit.actionPerformed(null);
+			}
+			@Override public void windowClosed(WindowEvent e) {}
+			@Override public void windowActivated(WindowEvent e) {}
+		});
+		frame.setBackground(backgroundColor);
+		frame.setJMenuBar(new WCCMenubar());
+		frame.getContentPane().setLayout(new BorderLayout());
+		frame.getContentPane().add(new WCCToolbar(), BorderLayout.NORTH);
+		
+		
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setBackground(backgroundColor);
 		splitPane.setContinuousLayout(true);
 		pageListContainer = new WCCListContainer(new BorderLayout());
 		pageListContainer.setBackground(backgroundColor);
 		pageListContainer.add(new JLabel(), BorderLayout.CENTER);
-		JScrollPane scrollpane = new JScrollPane(pageListContainer, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane scrollpane = new JScrollPane(pageListContainer, 
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
 		scrollpane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
 			@Override
@@ -184,10 +159,11 @@ public class WCCView {
 		});
 		splitPane.setLeftComponent(scrollpane);
 		clearPageList();
-		elementListContainer = new WCCListContainer(new BorderLayout());
+		/*elementListContainer = new WCCListContainer(new BorderLayout());
 		elementListContainer.setBackground(backgroundColor);
 		elementListContainer.add(new JLabel(), BorderLayout.CENTER);
-		JScrollPane scrollpane2 = new JScrollPane(elementListContainer, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane scrollpane2 = new JScrollPane(elementListContainer, 
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane2.getVerticalScrollBar().setUnitIncrement(16);
 		scrollpane2.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
 			@Override
@@ -196,9 +172,14 @@ public class WCCView {
 				frame.repaint();
 			}
 		});
-		splitPane.setRightComponent(scrollpane2);
-		clearElementList();
-		return splitPane;
+		splitPane.setRightComponent(scrollpane2);*/
+		contentArea = new WCCTextArea();
+		contentArea.setBackground(backgroundColor);
+		clearContentArea();
+		contentArea.getDocument().addDocumentListener(WCCController.documentlistener);
+		contentArea.addCaretListener(WCCController.caretListener);
+		splitPane.setRightComponent(contentArea);
+		frame.getContentPane().add(splitPane, BorderLayout.CENTER);
 	}
 
 	/**
@@ -275,6 +256,7 @@ public class WCCView {
 
 
 
+
 	public static void clearPageList() {
 		if(pageList!=null)
 			pageListContainer.remove(pageList);
@@ -288,7 +270,7 @@ public class WCCView {
 	}
 
 	public static void addPageListItem(String filename, String name) {
-		WCCListItem tmp = new WCCListItem(pages.size(), filename, name, true);
+		WCCListItem tmp = new WCCListItem(pages.size(), filename, name);
 		pageList.add(tmp);
 		pages.add(tmp);
 		frame.revalidate();
@@ -304,34 +286,32 @@ public class WCCView {
 		frame.repaint();
 	}
 
-	public static void clearElementList() {
-		if(elementList!=null)
-			elementListContainer.remove(elementList);
-		elements = new ArrayList<>();
-		elementList = new JPanel();
-		elementList.setBackground(backgroundColor);
-		elementList.setLayout(new BoxLayout(elementList, BoxLayout.Y_AXIS));
-		elementListContainer.add(elementList, BorderLayout.NORTH);
+	public static void clearContentArea() {
+		contentArea.setText("");
+		contentArea.setEnabled(false);
 		frame.revalidate();
 		frame.repaint();
 	}
 
-	public static void addElementListItem(String type, String value) {
-		WCCListItem tmp = new WCCListItem(elements.size(), type, value, false);
-		elementList.add(tmp);
-		elements.add(tmp);
+	public static void setContent(String content) {
+		contentArea.setText(content);
+		contentArea.setEnabled(true);
 		frame.revalidate();
 		frame.repaint();
+	}
+	
+	public static String getContent() {
+		return contentArea.getText();
+	}
+	
+	public static void setCaretPosition(int caretPosition) {
+		contentArea.setCaretPosition(caretPosition);
+	}
+	
+	public static int getCaretPosition() {
+		return contentArea.getCaretPosition();
 	}
 
-	public static void setSelectedElement(int selectedElement) {
-		for(WCCListItem item : elements) {
-			item.setSelected(false);
-		}
-		elements.get(selectedElement).setSelected(true);
-		frame.revalidate();
-		frame.repaint();
-	}
 
 
 
@@ -366,8 +346,8 @@ public class WCCView {
 				+ "Bitte suchen Sie einen anderen aus.\n\nEin Dateiname darf keine Umlaute oder Sonderzeichen (außer Punkten) enthalten.",
 				"Dateiname ungültig", JOptionPane.WARNING_MESSAGE);
 	}
-
-	public static String requestNewHeaderData(String oldValue) {
+	
+	/*public static String requestNewHeaderData(String oldValue) {
 		JPanel myPanel = new JPanel(new GridLayout(0, 1));
 		myPanel.add(new JLabel("Bitte geben Sie die neue Überschrift an:"));
 		JTextField headerField = new JTextField(oldValue, 30);
@@ -409,7 +389,7 @@ public class WCCView {
 		} else {
 			return null;
 		}
-	}
+	}*/
 
 	public static String requestNewImageData(String oldValue) {
 		JFileChooser filechooser = new JFileChooser(oldValue);
@@ -424,11 +404,11 @@ public class WCCView {
 		}
 	}
 
-
+	/*
 	public static boolean confirmDeleteElement(String filename, String name, String value) {
 		return JOptionPane.showConfirmDialog(frame, "Sind Sie sicher, dass Sie das Element mit dem Inhalt\n\""
 				+value+"\"\nvon der Seite \""+name+"\" ("+filename+") löschen wollen?", "Element löschen?", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
-	}
+	}*/
 
 	private static AncestorListener createFocusListener() {
 		return new AncestorListener() {
@@ -446,6 +426,8 @@ public class WCCView {
 
 
 
+
+
 	public static int getWidth() {
 		return frame.getContentPane().getWidth();
 	}
@@ -453,4 +435,5 @@ public class WCCView {
 	public static void setSavedState(boolean editedSinceLastSave) {
 		frame.setTitle((editedSinceLastSave?"*":"")+Language.title);
 	}
+	
 }
