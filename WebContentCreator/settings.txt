@@ -6,6 +6,6 @@ Maximized=false
 DividerLocation=477
 ImageChooseLocation=D:\Leo\Documents\Meine Websites\Museum\Version 2\Tmp\images
 CurrentlyOpenedFile=C:\Users\Leo\git\WebContentCreator\WebContentCreator\beispiel.xml
-SaveLocation=D:\Leo\Downloads\test
+SaveLocation=C:\Users\leo\Desktop
 OpenLocation=C:\Users\Leo\git\WebContentCreator\WebContentCreator
 QR-CodeBaseURL=http://www.troublex.de/app/index.html

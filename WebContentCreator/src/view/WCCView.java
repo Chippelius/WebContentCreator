@@ -159,10 +159,10 @@ public class WCCView {
 		});
 		splitPane.setLeftComponent(scrollpane);
 		clearPageList();
-		/*elementListContainer = new WCCListContainer(new BorderLayout());
-		elementListContainer.setBackground(backgroundColor);
-		elementListContainer.add(new JLabel(), BorderLayout.CENTER);
-		JScrollPane scrollpane2 = new JScrollPane(elementListContainer, 
+		contentArea = new WCCTextArea();
+		contentArea.setBackground(backgroundColor);
+		clearContentArea();
+		JScrollPane scrollpane2 = new JScrollPane(contentArea, 
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollpane2.getVerticalScrollBar().setUnitIncrement(16);
 		scrollpane2.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
@@ -172,13 +172,7 @@ public class WCCView {
 				frame.repaint();
 			}
 		});
-		splitPane.setRightComponent(scrollpane2);*/
-		contentArea = new WCCTextArea();
-		contentArea.setBackground(backgroundColor);
-		clearContentArea();
-		contentArea.getDocument().addDocumentListener(WCCController.documentlistener);
-		contentArea.addCaretListener(WCCController.caretListener);
-		splitPane.setRightComponent(contentArea);
+		splitPane.setRightComponent(scrollpane2);
 		frame.getContentPane().add(splitPane, BorderLayout.CENTER);
 	}
 

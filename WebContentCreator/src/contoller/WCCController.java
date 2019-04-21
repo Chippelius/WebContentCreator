@@ -6,11 +6,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.AbstractAction;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
 import model.Page;
 import model.WCCModel;
 import view.WCCView;
@@ -251,8 +246,7 @@ public class WCCController {
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			try {
-				int pageNr = Integer.parseInt(a.getActionCommand());
-				selectedPage = pageNr;
+				selectedPage = Integer.parseInt(a.getActionCommand());
 				refreshView();
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -458,36 +452,6 @@ public class WCCController {
 		}
 	};
 
-
-
-
-
-	
-	public static DocumentListener documentlistener = new DocumentListener() {
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			update(e);
-		}
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			update(e);
-		}
-		private void update(DocumentEvent e) {
-			//TODO
-			
-		}
-		@Override public void changedUpdate(DocumentEvent e) {}
-	};
-	public static CaretListener caretListener = new CaretListener() {
-		@Override
-		public void caretUpdate(CaretEvent e) {
-			if(selectedPage != -1) {
-				WCCModel.getDataStorage().get(selectedPage).setCaretPosition(e.getDot());
-			}
-			//TODO
-		}
-	};
-	
 	
 	
 	
@@ -556,8 +520,10 @@ public class WCCController {
 		}
 		enableContentListeners = false;
 		if(selectedPage == -1) {
+			enablePageDependentActions(false);
 			WCCView.clearContentArea();
 		} else {
+			enablePageDependentActions(true);
 			WCCView.setSelectedPage(selectedPage);
 			WCCView.setContent(WCCModel.getDataStorage().get(selectedPage).getContent());
 			WCCView.setCaretPosition(WCCModel.getDataStorage().get(selectedPage).getCaretPosition());

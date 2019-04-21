@@ -53,20 +53,21 @@ class XMLHandler {
 						org.w3c.dom.Element currentElement = (org.w3c.dom.Element) elements.item(j);
 						switch(currentElement.getAttribute(TYPE_ATTRIBUTE)) {
 						case "Überschrift":
-							p.setContent(p.getContent()+"\n# "+currentElement.getTextContent());
+							p.setContent(p.getContent()+"# "+currentElement.getTextContent());
 							break;
 						case "Unterüberschrift":
-							p.setContent(p.getContent()+"\n## "+currentElement.getTextContent());
+							p.setContent(p.getContent()+"## "+currentElement.getTextContent());
 							break;
 						case "Textinhalt":
-							p.setContent(p.getContent()+"\n"+currentElement.getTextContent());
+							p.setContent(p.getContent()+currentElement.getTextContent());
 							break;
 						case "Bild":
-							p.setContent(p.getContent()+"\n![Grafik]("+currentElement.getTextContent()+")");
+							p.setContent(p.getContent()+"![Grafik]("+currentElement.getTextContent()+")");
 							break;
 						default: 
-							p.setContent(p.getContent()+"\n"+currentElement.getTextContent());
+							p.setContent(p.getContent()+currentElement.getTextContent());
 						}
+						p.setContent(p.getContent()+"\n\n");
 					}
 				}
 			}

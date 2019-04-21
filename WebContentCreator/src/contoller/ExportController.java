@@ -3,11 +3,9 @@ package contoller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.util.LinkedList;
@@ -22,17 +20,12 @@ class ExportController implements Runnable {
 	private static final File indexFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\index.html");
 	private static final File menuItemFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\menuitem.html");
 	private static final File pageFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\page.html");
-	private static final File headerFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\header.html");
-	private static final File subheaderFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\subheader.html");
-	private static final File textFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\textcontent.html");
-	private static final File imageFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\image.html");
 
 	private static final String menuItems = "<!--menuitems-->";
 	private static final String firstFilename = "<!--firstFilename-->";
 	private static final String filename = "<!--filename-->";
 	private static final String name = "<!--name-->";
 	private static final String elements = "<!--elements-->";
-	private static final String value = "<!--value-->";
 	
 	private MessageDigest masterDigest;
 	private MessageDigest singleDigest;
@@ -119,6 +112,8 @@ class ExportController implements Runnable {
 	}
 
 	private void exportPages() throws Exception {
+		File pagesFolder = new File(WCCModel.exportFolder.getAbsolutePath()+"\\pages");
+		pagesFolder.mkdir();
 		for(Page p : WCCModel.getDataStorage()) {
 			File f = new File(WCCModel.exportFolder.getAbsolutePath()+"\\pages\\"+p.getFilename()+".html");
 			f.createNewFile();
@@ -132,28 +127,12 @@ class ExportController implements Runnable {
 					pw.println(line.substring(line.indexOf(name)+name.length()));
 				} else if(line.contains(elements)) {
 					pw.print(line.substring(0, line.indexOf(elements)));
-					for(Element e : p) {
-						if(e.isHeader()) {
-							pw.print(getHeaderText().replace(value, HtmlEscape.escape(e.getValue())));
-						} else if(e.isSubheader()) {
-							pw.print(getSubheaderText().replace(value, HtmlEscape.escape(e.getValue())));
-						} else if(e.isImage()) {
-							File imageFile = new File(e.getValue());
-							File newImageFile = new File(WCCModel.exportFolder.getAbsolutePath()+"\\images\\"+imageFile.getName());
-							pw.print(getImageText().replace(value, imageFile.getName()));
-							if(!newImageFile.exists()) {
-								InputStream is = new FileInputStream(imageFile);
-								OutputStream os = new FileOutputStream(newImageFile);
-								byte[] buffer = new byte[1024];
-								for(int i; (i = is.read(buffer)) > 0; os.write(buffer, 0, i));
-								is.close();
-								os.flush();
-								os.close();
-							}
-						} else {
-							pw.print(getTextText().replace(value, HtmlEscape.escape(e.getValue())));
-						}
-					}
+					
+					
+					pw.print(p.getContent());
+					
+					
+					
 					pw.println(line.substring(line.indexOf(elements)+elements.length()));
 				} else {
 					pw.println(line);
@@ -163,38 +142,6 @@ class ExportController implements Runnable {
 			pw.flush();
 			pw.close();
 		}
-	}
-
-	private String getHeaderText() throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader(headerFile));
-		String res = "";
-		for(String s; (s=br.readLine())!=null; res+=s+"\n");
-		br.close();
-		return res;
-	}
-
-	private String getSubheaderText() throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader(subheaderFile));
-		String res = "";
-		for(String s; (s=br.readLine())!=null; res+=s+"\n");
-		br.close();
-		return res;
-	}
-
-	private String getTextText() throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader(textFile));
-		String res = "";
-		for(String s; (s=br.readLine())!=null; res+=s+"\n");
-		br.close();
-		return res;
-	}
-
-	private String getImageText() throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader(imageFile));
-		String res = "";
-		for(String s; (s=br.readLine())!=null; res+=s+"\n");
-		br.close();
-		return res;
 	}
 
 	private void createVersionsFile() throws Exception {
