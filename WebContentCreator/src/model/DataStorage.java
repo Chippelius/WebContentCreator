@@ -19,7 +19,7 @@ public class DataStorage implements List<Page> {
 
 	public DataStorage() {
 		pages = new ArrayList<>();
-		editedSinceLastSave = true;
+		editedSinceLastSave = false;
 	}
 
 	public boolean isValidFilename(String s) {
@@ -30,6 +30,10 @@ public class DataStorage implements List<Page> {
 				return false;
 			}
 		}
+		return true;
+	}
+	
+	public boolean isUnusedFilename(String s) {
 		for(Page p : pages) {
 			if(p.getFilename().equals(s))
 				return false;
@@ -57,16 +61,17 @@ public class DataStorage implements List<Page> {
 
 	@Override
 	public boolean add(Page p) {
-		if(!isValidFilename(p.getFilename())) {
+		if(isValidFilename(p.getFilename()) && isUnusedFilename(p.getFilename())) {
+			editedSinceLastSave = true;
+			return pages.add(p);
+		} else {
 			return false;
 		}
-		editedSinceLastSave = true;
-		return pages.add(p);
 	}
 
 	@Override
 	public void add(int index, Page p) {
-		if(!isValidFilename(p.getFilename()))
+		if(!(isValidFilename(p.getFilename()) && isUnusedFilename(p.getFilename())))
 			throw new IllegalArgumentException("filename must not contain special characters!");
 		editedSinceLastSave = true;
 		pages.add(index, p);
@@ -75,7 +80,7 @@ public class DataStorage implements List<Page> {
 	@Override
 	public boolean addAll(Collection<? extends Page> c) {
 		for(Page p : c) {
-			if(!isValidFilename(p.getFilename()))
+			if(!(isValidFilename(p.getFilename()) && isUnusedFilename(p.getFilename())))
 				return false;
 		}
 		editedSinceLastSave = true;
@@ -85,7 +90,7 @@ public class DataStorage implements List<Page> {
 	@Override
 	public boolean addAll(int index, Collection<? extends Page> c) {
 		for(Page p : c) {
-			if(!isValidFilename(p.getFilename()))
+			if(!(isValidFilename(p.getFilename()) && isUnusedFilename(p.getFilename())))
 				return false;
 		}
 		editedSinceLastSave = true;

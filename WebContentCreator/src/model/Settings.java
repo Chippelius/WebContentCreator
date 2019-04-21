@@ -40,7 +40,7 @@ public class Settings {
 		maximized = false;
 		dividerLocation = (windowSize.width - 5)/2;
 		imageChooseLocation = "";
-		currentlyOpenedFile = null;
+		currentlyOpenedFile = "";
 		saveLocation = "";
 		openLocation = "";
 		qrCodeBaseUrl = "";

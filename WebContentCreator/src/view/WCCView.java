@@ -131,9 +131,13 @@ public class WCCView {
 		WCCController.pageNew.putValue(Action.LARGE_ICON_KEY, Icons.pageNewIcon);
 		WCCController.pageChangeData.putValue(Action.NAME, Language.pageChangeDataText);
 		WCCController.pageMoveTop.putValue(Action.NAME, Language.pageMoveTopText);
+		WCCController.pageMoveTop.putValue(Action.LARGE_ICON_KEY, Icons.moveTopIcon);
 		WCCController.pageMoveBottom.putValue(Action.NAME, Language.pageMoveBottomText);
+		WCCController.pageMoveBottom.putValue(Action.LARGE_ICON_KEY, Icons.moveBottomIcon);
 		WCCController.pageMoveUp.putValue(Action.NAME, Language.pageMoveUpText);
+		WCCController.pageMoveUp.putValue(Action.LARGE_ICON_KEY, Icons.moveUpIcon);
 		WCCController.pageMoveDown.putValue(Action.NAME, Language.pageMoveDownText);
+		WCCController.pageMoveDown.putValue(Action.LARGE_ICON_KEY, Icons.moveDownIcon);
 		WCCController.pageDelete.putValue(Action.NAME, Language.pageDeleteText);
 		WCCController.pageDelete.putValue(Action.LARGE_ICON_KEY, Icons.pageDeleteIcon);
 		WCCController.elementNewHeader.putValue(Action.NAME, Language.elementNewHeaderText);
@@ -150,9 +154,13 @@ public class WCCView {
 		WCCController.elementChangeToImage.putValue(Action.NAME, Language.elementChangeToImageText);
 		WCCController.elementChangeValue.putValue(Action.NAME, Language.elementChangeValueText);
 		WCCController.elementMoveTop.putValue(Action.NAME, Language.elementMoveTopText);
+		WCCController.elementMoveTop.putValue(Action.LARGE_ICON_KEY, Icons.moveTopIcon);
 		WCCController.elementMoveBottom.putValue(Action.NAME, Language.elementMoveBottomText);
+		WCCController.elementMoveBottom.putValue(Action.LARGE_ICON_KEY, Icons.moveBottomIcon);
 		WCCController.elementMoveUp.putValue(Action.NAME, Language.elementMoveUpText);
+		WCCController.elementMoveUp.putValue(Action.LARGE_ICON_KEY, Icons.moveUpIcon);
 		WCCController.elementMoveDown.putValue(Action.NAME, Language.elementMoveDownText);
+		WCCController.elementMoveDown.putValue(Action.LARGE_ICON_KEY, Icons.moveDownIcon);
 		WCCController.elementDelete.putValue(Action.NAME, Language.elementDeleteText);
 		WCCController.windowToggleMaximized.putValue(Action.NAME, Language.windowToggleMaximizedText);
 		WCCController.windowRestoreDefaultState.putValue(Action.NAME, Language.windowRestoreDefaultState);
@@ -174,7 +182,7 @@ public class WCCView {
 		pageListContainer.setBackground(backgroundColor);
 		pageListContainer.add(new JLabel(), BorderLayout.CENTER);
 		JScrollPane scrollpane = new JScrollPane(pageListContainer, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollpane.getVerticalScrollBar().setUnitIncrement(16);
+		scrollpane.getVerticalScrollBar().setUnitIncrement(50);
 		scrollpane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -188,7 +196,7 @@ public class WCCView {
 		elementListContainer.setBackground(backgroundColor);
 		elementListContainer.add(new JLabel(), BorderLayout.CENTER);
 		JScrollPane scrollpane2 = new JScrollPane(elementListContainer, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollpane2.getVerticalScrollBar().setUnitIncrement(16);
+		scrollpane2.getVerticalScrollBar().setUnitIncrement(50);
 		scrollpane2.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -216,9 +224,13 @@ public class WCCView {
 	 * @param s
 	 */
 	public static void applySettings(Settings s) {
-		frame.setLocation(s.getLocation());
-		frame.setSize(s.getSize());
-		frame.setExtendedState(s.isMaximized()?JFrame.MAXIMIZED_BOTH:JFrame.NORMAL);
+		if(s.isMaximized()) {
+			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		} else {
+			frame.setExtendedState(JFrame.NORMAL);
+			frame.setLocation(s.getLocation());
+			frame.setSize(s.getSize());
+		}
 		splitPane.setDividerLocation(s.getDividerLocation());
 	}
 
@@ -230,7 +242,7 @@ public class WCCView {
 	public static void fetchSettings(Settings s) {
 		s.setLocation(frame.getLocation());
 		s.setSize(frame.getSize());
-		s.setMaximized(frame.getExtendedState() == JFrame.MAXIMIZED_BOTH);
+		s.setMaximized((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH);
 		s.setDividerLocation(splitPane.getDividerLocation());
 	}
 

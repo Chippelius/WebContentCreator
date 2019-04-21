@@ -120,6 +120,10 @@ class ExportController implements Runnable {
 	}
 
 	private void exportPages() throws Exception {
+		File pagesFolder = new File(WCCModel.exportFolder.getAbsolutePath()+"\\pages");
+		pagesFolder.mkdir();
+		File imagesFolder = new File(WCCModel.exportFolder.getAbsolutePath()+"\\images");
+		imagesFolder.mkdir();
 		for(Page p : WCCModel.getDataStorage()) {
 			File f = new File(WCCModel.exportFolder.getAbsolutePath()+"\\pages\\"+p.getFilename()+".html");
 			f.createNewFile();

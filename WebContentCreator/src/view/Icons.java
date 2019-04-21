@@ -20,6 +20,10 @@ public class Icons {
 	public static final ImageIcon subheaderIcon = new ImageIcon("icons/subheaderIcon.png");
 	public static final ImageIcon textIcon = new ImageIcon("icons/textIcon.png");
 	public static final ImageIcon imageIcon = new ImageIcon("icons/imageIcon.png");
+	public static final ImageIcon moveUpIcon = new ImageIcon("icons/moveUpIcon.png");
+	public static final ImageIcon moveDownIcon = new ImageIcon("icons/moveDownIcon.png");
+	public static final ImageIcon moveTopIcon = new ImageIcon("icons/moveTopIcon.png");
+	public static final ImageIcon moveBottomIcon = new ImageIcon("icons/moveBottomIcon.png");
 	public static final ImageIcon qrIcon = new ImageIcon("icons/qrIcon.png");
 	
 }

@@ -294,7 +294,7 @@ public class WCCController {
 			String[] res = WCCView.requestNewPageData(null, null);
 			if(res==null)
 				return;
-			while(!WCCModel.getDataStorage().isValidFilename(res[0])) {
+			while(!(WCCModel.getDataStorage().isValidFilename(res[0]) && WCCModel.getDataStorage().isUnusedFilename(res[0]))) {
 				WCCView.showErrorInvalidFilename(res[0]);
 				res = WCCView.requestNewPageData(res[0], res[1]);
 				if(res==null)
@@ -320,7 +320,7 @@ public class WCCController {
 					WCCModel.getDataStorage().get(selectedPage).getName());
 			if(res==null)
 				return;
-			while(!WCCModel.getDataStorage().isValidFilename(res[0])) {
+			while(!(WCCModel.getDataStorage().isValidFilename(res[0]) && (WCCModel.getDataStorage().isUnusedFilename(res[0]) || WCCModel.getDataStorage().get(selectedPage).getFilename().equals(res[0])))) {
 				WCCView.showErrorInvalidFilename(res[0]);
 				res = WCCView.requestNewPageData(res[0], res[1]);
 				if(res==null)
@@ -586,8 +586,10 @@ public class WCCController {
 				res = WCCView.requestNewTextData(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue());
 				break;
 			case Element.IMAGE:
-				String value = WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue();
-				res = WCCView.requestNewImageData(value.substring(0, value.indexOf("\n")));
+				//String value = WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue();
+				//res = WCCView.requestNewImageData(value.substring(0, value.indexOf("\n")));
+				System.out.println(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue());
+				res = WCCView.requestNewImageData(WCCModel.getDataStorage().get(selectedPage).get(selectedElement).getValue());
 				break;
 			}
 			if(res==null)
@@ -631,7 +633,7 @@ public class WCCController {
 			int tmp = selectedPage;
 			refreshView();
 			setSelectedPage(tmp);
-			setSelectedElement(0);
+			setSelectedElement(WCCModel.getDataStorage().get(selectedPage).size()-1);
 		}
 	};
 
@@ -649,7 +651,7 @@ public class WCCController {
 			int tmp1 = selectedElement;
 			refreshView();
 			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
+			setSelectedElement(tmp1-1);
 		}
 	};
 
@@ -667,7 +669,7 @@ public class WCCController {
 			int tmp1 = selectedElement;
 			refreshView();
 			setSelectedPage(tmp);
-			setSelectedElement(tmp1);
+			setSelectedElement(tmp1+1);
 		}
 	};
 
