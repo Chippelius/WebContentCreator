@@ -32,8 +32,10 @@ class XMLHandler {
 		switch(Integer.parseInt(document.getDocumentElement().getAttribute(VERSION_ATTRIBUTE))) {
 		case 1:
 			return handleVersion1(document);
+		case 2:
+			return handleVersion2(document);
 		default:
-			return handleVersion1(document);
+			throw new IllegalArgumentException("The Version of the project file could not be handled.");
 		}
 	}
 
@@ -49,9 +51,39 @@ class XMLHandler {
 				for(int j=0; j<elements.getLength(); ++j) {
 					if(elements.item(j).getNodeType() == Node.ELEMENT_NODE) {
 						org.w3c.dom.Element currentElement = (org.w3c.dom.Element) elements.item(j);
-						p.add(new Element(currentElement.getAttribute(TYPE_ATTRIBUTE), currentElement.getTextContent()));
+						switch(currentElement.getAttribute(TYPE_ATTRIBUTE)) {
+						case "Überschrift":
+							p.setContent(p.getContent()+"\n# "+currentElement.getTextContent());
+							break;
+						case "Unterüberschrift":
+							p.setContent(p.getContent()+"\n## "+currentElement.getTextContent());
+							break;
+						case "Textinhalt":
+							p.setContent(p.getContent()+"\n"+currentElement.getTextContent());
+							break;
+						case "Bild":
+							p.setContent(p.getContent()+"\n![Grafik]("+currentElement.getTextContent()+")");
+							break;
+						default: 
+							p.setContent(p.getContent()+"\n"+currentElement.getTextContent());
+						}
 					}
 				}
+			}
+		}
+		dataStorage.setEditedSinceLastSave(false);
+		return dataStorage;
+	}
+
+	private static DataStorage handleVersion2(Document document) {
+		DataStorage dataStorage = new DataStorage();
+		NodeList pages = document.getElementsByTagName(PAGE_TAG);
+		for(int i=0; i<pages.getLength(); ++i) {
+			if(pages.item(i).getNodeType() == Node.ELEMENT_NODE) {
+				org.w3c.dom.Element currentPage = (org.w3c.dom.Element) pages.item(i);
+				Page p = new Page(currentPage.getAttribute(FILENAME_ATTRIBUTE), currentPage.getAttribute(NAME_ATTRIBUTE));
+				dataStorage.add(p);
+				p.setContent(currentPage.getTextContent());
 			}
 		}
 		dataStorage.setEditedSinceLastSave(false);
@@ -80,12 +112,7 @@ class XMLHandler {
 			pageNode.setAttribute(FILENAME_ATTRIBUTE, page.getFilename());
 			pageNode.setAttribute(NAME_ATTRIBUTE, page.getName());
 			root.appendChild(pageNode);
-			for(Element element : page) {
-				org.w3c.dom.Element elementNode = document.createElement(ELEMENT_TAG);
-				elementNode.setAttribute(TYPE_ATTRIBUTE, element.getType());
-				elementNode.setTextContent(element.getValue());
-				pageNode.appendChild(elementNode);
-			}
+			pageNode.setTextContent(page.getContent());
 		}
 
 		DOMSource domSource = new DOMSource(document);

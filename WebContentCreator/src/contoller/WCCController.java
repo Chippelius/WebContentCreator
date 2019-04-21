@@ -2,8 +2,6 @@ package contoller;
 
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -35,6 +33,7 @@ public class WCCController {
 	 * If no page/element is currently selected, the value is -1.
 	 */
 	private static int selectedPage = -1;
+	private static volatile boolean enableContentListeners = true;
 	
 	/**
 	 * Entry point for the program.
@@ -351,7 +350,7 @@ public class WCCController {
 	/**
 	 * The action to be fired when the currently selected page should be deleted.
 	 */
-	public static final AbstractAction pageDelete = new AbstractAction() {
+	public static final AbstractAction pageDelete = new AbstractAction() { 
 		@Override
 		public void actionPerformed(ActionEvent a) {
 			if(selectedPage==-1||!WCCView.confirmDeletePage(WCCModel.getDataStorage().get(selectedPage).getFilename(), 
@@ -361,6 +360,29 @@ public class WCCController {
 			WCCModel.getDataStorage().remove(selectedPage);
 			selectedPage = -1;
 			refreshView();
+		}
+	};
+	
+	/**
+	 * The action to be fired when the content of the currently selected page changes.
+	 */
+	public static final AbstractAction pageChangeContent = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent a) {
+			if(enableContentListeners && selectedPage != -1) {
+				WCCModel.getDataStorage().get(selectedPage).setContent(a.getActionCommand());
+			}
+		}
+	};
+	/**
+	 * The action to be fired when the caret position of the currently selected page changes.
+	 */
+	public static final AbstractAction pageChangeCaretPosition = new AbstractAction() {
+		@Override
+		public void actionPerformed(ActionEvent a) {
+			if(enableContentListeners && selectedPage != -1) {
+				WCCModel.getDataStorage().get(selectedPage).setCaretPosition(Integer.parseInt(a.getActionCommand()));
+			}
 		}
 	};
 
@@ -374,12 +396,8 @@ public class WCCController {
 			if(selectedPage==-1) {
 				return;
 			}
-			String res = WCCView.requestNewImageData(WCCModel.getSettings().getImageChooseLocation());
-			if(res == null)
-				return;
-			WCCModel.getSettings().setImageChooseLocation(new File(res).getParent());
-			WCCModel.getDataStorage().get(selectedPage).add(new Element(Element.IMAGE, res));
-			refreshView();
+			WCCView.insertContent("![Grafik]()", WCCModel.getDataStorage().get(selectedPage).getCaretPosition());
+			WCCView.setCaretPosition(WCCModel.getDataStorage().get(selectedPage).getCaretPosition()-1);
 		}
 	};
 
@@ -456,6 +474,7 @@ public class WCCController {
 		}
 		private void update(DocumentEvent e) {
 			//TODO
+			
 		}
 		@Override public void changedUpdate(DocumentEvent e) {}
 	};
@@ -488,7 +507,7 @@ public class WCCController {
 	 * 
 	 * @param value whether export-dependent actions should be enabled or not
 	 */
-	private static void enableExportActions(boolean value) {
+	static void enableExportActions(boolean value) {
 		fileExport.setEnabled(value);
 	}
 
@@ -535,6 +554,7 @@ public class WCCController {
 		for(Page p : WCCModel.getDataStorage()) {
 			WCCView.addPageListItem(p.getFilename(), p.getName());
 		}
+		enableContentListeners = false;
 		if(selectedPage == -1) {
 			WCCView.clearContentArea();
 		} else {
@@ -542,6 +562,7 @@ public class WCCController {
 			WCCView.setContent(WCCModel.getDataStorage().get(selectedPage).getContent());
 			WCCView.setCaretPosition(WCCModel.getDataStorage().get(selectedPage).getCaretPosition());
 		}
+		enableContentListeners = true;
 	}
 	
 }

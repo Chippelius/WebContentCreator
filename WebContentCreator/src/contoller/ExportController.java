@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.util.LinkedList;
 
-import model.Element;
 import model.Page;
 import model.WCCModel;
 import view.WCCView;

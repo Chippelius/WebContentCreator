@@ -13,7 +13,6 @@ public class WCCMenubar extends JMenuBar {
 		
 		add(createFileMenu());
 		add(createPageMenu());
-		add(createElementMenu());
 		add(createWindowMenu());
 		add(createHelpMenu());
 	}
@@ -40,6 +39,8 @@ public class WCCMenubar extends JMenuBar {
 		menuPage.addSeparator();
 		menuPage.add(new WCCMenuItem(WCCController.pageChangeData));
 		menuPage.addSeparator();
+		menuPage.add(new WCCMenuItem(WCCController.elementNewImage));
+		menuPage.addSeparator();
 		menuPage.add(new WCCMenuItem(WCCController.pageMoveTop));
 		menuPage.add(new WCCMenuItem(WCCController.pageMoveUp));
 		menuPage.add(new WCCMenuItem(WCCController.pageMoveDown));
@@ -47,28 +48,6 @@ public class WCCMenubar extends JMenuBar {
 		menuPage.addSeparator();
 		menuPage.add(new WCCMenuItem(WCCController.pageDelete));
 		return menuPage;
-	}
-
-	private static WCCMenu createElementMenu() {
-		WCCMenu menuElement = new WCCMenu(Language.elementText);
-		menuElement.add(new WCCMenuItem(WCCController.elementNewHeader));
-		menuElement.add(new WCCMenuItem(WCCController.elementNewSubheader));
-		menuElement.add(new WCCMenuItem(WCCController.elementNewText));
-		menuElement.add(new WCCMenuItem(WCCController.elementNewImage));
-		menuElement.addSeparator();
-		menuElement.add(new WCCMenuItem(WCCController.elementChangeValue));
-		menuElement.add(new WCCMenuItem(WCCController.elementChangeToHeader));
-		menuElement.add(new WCCMenuItem(WCCController.elementChangeToSubheader));
-		menuElement.add(new WCCMenuItem(WCCController.elementChangeToText));
-		menuElement.add(new WCCMenuItem(WCCController.elementChangeToImage));
-		menuElement.addSeparator();
-		menuElement.add(new WCCMenuItem(WCCController.elementMoveTop));
-		menuElement.add(new WCCMenuItem(WCCController.elementMoveUp));
-		menuElement.add(new WCCMenuItem(WCCController.elementMoveDown));
-		menuElement.add(new WCCMenuItem(WCCController.elementMoveBottom));
-		menuElement.addSeparator();
-		menuElement.add(new WCCMenuItem(WCCController.elementDelete));
-		return menuElement;
 	}
 
 	private static WCCMenu createWindowMenu() {

@@ -23,9 +23,6 @@ public class WCCToolbar extends JToolBar {
 		addSeparator();
 		add(new WCCButton(WCCController.pageNew));
 		addSeparator();
-		add(new WCCButton(WCCController.elementNewHeader));
-		add(new WCCButton(WCCController.elementNewSubheader));
-		add(new WCCButton(WCCController.elementNewText));
 		add(new WCCButton(WCCController.elementNewImage));
 	}
 	

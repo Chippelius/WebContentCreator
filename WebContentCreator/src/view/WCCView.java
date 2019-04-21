@@ -300,6 +300,10 @@ public class WCCView {
 		frame.repaint();
 	}
 	
+	public static void insertContent(String content, int position) {
+		contentArea.insert(content, position);
+	}
+	
 	public static String getContent() {
 		return contentArea.getText();
 	}
