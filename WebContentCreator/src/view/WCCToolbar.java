@@ -38,7 +38,7 @@ public class WCCToolbar extends JToolBar {
 		add(new WCCButton(WCCController.elementNewSubheader));
 		add(new WCCButton(WCCController.elementNewText));
 		add(new WCCButton(WCCController.elementNewImage));
-		add(new JLabel("     "));
+		add(new JLabel("   "));
 		add(new WCCButton(WCCController.elementMoveTop));
 		add(new WCCButton(WCCController.elementMoveUp));
 		add(new WCCButton(WCCController.elementMoveDown));

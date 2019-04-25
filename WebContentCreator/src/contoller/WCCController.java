@@ -718,7 +718,7 @@ public class WCCController {
 	public static final AbstractAction windowCenterDivider = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
-			WCCModel.getSettings().setDividerLocation(WCCView.getWidth()/2);
+			WCCModel.getSettings().setDividerLocation((WCCView.getWidth()-10)/2);
 			WCCView.applySettings(WCCModel.getSettings());
 		}
 	};

@@ -459,7 +459,7 @@ public class WCCView {
 
 
 	public static int getWidth() {
-		return frame.getContentPane().getWidth();
+		return frame.getWidth();
 	}
 
 	public static void setSavedState(boolean editedSinceLastSave) {

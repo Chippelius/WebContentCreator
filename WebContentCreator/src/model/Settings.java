@@ -34,11 +34,7 @@ public class Settings {
 	private String qrCodeBaseUrl;
 
 	public Settings () {
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		windowLocation = new Point(toolkit.getScreenSize().width/4, toolkit.getScreenSize().height/4);
-		windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
-		maximized = false;
-		dividerLocation = (windowSize.width - 5)/2;
+		restoreDefaultWindowState();
 		imageChooseLocation = "";
 		currentlyOpenedFile = "";
 		saveLocation = "";
@@ -48,9 +44,12 @@ public class Settings {
 	
 	public void restoreDefaultWindowState() {
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		windowLocation = new Point(toolkit.getScreenSize().width/4, toolkit.getScreenSize().height/4);
-		windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
+//		windowLocation = new Point(toolkit.getScreenSize().width/4, toolkit.getScreenSize().height/4);
+//		windowSize = new Dimension(toolkit.getScreenSize().width/2, toolkit.getScreenSize().height/2);
+		windowSize = new Dimension(960, 540);
+		windowLocation = new Point((toolkit.getScreenSize().width - windowSize.width)/2, (toolkit.getScreenSize().height - windowSize.height)/2);
 		maximized = false;
+		dividerLocation = (windowSize.width - 10)/2;
 	}
 	
 	public boolean setByCommand(String command) {
