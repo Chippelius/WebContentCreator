@@ -312,6 +312,8 @@ public class WCCView {
 			item.setSelected(false);
 		}
 		pages.get(selectedPage).setSelected(true);
+		//Causes some UI bugs, may implement later
+		//pageListContainer.scrollRectToVisible(pages.get(selectedPage).getBounds(null));
 		frame.revalidate();
 		frame.repaint();
 	}
@@ -341,6 +343,8 @@ public class WCCView {
 			item.setSelected(false);
 		}
 		elements.get(selectedElement).setSelected(true);
+		//Causes some UI bugs, may implement later
+		//elementListContainer.scrollRectToVisible(elements.get(selectedElement).getBounds(null));
 		frame.revalidate();
 		frame.repaint();
 	}
@@ -411,7 +415,7 @@ public class WCCView {
 		JPanel myPanel = new JPanel(new BorderLayout());
 		JLabel descriptionLabel = new JLabel("Bitte geben Sie den neuen Textinhalt an:");
 		myPanel.add(descriptionLabel, BorderLayout.NORTH);
-		JTextArea textarea = new JTextArea(oldValue, 10, 40);
+		JTextArea textarea = new JTextArea(oldValue, 20, 40);
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
 		textarea.addAncestorListener(createFocusListener());

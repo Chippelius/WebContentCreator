@@ -77,7 +77,7 @@ public class WCCController {
 	 * Deselects all pages and resets selectedPage to -1.
 	 */
 	public static void refreshProjectView() {
-		selectedPage = -1;
+		setSelectedPage(-1);
 		WCCView.clearPageList();
 		for(Page p : WCCModel.getDataStorage()) {
 			WCCView.addPageListItem(p.getFilename(), p.getName());
@@ -90,8 +90,9 @@ public class WCCController {
 	 * @param selectedPage The index of the page to be selected
 	 */
 	public static void setSelectedPage(int selectedPage) {
-		if(selectedPage>=WCCModel.getDataStorage().size())
+		if(selectedPage>=WCCModel.getDataStorage().size()) {
 			return;
+		}
 		WCCController.selectedPage = selectedPage;
 		if(selectedPage>=0) {
 			WCCView.setSelectedPage(selectedPage);
@@ -100,11 +101,11 @@ public class WCCController {
 				WCCView.addElementListItem(e.getType(), e.getValue());
 			}
 			enablePageDependentActions(true);
-			enableElementDependentActions(false);
 		} else {
 			enablePageDependentActions(false);
-			enableElementDependentActions(false);
 		}
+		WCCController.selectedElement = -1;
+		enableElementDependentActions(false);
 	}
 
 	/**
@@ -113,8 +114,9 @@ public class WCCController {
 	 * @param selectedElement The index of the element to be selected
 	 */
 	public static void setSelectedElement(int selectedElement) {
-		if(selectedPage==-1||selectedElement>=WCCModel.getDataStorage().get(selectedPage).size())
+		if(selectedPage==-1||selectedElement>=WCCModel.getDataStorage().get(selectedPage).size()) {
 			return;
+		}
 		WCCController.selectedElement = selectedElement;
 		if(selectedElement>=0) {
 			WCCView.setSelectedElement(selectedElement);

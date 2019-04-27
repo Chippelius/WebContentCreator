@@ -20,6 +20,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.Caret;
 import javax.swing.text.JTextComponent;
 
+import contoller.HtmlEscape;
 import contoller.WCCController;
 
 @SuppressWarnings({ "unused", "serial" })
@@ -51,6 +52,8 @@ public class WCCListItem extends JPanel {
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
 		selfRef = this;
 		contextMenu = isPage?getPageContextMenu():getElementContextMenu();
+		topText = HtmlEscape.escape(topText);
+		bottomText = HtmlEscape.escape(bottomText);
 		addMouseListener(listener);
 		setBackground(WCCView.backgroundColor);
 		setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
@@ -70,11 +73,11 @@ public class WCCListItem extends JPanel {
 				break;
 			case "Textinhalt":
 				textLabel.setText("<html><a style='font-size: "+secondaryFontSize+"px;'>"+topText+":</a><br>"
-						+ "<a style='font-size: "+textFontSize+"px;'>"+bottomText.replaceAll("\n", "<br>")+"</a></html>");
+						+ "<a style='font-size: "+textFontSize+"px;'>"+bottomText+"</a></html>");
 				break;
 			case "Bild":
 				textLabel.setText("<html><a style='font-size: "+secondaryFontSize+"px;'>"+topText+":</a><br>"
-						+ "<a style='font-size: "+imageFontSize+"px;'>"+bottomText.replaceAll("\n", "<br>")+"</a></html>");
+						+ "<a style='font-size: "+imageFontSize+"px;'>"+bottomText+"</a></html>");
 				break;
 			default:
 				textLabel.setText("<html><a style='font-size: "+secondaryFontSize+"px;'>"+topText+":</a><br>"
