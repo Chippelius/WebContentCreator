@@ -225,6 +225,10 @@ public class WCCView {
 	 */
 	public static void applySettings(Settings s) {
 		if(s.isMaximized()) {
+			if((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) != JFrame.MAXIMIZED_BOTH) {
+				frame.setLocation(s.getLocation());
+				frame.setSize(s.getSize());
+			}
 			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		} else {
 			frame.setExtendedState(JFrame.NORMAL);
@@ -240,9 +244,13 @@ public class WCCView {
 	 * @param s the reference to write the settings into
 	 */
 	public static void fetchSettings(Settings s) {
-		s.setLocation(frame.getLocation());
-		s.setSize(frame.getSize());
-		s.setMaximized((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH);
+		if((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
+			s.setMaximized(true);
+		} else {
+			s.setLocation(frame.getLocation());
+			s.setSize(frame.getSize());
+			s.setMaximized(false);
+		}
 		s.setDividerLocation(splitPane.getDividerLocation());
 	}
 

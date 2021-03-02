@@ -233,7 +233,10 @@ public class WCCController {
 		public void actionPerformed(ActionEvent a) {
 			try {
 				enableExportActions(false);
-				new Thread(new ExportController()).start();
+				new ExportController().run();
+				WCCView.showInformationMessage("Exportieren erfolgreich angeschlossen.");
+				enableExportActions(true);
+				Desktop.getDesktop().open(WCCModel.exportFolder);
 			} catch(Exception e) {
 				e.printStackTrace();
 				WCCView.showErrorMessage("Error occurred during export: \n\n" + e.getMessage());
@@ -698,6 +701,7 @@ public class WCCController {
 	public static final AbstractAction windowToggleMaximized = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
+			WCCView.fetchSettings(WCCModel.getSettings());
 			WCCModel.getSettings().setMaximized(!WCCModel.getSettings().isMaximized());
 			WCCView.applySettings(WCCModel.getSettings());
 		}
@@ -709,6 +713,7 @@ public class WCCController {
 	public static final AbstractAction windowRestoreDefaultState = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			WCCView.fetchSettings(WCCModel.getSettings());
 			WCCModel.getSettings().restoreDefaultWindowState();
 			WCCView.applySettings(WCCModel.getSettings());
 		}
@@ -720,6 +725,7 @@ public class WCCController {
 	public static final AbstractAction windowCenterDivider = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent a) {
+			WCCView.fetchSettings(WCCModel.getSettings());
 			WCCModel.getSettings().setDividerLocation((WCCView.getWidth()-10)/2);
 			WCCView.applySettings(WCCModel.getSettings());
 		}
@@ -752,7 +758,7 @@ public class WCCController {
 
 
 
-
+	
 	/**
 	 * Enables or disables actions regarding saving.
 	 * 

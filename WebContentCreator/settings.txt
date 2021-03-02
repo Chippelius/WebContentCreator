@@ -1,5 +1,5 @@
-WindowLocationX=486
-WindowLocationY=252
+WindowLocationX=480
+WindowLocationY=270
 WindowWidth=960
 WindowHeight=540
 Maximized=false

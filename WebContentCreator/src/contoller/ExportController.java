@@ -15,9 +15,8 @@ import java.util.LinkedList;
 import model.Element;
 import model.Page;
 import model.WCCModel;
-import view.WCCView;
 
-class ExportController implements Runnable {
+class ExportController {
 
 	private static final File staticFolder = new File(WCCModel.templateFolder.getAbsolutePath()+"\\static");
 	private static final File indexFile = new File(WCCModel.templateFolder.getAbsolutePath()+"\\dynamic\\index.html");
@@ -39,22 +38,13 @@ class ExportController implements Runnable {
 	private MessageDigest singleDigest;
 	private LinkedList<String> versionList;
 
-	public void run() {
-		try {
-			delete(WCCModel.exportFolder);
-			WCCModel.exportFolder.mkdirs();
-			exportStatic("");
-			exportIndexFile();
-			exportPages();
-			createVersionsFile();
-			
-			WCCView.showInformationMessage("Exportieren erfolgreich angeschlossen.");
-		} catch(Exception e) {
-			e.printStackTrace();
-			WCCView.showErrorMessage("Error occurred during export: \n\n" + e.getMessage());
-		} finally {
-			WCCController.enableExportActions(true);
-		}
+	public void run() throws Exception {
+		delete(WCCModel.exportFolder);
+		WCCModel.exportFolder.mkdirs();
+		exportStatic("");
+		exportIndexFile();
+		exportPages();
+		createVersionsFile();
 	}
 
 	public static void delete(File f) {
